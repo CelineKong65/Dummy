@@ -1,20 +1,39 @@
-Member ID: U0001
-Username: yuxuan
-Password: yuxuan123
-Contact Number: 011-1111111
+U0001
+Loy yu xuan
+yuxuan@gmail.com
+yuxuan123
+20F
+emale
+011-1111111
 
-Member ID: U0002
-Username: celine
-Password: celine123
-Contact Number: 022-2222222
+U0002
+Kong lee ching
+celine@gmail.com
+celine123
+20
+Female
+022-2222222
 
-Member ID: U0003
-Username: xuanting
-Password: xuanting123
-Contact Number: 033-3333333
+U0003
+Wong xuan ting
+xuanting@gmail.com
+xuanting0330
+20
+Female
+033-3333333
 
-Member ID: U0004
-Username: zhixin
-Password: zhixin123
-Contact Number: 044-4444444
+U0004
+Pan zhi xin
+zhixin@gmail.com
+zhixin123
+20
+Female
+044-4444444
 
+U0005
+LIM SIEW JIN
+siewjin@gmail.com
+siewJin0530
+20
+female
+012-12345678

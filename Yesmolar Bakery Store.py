@@ -3,14 +3,21 @@ import os
 # Constants
 MEMBERS_FILE = "member.txt"
 PRODUCT_FILE = "product.txt"
+MEMBERS_ID_FILE = "member_id.txt"
 
 # Structures
 class Member:
-    def __init__(self, member_id="", username="", password="", contact=""):
+    def __init__(self, full_name="", member_id="", email="", password="", age="", gender="" , contact=""):
         self.member_id = member_id
-        self.username = username
+        self.full_name = full_name
+        self.email = email
         self.password = password
+        self.age = age
+        self.gender = gender
         self.contact = contact
+    
+    def __str__(self):
+        return f"{self.member_id}\n{self.full_name}\n{self.email}\n{self.password}\n{self.age}\n{self.gender}\n{self.contact}"
 
 class Product:
     def __init__(self, product_id="", name="", category="", price=0.0, stock=0):
@@ -36,6 +43,315 @@ logged_in_member = ""
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
+
+def load_members():
+    global members
+    try:
+        with open(MEMBERS_FILE, "r", encoding='utf-8') as file:
+            members = []
+            data_lines = []
+            for line in file:
+                data_lines.append(line.strip())
+                if len(data_lines) == 5:
+                    member = Member.from_string(data_lines)
+                    if member:
+                        members.append(member)
+                    data_lines = [] 
+    except FileNotFoundError:
+        open(MEMBERS_FILE, "w", encoding='utf-8').close()
+
+def get_next_member_id():
+    try:
+        with open(MEMBERS_ID_FILE, "r", encoding='utf-8') as file:
+            read_current_id = file.readlines()
+            if read_current_id:
+                last_id = read_current_id[-1].strip()
+                last_id_number = int(last_id[1:])
+                next_id_number = last_id_number + 1 
+                next_id = f"U{next_id_number:04d}"
+                return next_id
+            else:
+                return "U0001"
+    except FileNotFoundError:
+        with open(MEMBERS_ID_FILE, "w", encoding='utf-8') as file:
+            file.write("U0001\n")
+        return "U0001"
+
+def save_member(member):
+    with open(MEMBERS_FILE, "a", encoding='utf-8') as file:
+        file.write(str(member) + "\n\n")
+
+def signup():
+    global logged_in_member 
+
+    # Member id
+    member_id = get_next_member_id()
+    #Enter name
+    full_name = input("Enter your full name: ")
+
+    # Enter email
+    while True:
+        email = input("Enter your email (example: xuanting@example.com): ")
+        if "@" not in email or "." not in email:
+            print("Invalid email format. Please include @ and . in your email!")
+            continue
+        break
+
+    # Enter password
+    while True:
+        password = ""
+        password = input("Enter your new password (example: MyPass123): ")
+
+        if len(password) < 8:
+            print("Password must be at least 8 characters!")
+            continue
+
+        upper = False
+        lower = False
+        digit = False
+
+        for char in password:
+            if 'A' <= char <= 'Z':
+                upper = True
+            elif 'a' <= char <= 'z': 
+                lower = True
+            elif '0' <= char <= '9': 
+                digit = True
+
+        if not upper:
+            print("Password must contain at least one uppercase letter!")
+            continue
+        if not lower:
+            print("Password must contain at least one lowercase letter!")
+            continue
+        if not digit:
+            print("Password must contain at least one digit!")
+            continue
+        
+        confirm_password = input("Confrim your password: ")
+        if confirm_password != password:
+            print("Passwords do not match!")
+            continue
+    
+        break
+
+    # Enter age 
+    while True:
+        age = input("Enter your age: ")
+
+        if len(age) != 2:
+            print("Age must be exactly 2 digits!")
+            continue
+
+        is_digit = True
+        for char in age:
+            if char < '0' or char > '9':
+                is_digit = False
+
+        if not is_digit:
+            print("Age must contain only digits!")
+            continue
+
+        if age[0] == '0':
+            print("Age cannot start with 0!")
+            continue
+
+        break
+
+    # Enter gender
+    while True:
+        gender = input("Enter your gender (male or female): ")
+
+        is_valid= False
+
+        if len(gender) == 4:
+            if ((gender[0] == 'M' or gender[0] == 'm') and
+                (gender[1] == 'a' or gender[1] == 'A') and
+                (gender[2] == 'l' or gender[2] == 'L') and
+                (gender[3] == 'e' or gender[3] == 'E')):
+                is_valid = True
+
+        elif len(gender) == 6:
+            if ((gender[0] == 'F' or gender[0] == 'f') and
+                (gender[1] == 'e' or gender[1] == 'E') and
+                (gender[2] == 'm' or gender[2] == 'M') and
+                (gender[3] == 'a' or gender[3] == 'A') and
+                (gender[4] == 'l' or gender[4] == 'L') and
+                (gender[5] == 'e' or gender[5] == 'E')):
+                is_valid = True
+
+        if not is_valid:
+            print("Please enter 'Male', 'Female', 'male' or 'female'!")
+            continue
+        break
+
+    # Enter contact number
+    while True:
+        contact = input("Enter your contact number (example: 012-34567890): ")
+        clean_contact = ""
+        for char in contact:
+            if char != '-':
+                clean_contact += char
+
+
+        is_valid = True
+
+        if contact[3] != '-':
+            print("Format must with dash like 012-34567890!")
+            continue
+
+        if len(clean_contact) >= 2 and (clean_contact[0] != '0' or clean_contact[1] != '1'):
+            print("Phone number must start with '01'!")
+            is_valid = False
+            continue
+
+        if len(clean_contact) != 10 and len(clean_contact) != 11:
+            print("Invalid phone number length. It must be exactly 11 digits!")
+            is_valid = False
+            continue
+
+        for char in clean_contact:
+            if char < '0' or char > '9':
+                print("Phone number must contain only digits!")
+                is_valid = False
+    
+        break
+   
+    if not all([full_name, password, confirm_password, email, age, gender, contact]):
+        print("Error : All fields are required!")
+    elif password != confirm_password:
+        print("Error : Passwords do not match!")
+    else:
+        new_member = Member(full_name=full_name, member_id=member_id, email=email, password=password, age=age, gender=gender, contact=contact)
+        members.append(new_member)
+
+        with open(MEMBERS_ID_FILE, "a", encoding='utf-8') as file:
+            file.write(member_id + "\n")
+            
+        save_member(new_member)
+        print(f"Registration successful! Your Member ID: {member_id}")
+        input("\nPress [ENTER] to login menu.")
+        clear_screen()
+
+def reset_pass(email): ##### reset pass save format got problem
+    new_password = input("Enter your new password: ").strip()
+    confirm_password = input("Confirm your new password: ").strip()
+    
+    if new_password != confirm_password:
+        print("Error: Passwords do not match!")
+        return False
+
+    try:
+        with open(MEMBERS_FILE, "r", encoding='utf-8') as f:
+            lines = [line.strip() for line in f if line.strip() != ''] 
+
+        for i in range(0, len(lines), 7):
+            if lines[i + 2].strip() == email:
+                lines[i + 3] = new_password + "\n"
+                break
+        else:
+            print("Error: Email not found!")
+            return False
+        
+        with open(MEMBERS_FILE, "w", encoding='utf-8') as f:
+            f.writelines(lines)
+
+        print("Password has been reset successfully.")
+        input("\nPress [ENTER] back login menu.")
+        clear_screen()
+        return True
+    
+    except FileNotFoundError:
+        print("Error: Members file not found!")
+        return False
+
+def login():
+    global logged_in_member 
+    
+    email = input("\nEnter your email :").strip()
+    password = input("Enter your password :").strip()
+
+    try:
+        with open(MEMBERS_FILE, "r", encoding='utf-8') as f:
+            lines = [line.strip() for line in f if line.strip() != ''] 
+
+        for i in range(0, len(lines), 7):  
+            stored_email = lines[i + 2]
+            stored_password = lines[i + 3]    
+
+            if email == stored_email:
+                for attempt in range(3):
+                    if password == stored_password:
+                        print("Logged in Successfully!")
+                        logged_in_member = Member(
+                            full_name=lines[i + 1],
+                            member_id=lines[i],
+                            email=lines[i + 2],
+                            password=lines[i + 3],
+                            age=lines[i + 4],
+                            gender=lines[i + 5],
+                            contact=lines[i + 6]
+                        )
+                        input("\nPress [ENTER] to continue.")
+                        return main_menu()
+                    else:
+                        print(f"Incorrect password! Attempts left: {2 - attempt}")
+                        password = input("Please enter your password again: ").strip()
+
+                print("Too many incorrect password attempts.")
+                if reset_pass(email):
+                    logged_in_member = email
+                    return True
+                else:
+                    print("Password reset failed. Returning to login.")
+                    input("\nPress [ENTER] back login menu.")
+                    clear_screen()
+                    return False
+                    
+        print("Email not found.\n")
+        input("\nPress [ENTER] to continue.")
+        clear_screen()
+        return False
+
+    except FileNotFoundError:
+        print("Error: Members file not found!")
+        return False
+
+
+def login_menu():
+    global logged_in_member 
+
+    while True:
+        print("===============================================================")
+        print("                   WELOCOME TO YESMOLAR BAKERY                 ")
+        print("===============================================================")
+
+        print("1.    Sign Up  ")
+        print("2.    Login  ")
+        print("3.    Admin Login  ")
+        print("4.    Exit  ")
+
+        print("===============================================================")
+
+        choice = int(input("\nEnter your choice :"))
+
+        if (choice == 1):
+            signup()
+        elif(choice == 2):
+            if login():
+                return
+        elif(choice == 3):
+            print("adminlogin")
+            exit()
+        elif(choice == 4):
+            print("\nThank you for visiting Yesmolar Bakery!\n")
+            exit()
+        else:
+            print("Invalid choice. Please try again.")
+            input("\nPress [ENTER] to try again.")
+            clear_screen()
+
+
 
 def get_quoted_field(ss):
     field = ""
@@ -465,8 +781,9 @@ def main_menu():
 
     while True:
         clear_screen()
+        print(f"Welcome {logged_in_member.full_name} ! ")
         print("===============================================================")
-        print(f"             Main Menu (Logged in as: {logged_in_member})     ")
+        print("                            Main Menu                          ")
         print("===============================================================")
         print(" [1] Browse Products")
         print(" [2] View My Cart")
@@ -487,18 +804,22 @@ def main_menu():
         elif choice == '4':
             return
         elif choice == '5':
-            return
+            input("\nPress [ENTER] to logout.")
+            clear_screen()
+            return login_menu()
         else:
             input("\nInvalid choice. Press [ENTER] to try again.")
 
 def main():
     global logged_in_member
-    logged_in_member = "guest"  # Default the member for testing
-    
+    logged_in_member = None 
+
     if not os.path.exists(PRODUCT_FILE):
         print(f"Error: Product file '{PRODUCT_FILE}' not found.")
         input("Press [ENTER] to exit.")
         return
+    
+    login_menu()
 
     main_menu()
 main()
