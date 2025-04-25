@@ -1,0 +1,20 @@
+Member ID: U0001
+Username: yuxuan
+Password: yuxuan123
+Contact Number: 011-1111111
+
+Member ID: U0002
+Username: celine
+Password: celine123
+Contact Number: 022-2222222
+
+Member ID: U0003
+Username: xuanting
+Password: xuanting123
+Contact Number: 033-3333333
+
+Member ID: U0004
+Username: zhixin
+Password: zhixin123
+Contact Number: 044-4444444
+
