@@ -1,15 +1,15 @@
 U0001
 Loy yu xuan
 yuxuan@gmail.com
-yuxuan123
-20F
-emale
+Yuxuan123
+20
+Female
 011-1111111
 
 U0002
 Kong lee ching
 celine@gmail.com
-celine123
+Celine123
 20
 Female
 022-2222222
@@ -17,15 +17,15 @@ Female
 U0003
 Wong xuan ting
 xuanting@gmail.com
-xuanting0330
-20
-Female
-033-3333333
+Xuanting123
+21
+female
+018-7730806
 
 U0004
 Pan zhi xin
 zhixin@gmail.com
-zhixin123
+Zhixin123
 20
 Female
 044-4444444
