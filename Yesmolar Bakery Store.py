@@ -387,6 +387,8 @@ def member_profile():
 
     clear_screen()
 
+    
+
     while True:
         print("------------------------------------------------------------------")
         print("|                         YOUR PROFILE                           |")
@@ -410,6 +412,7 @@ def member_profile():
             return main_menu()
         else:
             input("\nInvalid choice. Press [ENTER] to try again.")
+            clear_screen()
 
 def edit_member_profile():
     global logged_in_member 
@@ -718,6 +721,7 @@ def admin_profile():
             return admin_menu()
         else:
             input("\nInvalid choice. Press [ENTER] to try again.")
+            clear_screen()
 
 def edit_admin_profile():
     global logged_in_admin
@@ -850,16 +854,16 @@ def login_menu():
         print("4.    Exit  ")
         print("===============================================================")
 
-        choice = int(input("\nEnter your choice :"))
+        choice = input("Enter your choice: ")
 
-        if (choice == 1):
+        if choice == '1':
             load_members()
             signup()
-        elif(choice == 2):
+        elif choice == '2':
             login()
-        elif(choice == 3):
+        elif choice == '3':
             admin_login()
-        elif(choice == 4):
+        elif choice == '4':
             print("\nThank you for visiting Yesmolar Bakery!\n")
             exit()
         else:
@@ -882,21 +886,21 @@ def admin_menu():
         print(" [7] Log Out")
         print("===============================================================")
 
-        choice = int(input("\nEnter your choice :"))
+        choice = input("Enter your choice: ")
 
-        if (choice == 1):
+        if choice == '1':
             return
-        elif (choice == 2):
+        elif choice == '2':
             return
-        elif (choice == 3):
+        elif choice == '3':
             return
-        elif (choice == 4):
+        elif choice == '4':
             return
-        elif (choice == 5):
+        elif choice == '5':
             return
-        elif (choice == 6):
+        elif choice == '6':
             admin_profile()
-        elif (choice == 7):
+        elif choice == '7':
             input("\nPress [ENTER] to logout.")
             clear_screen()
             return login_menu()
