@@ -51,14 +51,25 @@ def load_members():
             members = []
             data_lines = []
             for line in file:
-                data_lines.append(line.strip())
-                if len(data_lines) == 5:
-                    member = Member.from_string(data_lines)
-                    if member:
-                        members.append(member)
-                    data_lines = [] 
+                line = line.strip()
+                if line != "":
+                    data_lines.append(line)
+
+                if len(data_lines) == 7:
+                    member = Member(
+                        member_id=data_lines[0],
+                        full_name=data_lines[1],
+                        email=data_lines[2],
+                        password=data_lines[3],
+                        age=data_lines[4],
+                        gender=data_lines[5],
+                        contact=data_lines[6]
+                    )
+                    members.append(member)
+                    data_lines = []
     except FileNotFoundError:
         open(MEMBERS_FILE, "w", encoding='utf-8').close()
+
 
 def get_next_member_id():
     try:
@@ -79,7 +90,7 @@ def get_next_member_id():
 
 def save_member(member):
     with open(MEMBERS_FILE, "a", encoding='utf-8') as file:
-        file.write(str(member) + "\n\n")
+        file.write(f"\n\n{member.member_id}\n{member.full_name}\n{member.email}\n{member.password}\n{member.age}\n{member.gender}\n{member.contact}\n\n")
 
 def signup():
     global logged_in_member 
@@ -92,9 +103,41 @@ def signup():
     # Enter email
     while True:
         email = input("Enter your email (example: xuanting@example.com): ")
-        if "@" not in email or "." not in email:
+
+        clean_email = ""
+        
+        at = False
+        dot = False
+        for char in email:
+            if char != ' ' and char != '\n':
+                clean_email += char
+            if char == '@':
+                at = True
+            if char == '.':
+                dot = True
+
+        if not at or not dot:
             print("Invalid email format. Please include @ and . in your email!")
             continue
+
+        same = False
+        for member in members:
+            stored_email = member.email
+
+            if len(stored_email) == len(email):
+                match = True
+                for i in range(len(email)):
+                    if email[i] != stored_email[i]:
+                        match = False
+                        break
+                if match:
+                    same = True
+                    break
+
+        if same:
+            print("This email is already registered. Please use a different email!")
+            continue
+        
         break
 
     # Enter password
@@ -188,32 +231,37 @@ def signup():
     # Enter contact number
     while True:
         contact = input("Enter your contact number (example: 012-34567890): ")
-        clean_contact = ""
-        for char in contact:
-            if char != '-':
-                clean_contact += char
 
-
-        is_valid = True
-
-        if contact[3] != '-':
-            print("Format must with dash like 012-34567890!")
+        if len(contact) < 4 or contact[3] != '-':
+            print("Format must be like 012-34567890 with a dash at the 4th position!")
             continue
 
-        if len(clean_contact) >= 2 and (clean_contact[0] != '0' or clean_contact[1] != '1'):
+        part1 = ""
+        part2 = ""
+        for i in range(len(contact)):
+            if i < 3:
+                part1 += contact[i]
+            elif i > 3:
+                part2 += contact[i]
+
+
+        if not (part1[0] == '0' and part1[1] == '1'):
             print("Phone number must start with '01'!")
-            is_valid = False
             continue
 
-        if len(clean_contact) != 10 and len(clean_contact) != 11:
-            print("Invalid phone number length. It must be exactly 11 digits!")
-            is_valid = False
+        combined = part1 + part2
+        only_digits = True
+        for c in combined:
+            if not ('0' <= c <= '9'):
+                only_digits = False
+                break
+        if not only_digits:
+            print("Phone number cannot contain symbols or space!")
             continue
 
-        for char in clean_contact:
-            if char < '0' or char > '9':
-                print("Phone number must contain only digits!")
-                is_valid = False
+        if len(combined) != 10 and len(combined) != 11:
+            print("Phone number must be 10 or 11 digits!")
+            continue
     
         break
    
@@ -230,40 +278,8 @@ def signup():
             
         save_member(new_member)
         print(f"Registration successful! Your Member ID: {member_id}")
-        input("\nPress [ENTER] to login menu.")
+        input("\nPress [ENTER] back to login menu.")
         clear_screen()
-
-def reset_pass(email): ##### reset pass save format got problem
-    new_password = input("Enter your new password: ").strip()
-    confirm_password = input("Confirm your new password: ").strip()
-    
-    if new_password != confirm_password:
-        print("Error: Passwords do not match!")
-        return False
-
-    try:
-        with open(MEMBERS_FILE, "r", encoding='utf-8') as f:
-            lines = [line.strip() for line in f if line.strip() != ''] 
-
-        for i in range(0, len(lines), 7):
-            if lines[i + 2].strip() == email:
-                lines[i + 3] = new_password + "\n"
-                break
-        else:
-            print("Error: Email not found!")
-            return False
-        
-        with open(MEMBERS_FILE, "w", encoding='utf-8') as f:
-            f.writelines(lines)
-
-        print("Password has been reset successfully.")
-        input("\nPress [ENTER] back login menu.")
-        clear_screen()
-        return True
-    
-    except FileNotFoundError:
-        print("Error: Members file not found!")
-        return False
 
 def login():
     global logged_in_member 
@@ -277,10 +293,11 @@ def login():
 
         for i in range(0, len(lines), 7):  
             stored_email = lines[i + 2]
-            stored_password = lines[i + 3]    
+            stored_password = lines[i + 3]
 
             if email == stored_email:
-                for attempt in range(3):
+                attempts = 0
+                while attempts < 3:
                     if password == stored_password:
                         print("Logged in Successfully!")
                         logged_in_member = Member(
@@ -295,18 +312,14 @@ def login():
                         input("\nPress [ENTER] to continue.")
                         return main_menu()
                     else:
-                        print(f"Incorrect password! Attempts left: {2 - attempt}")
+                        attempts += 1
+                        print(f"Incorrect password! Attempts left: {3 - attempts}")
                         password = input("Please enter your password again: ").strip()
 
-                print("Too many incorrect password attempts.")
-                if reset_pass(email):
-                    logged_in_member = email
-                    return True
-                else:
-                    print("Password reset failed. Returning to login.")
-                    input("\nPress [ENTER] back login menu.")
-                    clear_screen()
-                    return False
+                print("Too many failed attempts. Login terminating.")
+                input("\nPress [ENTER] back to login menu.")
+                clear_screen()
+                return False
                     
         print("Email not found.\n")
         input("\nPress [ENTER] to continue.")
@@ -336,6 +349,7 @@ def login_menu():
         choice = int(input("\nEnter your choice :"))
 
         if (choice == 1):
+            load_members()
             signup()
         elif(choice == 2):
             if login():
