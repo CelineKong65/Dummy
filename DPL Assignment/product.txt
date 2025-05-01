@@ -1,7 +1,7 @@
-100,White Bread,Bread,4.5,90,Active
+100,White Bread,Bread,4.5,85,Inactive
 101,Whole Wheat Bread,Bread,4.8,90,Active
 102,Sourdough,Bread,5.5,90,Active
-103,Baguette,Bread,4.2,100,Active
+103,Baguette,Bread,4.2,90,Active
 104,Rye Bread,Bread,5.0,100,Inactive
 200,Croissant,Pastries,3.5,100,Active
 201,Danish Pastry,Pastries,4.0,100,Active

@@ -1,10 +1,14 @@
 import os
 
-# Constants
-MEMBERS_FILE = "member.txt"
-MEMBERS_ID_FILE = "member_id.txt"
-ADMINS_FILE = "admin.txt"
-PRODUCT_FILE = "product.txt"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Define file paths
+PRODUCT_FILE = os.path.join(SCRIPT_DIR, "product.txt")
+MEMBERS_FILE = os.path.join(SCRIPT_DIR, "member.txt")
+MEMBERS_ID_FILE = os.path.join(SCRIPT_DIR, "member_id.txt")
+ADMINS_FILE = os.path.join(SCRIPT_DIR, "admin.txt")
+PURCHASE_HISTORY_FILE = os.path.join(SCRIPT_DIR, "purchase_history.txt")  # New
+RATING_FILE = os.path.join(SCRIPT_DIR, "rating.txt")  # New
 
 # Structures
 class Member:
@@ -937,7 +941,7 @@ def get_quoted_field(ss):
     return field.strip(), ss.strip()
 
 def display_product(product):
-    if product.status=="Active":
+    if product.status == "Active":
         print("---------------------------------------------------------------")
         print(f"Product ID: {product.product_id}")
         print("---------------------------------------------------------------")
@@ -945,11 +949,11 @@ def display_product(product):
         print(f"| Category : {product.category}")
         print(f"| Price    : RM {product.price:.2f}")
 
-    if product.stock <= 0:
-        print("| WARNING  : SORRY! THIS PRODUCT IS CURRENTLY OUT OF STOCK!")
-    else:
-        print(f"| Stock    : {product.stock}")
-    print("---------------------------------------------------------------")
+        if product.stock <= 0:
+            print("| WARNING  : SORRY! THIS PRODUCT IS CURRENTLY OUT OF STOCK!")
+        else:
+            print(f"| Stock    : {product.stock}")
+        print("---------------------------------------------------------------")
 
 def load_products():
     global products
@@ -1015,7 +1019,7 @@ def load_cart(cart):
         print("Error: Cannot load cart. No user logged in.")
         return False
 
-    cart_file = f"{logged_in_member}_cart.txt"
+    cart_file = f"{logged_in_member.member_id}_cart.txt"  # Changed to use member_id
     cart.clear()
     
     if not products and not load_products():
@@ -1039,7 +1043,6 @@ def load_cart(cart):
                 item = CartItem()
                 item.product_id = parts[1].strip()
                 item.name = parts[2].strip()
-                item.status = parts[3].strip()
                 
                 try:
                     item.price = float(parts[3].strip())
@@ -1064,7 +1067,7 @@ def save_cart(cart):
         print("Error: Cannot save cart. No user logged in.")
         return False
 
-    cart_file = f"{logged_in_member}_cart.txt"
+    cart_file = f"{logged_in_member.member_id}_cart.txt"  # Changed to use member_id
     try:
         with open(cart_file, 'w', encoding='utf-8') as file:
             for item in cart:
@@ -1075,7 +1078,7 @@ def save_cart(cart):
                 total = item.total if item.total is not None else (price * quantity)
                 status = item.status if item.status else (item.product.status if item.product else "")
 
-                file.write(f"{logged_in_member},{pid},{name},{price:.2f},{quantity},{total:.2f}\n")
+                file.write(f"{logged_in_member.member_id},{pid},{name},{price:.2f},{quantity},{total:.2f}\n")
         return True
     except IOError as e:
         print(f"Error: Could not update cart file: {e}")
@@ -1133,15 +1136,17 @@ def display_cart(cart):
         print(f"Item {i}:")
         print(f"Product ID : {pid}")
         print(f"Name       : {name}")
-        print(f"Category   : {category}")
-        print(f"Price      : RM {price:.2f}")
-        print(f"Quantity   : {quantity}")
-        print(f"Total      : RM {total:.2f}")
-        print("------------------------------------------------------------------")
 
-        if status=="Inative":
-            print("SORRY! This product is currently unavailable :(")
+        if status=="Inactive":
             total=0.0
+            print("SORRY! This product is currently unavailable :(")
+        else:
+            print(f"Category   : {category}")
+            print(f"Price      : RM {price:.2f}")
+            print(f"Quantity   : {quantity}")
+            print(f"Total      : RM {total:.2f}")
+
+        print("------------------------------------------------------------------")
 
         grand_total += total
 
@@ -1197,7 +1202,10 @@ def add_to_cart(cart, product_id, quantity):
     if not selected_product:
         print(f"Error: Product with ID {product_id} not found.")
         return
-
+    
+    if selected_product.status == "Inactive":
+        print("Error: This product is currently unavailable.")
+        return
     if quantity <= 0:
         print("Error: Quantity must be positive.")
         return
@@ -1283,10 +1291,11 @@ def filter_products():
             clear_screen()
             print(f"===== Products in Category: {selected_category} =====")
             load_products()
-            filtered = [p for p in products if p.category.lower() == selected_category.lower()]
+            # Only show active products in this category
+            filtered = [p for p in products if p.category.lower() == selected_category.lower() and p.status == "Active"]
 
             if not filtered:
-                print(f"\nNo products found in '{selected_category}' category.")
+                print(f"\nNo available products found in '{selected_category}' category.")
             else:
                 for product in filtered:
                     display_product(product)
@@ -1314,13 +1323,20 @@ def filter_products():
 
             product_id = selection
             product = None
-            for p in filtered:
+            # Check all products (not just filtered) to see if ID exists
+            for p in products:
                 if p.product_id == product_id:
                     product = p
                     break
 
             if not product:
-                print(f"\nProduct with ID '{product_id}' not found under this category.")
+                print(f"\nProduct with ID '{product_id}' not found.")
+                input("Press [ENTER] to continue.")
+                continue
+
+            # Check if product is inactive
+            if product.status == "Inactive":
+                print("\nThis product is currently unavailable.")
                 input("Press [ENTER] to continue.")
                 continue
 
