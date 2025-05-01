@@ -1,10 +1,12 @@
 import os
 
 # Constants
-MEMBERS_FILE = "member.txt"
-MEMBERS_ID_FILE = "member_id.txt"
-ADMINS_FILE = "admin.txt"
-PRODUCT_FILE = "product.txt"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))### Bulid in fucntion, remember to remove when add to DPL assignment code
+PRODUCT_FILE = os.path.join(SCRIPT_DIR, "product.txt")
+MEMBERS_FILE = os.path.join(SCRIPT_DIR, "member.txt")
+MEMBERS_ID_FILE = os.path.join(SCRIPT_DIR, "member_id.txt")
+ADMINS_FILE = os.path.join(SCRIPT_DIR, "admin.txt")
+
 
 # Structures
 class Member:

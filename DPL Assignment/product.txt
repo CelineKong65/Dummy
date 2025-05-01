@@ -1,36 +1,36 @@
-100,White Bread,Bread,4.5,90
-101,Whole Wheat Bread,Bread,4.8,90
-102,Sourdough,Bread,5.5,90
-103,Baguette,Bread,4.2,100
-104,Rye Bread,Bread,5.0,100
-200,Croissant,Pastries,3.5,100
-201,Danish Pastry,Pastries,4.0,100
-202,Puff Pastry,Pastries,3.8,100
-203,Pain au Chocolat,Pastries,4.2,100
-204,Apple Turnover,Pastries,4.0,100
-300,Chocolate Cake,Cakes,15.0,100
-301,Cheesecake,Cakes,16.5,100
-302,Sponge Cake,Cakes,13.0,100
-303,Fruit Cake,Cakes,14.5,100
-304,Tiramisu,Cakes,17.0,100
-400,Glazed Donut,Donuts,2.5,100
-401,Chocolate Donut,Donuts,2.8,100
-402,Custard-Filled Donut,Donuts,3.0,100
-403,Jam-Filled Donut,Donuts,2.9,100
-404,Sugar Donut,Donuts,2.5,100
-500,Vanilla Cupcake,Cupcakes & Muffins,3.5,100
-501,Chocolate Muffin,Cupcakes & Muffins,3.8,100
-502,Blueberry Muffin,Cupcakes & Muffins,4.0,100
-503,Red Velvet Cupcake,Cupcakes & Muffins,4.2,100
-600,Chocolate Chip Cookie,Cookies,2.0,100
-601,Oatmeal Raisin Cookie,Cookies,2.2,100
-602,Butter Cookie,Cookies,1.8,100
-603,Shortbread,Cookies,2.5,100
-700,Apple Pie,Pies & Tarts,6.0,100
-701,Lemon Tart,Pies & Tarts,5.5,100
-702,Pumpkin Pie,Pies & Tarts,6.5,100
-703,Egg Tart,Pies & Tarts,3.5,100
-800,Chicken Puff,Savories & Sandwiches,4.5,100
-801,Tuna Sandwich,Savories & Sandwiches,5.0,100
-802,Quiche,Savories & Sandwiches,6.0,100
-803,Sausage Roll,Savories & Sandwiches,4.2,100
+100,White Bread,Bread,4.5,90,Active
+101,Whole Wheat Bread,Bread,4.8,90,Active
+102,Sourdough,Bread,5.5,90,Active
+103,Baguette,Bread,4.2,100,Active
+104,Rye Bread,Bread,5.0,100,Active
+200,Croissant,Pastries,3.5,100,Active
+201,Danish Pastry,Pastries,4.0,100,Active
+202,Puff Pastry,Pastries,3.8,100,Active
+203,Pain au Chocolat,Pastries,4.2,100,Active
+204,Apple Turnover,Pastries,4.0,100,Active
+300,Chocolate Cake,Cakes,15.0,100,Active
+301,Cheesecake,Cakes,16.5,100,Active
+302,Sponge Cake,Cakes,13.0,100,Active
+303,Fruit Cake,Cakes,14.5,100,Active
+304,Tiramisu,Cakes,17.0,100,Active
+400,Glazed Donut,Donuts,2.5,100,Active
+401,Chocolate Donut,Donuts,2.8,100,Active
+402,Custard-Filled Donut,Donuts,3.0,100,Active
+403,Jam-Filled Donut,Donuts,2.9,100,Active
+404,Sugar Donut,Donuts,2.5,100,Active
+500,Vanilla Cupcake,Cupcakes & Muffins,3.5,100,Active
+501,Chocolate Muffin,Cupcakes & Muffins,3.8,100,Active
+502,Blueberry Muffin,Cupcakes & Muffins,4.0,100,Active
+503,Red Velvet Cupcake,Cupcakes & Muffins,4.2,100,Active
+600,Chocolate Chip Cookie,Cookies,2.0,100,Active
+601,Oatmeal Raisin Cookie,Cookies,2.2,100,Active
+602,Butter Cookie,Cookies,1.8,100,Active
+603,Shortbread,Cookies,2.5,100,Active
+700,Apple Pie,Pies & Tarts,6.0,100,Active
+701,Lemon Tart,Pies & Tarts,5.5,100,Active
+702,Pumpkin Pie,Pies & Tarts,6.5,100,Active
+703,Egg Tart,Pies & Tarts,3.5,100,Active
+800,Chicken Puff,Savories & Sandwiches,4.5,100,Active
+801,Tuna Sandwich,Savories & Sandwiches,5.0,100,Active
+802,Quiche,Savories & Sandwiches,6.0,100,Active
+803,Sausage Roll,Savories & Sandwiches,4.2,100,Active
