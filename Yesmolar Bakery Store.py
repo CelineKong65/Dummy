@@ -8,7 +8,7 @@ PRODUCT_FILE = "product.txt"
 
 # Structures
 class Member:
-    def __init__(self, full_name="", member_id="", email="", password="", age="", gender="" , contact=""):
+    def __init__(self, full_name="", member_id="", email="", password="", age="", gender="" , contact="", status="Active"):
         self.member_id = member_id
         self.full_name = full_name
         self.email = email
@@ -16,12 +16,13 @@ class Member:
         self.age = age
         self.gender = gender
         self.contact = contact
+        self.status = status
     
     def __str__(self):
-        return f"{self.member_id}\n{self.full_name}\n{self.email}\n{self.password}\n{self.age}\n{self.gender}\n{self.contact}"
+        return f"{self.member_id}\n{self.full_name}\n{self.email}\n{self.password}\n{self.age}\n{self.gender}\n{self.contact}\n{self.status}"
     
 class Admin:
-    def __init__(self, name="", password="", contact="", position="admin"):
+    def __init__(self, name="", password="", contact="", position="admin", status="Active"):
         allowed_positions = ["admin", "superadmin"]
         if position not in allowed_positions:
             raise ValueError(f"Invalid position: {position}. Must be 'admin' or 'superadmin'.")
@@ -30,9 +31,10 @@ class Admin:
         self.password = password
         self.contact = contact
         self.position = position
+        self.status = status
 
     def __str__(self):
-        return f"{self.name}\n{self.password}\n{self.contact}\n{self.position}"
+        return f"{self.name}\n{self.password}\n{self.contact}\n{self.position}\n{self.status}"
 
 class Product:
     def __init__(self, product_id="", name="", category="", price=0.0, stock=0):
@@ -71,7 +73,7 @@ def load_members():
                 if line != "":
                     data_lines.append(line)
 
-                if len(data_lines) == 7:
+                if len(data_lines) == 8:
                     member = Member(
                         member_id=data_lines[0],
                         full_name=data_lines[1],
@@ -79,7 +81,8 @@ def load_members():
                         password=data_lines[3],
                         age=data_lines[4],
                         gender=data_lines[5],
-                        contact=data_lines[6]
+                        contact=data_lines[6],
+                        status=data_lines[7]
                     )
                     members.append(member)
                     data_lines = []
@@ -101,15 +104,16 @@ def get_next_member_id():
                 return "U0001"
     except FileNotFoundError:
         with open(MEMBERS_ID_FILE, "w", encoding='utf-8') as file:
-            file.write("U0001\n")
+            file.write("\nU0001\n")
         return "U0001"
 
 def save_member(member):
     with open(MEMBERS_FILE, "a", encoding='utf-8') as file:
-        file.write(f"\n\n{member.member_id}\n{member.full_name}\n{member.email}\n{member.password}\n{member.age}\n{member.gender}\n{member.contact}\n\n")
+        file.write(f"\n\n{member.member_id}\n{member.full_name}\n{member.email}\n{member.password}\n{member.age}\n{member.gender}\n{member.contact}\n{member.status}\n\n")
 
 def signup():
     global logged_in_member 
+    status = "Active"
 
     # Member id
     member_id = get_next_member_id()
@@ -286,7 +290,7 @@ def signup():
     elif password != confirm_password:
         print("Error : Passwords do not match!")
     else:
-        new_member = Member(full_name=full_name, member_id=member_id, email=email, password=password, age=age, gender=gender, contact=contact)
+        new_member = Member(full_name=full_name, member_id=member_id, email=email, password=password, age=age, gender=gender, contact=contact,status=status)
         members.append(new_member)
 
         with open(MEMBERS_ID_FILE, "a", encoding='utf-8') as file:
@@ -296,6 +300,15 @@ def signup():
         print(f"Registration successful! Your Member ID: {member_id}")
         input("\nPress [ENTER] to return to login menu.")
         clear_screen()
+
+def to_lower_case(s):
+    result = ""
+    for char in s:
+        if 'A' <= char <= 'Z':
+            result += chr(ord(char) + 32)
+        else:
+            result += char
+    return result
 
 def login():
     global logged_in_member 
@@ -307,11 +320,18 @@ def login():
         with open(MEMBERS_FILE, "r", encoding='utf-8') as f:
             lines = [line.strip() for line in f if line.strip() != ''] 
 
-        for i in range(0, len(lines), 7):  
+        for i in range(0, len(lines), 8):  
             stored_email = lines[i + 2]
             stored_password = lines[i + 3]
+            status = lines[i + 7]
 
             if email == stored_email:
+                if to_lower_case(status) != "active":
+                    print("Your account is inactive. Please contact admin.")
+                    input("\nPress [ENTER] to return to login menu.")
+                    clear_screen()
+                    return False
+                
                 attempts = 0
                 while attempts < 3:
                     if password == stored_password:
@@ -323,7 +343,8 @@ def login():
                             password=lines[i + 3],
                             age=lines[i + 4],
                             gender=lines[i + 5],
-                            contact=lines[i + 6]
+                            contact=lines[i + 6],
+                            status=lines[i + 7]
                         )
                         input("\nPress [ENTER] to continue.")
                         return main_menu()
@@ -366,7 +387,8 @@ def update_member(updated_member):
                     updated_member.password,
                     str(updated_member.age),
                     updated_member.gender,
-                    updated_member.contact
+                    updated_member.contact,
+
                 ]
                 updated_members.append("\n".join(new_member_data))
             else:
@@ -386,8 +408,6 @@ def member_profile():
     global logged_in_member 
 
     clear_screen()
-
-    
 
     while True:
         print("------------------------------------------------------------------")
@@ -434,17 +454,15 @@ def edit_member_profile():
 
         choice = input("\nSelect the number you want to edit (1-8): ")
 
-        # Member ID
         if choice == "1":
             input("\nMember ID cannot be edited. Press [ENTER] to continue.")
-        # Full Name
+
         elif choice == "2":
             logged_in_member.full_name = input("Enter new Full Name: ")
             update_member(logged_in_member)
             print("Full Name updated successfully!")
             input("Press [ENTER] to continue.")
 
-        # Email
         elif choice == "3":
             while True:
                 logged_in_member.email = input("Enter your new email (example: xuanting@example.com): ")
@@ -471,7 +489,6 @@ def edit_member_profile():
 
                 break
 
-        # Password
         elif choice == "4":
             while True:
                 logged_in_member.password = ""
@@ -513,7 +530,6 @@ def edit_member_profile():
                 input("Press [ENTER] to continue.")
                 break
 
-        # Age
         elif choice == "5":
             try:
                 while True:
@@ -543,7 +559,6 @@ def edit_member_profile():
                 print("Invalid input! Age must be a number.")
             input("Press [ENTER] to continue.")
 
-        # Gender
         elif choice == "6":
             while True:
                 logged_in_member.gender = input("Enter new gender (male or female): ")
@@ -575,7 +590,6 @@ def edit_member_profile():
                 input("Press [ENTER] to continue.")
                 break
 
-        # Contact Number
         elif choice == "7":
             while True:
                 logged_in_member.contact  = input("Enter your contact number (example: 012-34567890): ")
@@ -616,7 +630,6 @@ def edit_member_profile():
                 input("Press [ENTER] to continue.")
                 break
         
-        # Return to view profile
         elif choice == "8":
             input("\nPress [ENTER] to return to your profile.")
             clear_screen()
@@ -635,22 +648,30 @@ def admin_login():
         with open(ADMINS_FILE, "r", encoding='utf-8') as f:
             lines = [line.strip() for line in f if line.strip() != ''] 
 
-        for i in range(0, len(lines), 4):  
+        for i in range(0, len(lines), 5):  
             stored_name = lines[i]
             stored_password = lines[i + 1]
             stored_position = lines[i + 3]
+            status = lines[i + 4]
 
             if name == stored_name:
+                if to_lower_case(status) != "active":
+                    print("Your account is inactive. Please contact superadmin.")
+                    input("\nPress [ENTER] to return to login menu.")
+                    clear_screen()
+                    return False
+                
                 attempts = 0
                 while attempts < 3:
                     if password == stored_password:
                         print("Logged in Successfully!")
-                        print(f"Welcome {stored_position}!\n") # check is admin or superadmin
+                        print(f"Welcome {stored_position}!\n")
                         logged_in_admin = Admin(
                             name=lines[i],
                             password=lines[i + 1],
                             contact=lines[i + 2],
-                            position=lines[i + 3]
+                            position=lines[i + 3],
+                            status=lines[i + 4]
                         )
                         input("\nPress [ENTER] to continue.")
                         clear_screen()
@@ -665,11 +686,11 @@ def admin_login():
                 input("\nPress [ENTER] to return to login menu.")
                 clear_screen()
                 return False
-                    
-        print("Name not found.\n")
-        input("\nPress [ENTER] to continue.")
-        clear_screen()
-        return False
+
+            print("Name not found.\n")
+            input("\nPress [ENTER] to continue.")
+            clear_screen()
+            return False
 
     except FileNotFoundError:
         print("Error: Admins file not found!")
@@ -740,14 +761,12 @@ def edit_admin_profile():
 
         choice = input("\nSelect the number you want to edit (1-5): ")
 
-        # Full Name
         if choice == "1":
             logged_in_admin.name = input("Enter new Full Name: ")
             update_admin(logged_in_admin)
             print("Full Name updated successfully!")
             input("Press [ENTER] to continue.")
 
-        # Password
         elif choice == "2":
             while True:
                 logged_in_admin.password = ""
@@ -789,7 +808,6 @@ def edit_admin_profile():
                 input("Press [ENTER] to continue.")
                 break
 
-        # Contact Number
         elif choice == "3":
             while True:
                 logged_in_admin.contact  = input("Enter your contact number (example: 012-34567890): ")
@@ -832,7 +850,6 @@ def edit_admin_profile():
         elif choice == "4":
             input("\nYour position cannot be edited. Press [ENTER] to continue.")
         
-        # Return to view profile
         elif choice == "5":
             input("\nPress [ENTER] to return to your profile.")
             clear_screen()

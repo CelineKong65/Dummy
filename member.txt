@@ -5,6 +5,7 @@ Yuxuan123
 20
 Female
 011-1111111
+Active
 
 U0002
 Kong lee ching
@@ -13,6 +14,7 @@ Celine123
 20
 Female
 022-2222222
+Active
 
 U0003
 Wong xuan ting
@@ -21,6 +23,7 @@ Xuanting123
 21
 female
 018-7730806
+Active
 
 U0004
 Pan zhi xin
@@ -29,6 +32,7 @@ Zhixin123
 20
 Female
 044-4444444
+Active
 
 U0005
 LIM SIEW JIN
@@ -37,3 +41,4 @@ siewJin0530
 20
 female
 012-12345678
+Active
