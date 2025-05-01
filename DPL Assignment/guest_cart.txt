@@ -1,3 +1,0 @@
-guest,100,White Bread,4.50,10,45.00
-guest,101,Whole Wheat Bread,4.80,10,48.00
-guest,102,Sourdough,5.50,10,55.00

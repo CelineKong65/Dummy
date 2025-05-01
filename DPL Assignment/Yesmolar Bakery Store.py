@@ -1014,12 +1014,16 @@ def update_product_file():
         print(f"Error: Could not update the product file: {e}")
         return False
 
+def get_cart_filename(member_id):
+    """Returns the full path to the cart file for a given member ID"""
+    return os.path.join(SCRIPT_DIR, f"{member_id}_cart.txt")
+
 def load_cart(cart):
     if not logged_in_member:
         print("Error: Cannot load cart. No user logged in.")
         return False
 
-    cart_file = f"{logged_in_member.member_id}_cart.txt"  # Changed to use member_id
+    cart_file = get_cart_filename(logged_in_member.member_id)
     cart.clear()
     
     if not products and not load_products():
@@ -1067,7 +1071,7 @@ def save_cart(cart):
         print("Error: Cannot save cart. No user logged in.")
         return False
 
-    cart_file = f"{logged_in_member.member_id}_cart.txt"  # Changed to use member_id
+    cart_file = get_cart_filename(logged_in_member.member_id)
     try:
         with open(cart_file, 'w', encoding='utf-8') as file:
             for item in cart:
