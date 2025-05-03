@@ -1,0 +1,13 @@
+U0002,Kong lee ching,ORD0001,2025-05-02 23:15:06
+U0002,Kong lee ching,ORD0001,302,Sponge Cake,Cakes,13.00,22,286.00
+U0002,Kong lee ching,ORD0001,701,Lemon Tart,Pies & Tarts,5.50,8,44.00
+U0002,Kong lee ching,ORD0001,TOTAL,313.50
+
+U0002,Kong lee ching,ORD0002,2025-05-02 23:16:32
+U0002,Kong lee ching,ORD0002,202,Puff Pastry,Pastries,3.80,45,171.00
+U0002,Kong lee ching,ORD0002,TOTAL,162.45
+
+U0002,Kong lee ching,ORD0003,2025-05-02 23:20:20
+U0002,Kong lee ching,ORD0003,101,Whole Wheat Bread,Bread,4.80,11,52.80
+U0002,Kong lee ching,ORD0003,TOTAL,52.80
+
