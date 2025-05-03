@@ -11,3 +11,9 @@ U0002,Kong lee ching,ORD0003,2025-05-02 23:20:20
 U0002,Kong lee ching,ORD0003,101,Whole Wheat Bread,Bread,4.80,11,52.80
 U0002,Kong lee ching,ORD0003,TOTAL,52.80
 
+U0001,Loy yu xuan,ORD0004,2025-05-03 15:08:21
+U0001,Loy yu xuan,ORD0004,103,Baguette,Bread,4.20,10,42.00
+U0001,Loy yu xuan,ORD0004,203,Pain au Chocolat,Pastries,4.20,22,92.40
+U0001,Loy yu xuan,ORD0004,304,Tiramisu,Cakes,17.00,11,187.00
+U0001,Loy yu xuan,ORD0004,TOTAL,305.33
+
