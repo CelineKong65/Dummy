@@ -1,19 +1,47 @@
-U0002,Kong lee ching,ORD0001,2025-05-02 23:15:06
-U0002,Kong lee ching,ORD0001,302,Sponge Cake,Cakes,13.00,22,286.00
-U0002,Kong lee ching,ORD0001,701,Lemon Tart,Pies & Tarts,5.50,8,44.00
-U0002,Kong lee ching,ORD0001,TOTAL,313.50
+U0002,Kong lee ching,ORD0001,2025-05-03 22:14:05,Cash
+U0002,Kong lee ching,ORD0001,101,Whole Wheat Bread,Bread,4.80,1,4.80
+U0002,Kong lee ching,ORD0001,102,Sourdough,Bread,5.50,23,126.50
+U0002,Kong lee ching,ORD0001,TOTAL,124.74
 
-U0002,Kong lee ching,ORD0002,2025-05-02 23:16:32
-U0002,Kong lee ching,ORD0002,202,Puff Pastry,Pastries,3.80,45,171.00
-U0002,Kong lee ching,ORD0002,TOTAL,162.45
+U0002,Kong lee ching,ORD0002,2025-05-03 22:27:39,Cash
+U0002,Kong lee ching,ORD0002,203,Pain au Chocolat,Pastries,4.20,23,96.60
+U0002,Kong lee ching,ORD0002,303,Fruit Cake,Cakes,14.50,12,174.00
+U0002,Kong lee ching,ORD0002,TOTAL,257.07
 
-U0002,Kong lee ching,ORD0003,2025-05-02 23:20:20
-U0002,Kong lee ching,ORD0003,101,Whole Wheat Bread,Bread,4.80,11,52.80
-U0002,Kong lee ching,ORD0003,TOTAL,52.80
+U0002,Kong lee ching,ORD0003,2025-05-03 22:46:43,Cash
+U0002,Kong lee ching,ORD0003,201,Danish Pastry,Pastries,4.00,2,8.00
+U0002,Kong lee ching,ORD0003,202,Puff Pastry,Pastries,3.80,2,7.60
+U0002,Kong lee ching,ORD0003,TOTAL,15.60
 
-U0001,Loy yu xuan,ORD0004,2025-05-03 15:08:21
-U0001,Loy yu xuan,ORD0004,103,Baguette,Bread,4.20,10,42.00
-U0001,Loy yu xuan,ORD0004,203,Pain au Chocolat,Pastries,4.20,22,92.40
-U0001,Loy yu xuan,ORD0004,304,Tiramisu,Cakes,17.00,11,187.00
-U0001,Loy yu xuan,ORD0004,TOTAL,305.33
+U0002,Kong lee ching,ORD0004,2025-05-03 22:53:53,Cash
+U0002,Kong lee ching,ORD0004,204,Apple Turnover,Pastries,4.00,23,92.00
+U0002,Kong lee ching,ORD0004,803,Sausage Roll,Savories & Sandwiches,4.20,10,42.00
+U0002,Kong lee ching,ORD0004,TOTAL,127.30
+
+U0002,Kong lee ching,ORD0005,2025-05-03 22:59:52,Cash
+U0002,Kong lee ching,ORD0005,302,Sponge Cake,Cakes,13.00,20,260.00
+U0002,Kong lee ching,ORD0005,TOTAL,247.00
+
+U0002,Kong lee ching,ORD0006,2025-05-03 23:00:57,Debit Card
+U0002,Kong lee ching,ORD0006,301,Cheesecake,Cakes,16.50,22,363.00
+U0002,Kong lee ching,ORD0006,TOTAL,344.85
+
+U0002,Kong lee ching,ORD0007,2025-05-03 23:04:45,Debit Card
+U0002,Kong lee ching,ORD0007,202,Puff Pastry,Pastries,3.80,2,7.60
+U0002,Kong lee ching,ORD0007,404,Sugar Donut,Donuts,2.50,4,10.00
+U0002,Kong lee ching,ORD0007,TOTAL,17.60
+
+U0002,Kong lee ching,ORD0008,2025-05-03 23:06:37,Cash
+U0002,Kong lee ching,ORD0008,102,Sourdough,Bread,5.50,22,121.00
+U0002,Kong lee ching,ORD0008,TOTAL,114.95
+
+U0001,Loy yu xuan,ORD0009,2025-05-03 23:12:32,Debit Card
+U0001,Loy yu xuan,ORD0009,600,Chocolate Chip Cookie,Cookies,2.00,12,24.00
+U0001,Loy yu xuan,ORD0009,304,Tiramisu,Cakes,17.00,1,17.00
+U0001,Loy yu xuan,ORD0009,TOTAL,41.00
+
+U0002,Kong lee ching,ORD0010,2025-05-03 23:19:38,Debit Card
+U0002,Kong lee ching,ORD0010,102,Sourdough,Bread,5.50,2,11.00
+U0002,Kong lee ching,ORD0010,301,Cheesecake,Cakes,16.50,20,330.00
+U0002,Kong lee ching,ORD0010,TOTAL,323.95
 
