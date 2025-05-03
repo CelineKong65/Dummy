@@ -120,8 +120,29 @@ def signup():
     global logged_in_member 
 
     member_id = get_next_member_id()
-    full_name = input("Enter your full name: ")
     status = "Active"
+    
+    while True:
+        full_name = input("Enter your full name: ")
+
+        valid_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
+        is_valid = True
+
+        for char in full_name:
+            if char not in valid_chars:
+                is_valid = False
+                break
+
+        name_only = ""
+        for char in full_name:
+            if char != ' ':
+                name_only += char
+
+        if not is_valid or len(name_only) < 2:
+            print("Invalid name. Name must have at least 2 letters and contain only letters and spaces.")
+            continue
+
+        break 
 
     while True:
         email = input("Enter your email (example: xuanting@example.com): ")
@@ -395,7 +416,7 @@ def update_member(updated_member):
                     str(updated_member.age),
                     updated_member.gender,
                     updated_member.contact,
-
+                    updated_member.status,
                 ]
                 updated_members.append("\n".join(new_member_data))
             else:
@@ -465,10 +486,30 @@ def edit_member_profile():
             input("\nMember ID cannot be edited. Press [ENTER] to continue.")
 
         elif choice == "2":
-            logged_in_member.full_name = input("Enter new Full Name: ")
-            update_member(logged_in_member)
-            print("Full Name updated successfully!")
-            input("Press [ENTER] to continue.")
+            while True:
+                logged_in_member.full_name = input("Enter new Full Name: ")
+
+                valid_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
+                is_valid = True
+
+                for char in logged_in_member.full_name:
+                    if char not in valid_chars:
+                        is_valid = False
+                        break
+
+                name_only = ""
+                for char in logged_in_member.full_name:
+                    if char != ' ':
+                        name_only += char
+
+                if not is_valid or len(name_only) < 2:
+                    print("Invalid name. Name must have at least 2 letters and contain only letters and spaces.")
+                    continue
+
+                update_member(logged_in_member)
+                print("Full Name updated successfully!")
+                input("Press [ENTER] to continue.")
+                break
 
         elif choice == "3":
             while True:
@@ -493,7 +534,6 @@ def edit_member_profile():
                 update_member(logged_in_member)
                 print("Email updated successfully!")
                 input("Press [ENTER] to continue.")
-
                 break
 
         elif choice == "4":
@@ -694,36 +734,91 @@ def admin_login():
                 clear_screen()
                 return False
 
-            print("Name not found.\n")
-            input("\nPress [ENTER] to continue.")
-            clear_screen()
-            return False
+        print("Name not found.\n")
+        input("\nPress [ENTER] to continue.")
+        clear_screen()
+        return False
 
     except FileNotFoundError:
         print("Error: Admins file not found!")
         return False
     
-def update_admin(updated_admin):
-    admins = []
+#only update admin have not any .strip() and .append() buildin function
+def update_admin(updated_admin, original_name):
+    try:
+        with open(ADMINS_FILE, "r", encoding="utf-8") as file:
+            lines = []
+            for line in file:
+                is_empty = True
+                for ch in line:
+                    if ch != '\n' and ch != '\r':
+                        is_empty = False
+                        break
+                if not is_empty:
+                    clean_line = ""
+                    for ch in line:
+                        if ch != '\n' and ch != '\r':
+                            clean_line += ch
+                    lines.append(clean_line)
 
-    with open(ADMINS_FILE, "r", encoding="utf-8") as file:
-        lines = [line.strip() for line in file if line.strip() != ""]
+        updated_admins = []
 
-    for i in range(0, len(lines), 4):
-        name = lines[i]
-        password = lines[i+1]
-        contact = lines[i+2]
-        position = lines[i+3]
+        i = 0
+        while i < len(lines):
+            name = lines[i]
+            password = lines[i + 1]
+            contact = lines[i + 2]
+            position = lines[i + 3]
+            status = lines[i + 4]
 
-        if name == updated_admin.name:
-            admins.append(str(updated_admin))
-        else:
-            admins.append(f"{name}\n{password}\n{contact}\n{position}")
+            same = True
+            if len(name) == len(original_name):
+                j = 0
+                while j < len(name):
+                    a = name[j]
+                    b = original_name[j]
+                    if 'A' <= a <= 'Z':
+                        a = chr(ord(a) + 32)
+                    if 'A' <= b <= 'Z':
+                        b = chr(ord(b) + 32)
+                    if a != b:
+                        same = False
+                        break
+                    j += 1
+            else:
+                same = False
 
-    with open(ADMINS_FILE, "w", encoding="utf-8") as file:
-        file.write("\n\n".join(admins))
+            if same:
+                updated_admins.append([
+                    updated_admin.name,
+                    updated_admin.password,
+                    updated_admin.contact,
+                    updated_admin.position,
+                    updated_admin.status
+                ])
+            else:
+                updated_admins.append([name, password, contact, position, status])
 
-    
+            i += 5
+
+        with open(ADMINS_FILE, "w", encoding="utf-8") as file:
+            idx = 0
+            while idx < len(updated_admins):
+                admin = updated_admins[idx]
+                j = 0
+                while j < 5:
+                    file.write(admin[j])
+                    file.write("\n")
+                    j += 1
+                if idx != len(updated_admins) - 1:
+                    file.write("\n")
+                idx += 1
+
+    except Exception as e:
+        print("Error:", e)
+
+
+
 def admin_profile():
     global logged_in_admin
 
@@ -769,10 +864,32 @@ def edit_admin_profile():
         choice = input("\nSelect the number you want to edit (1-5): ")
 
         if choice == "1":
-            logged_in_admin.name = input("Enter new Full Name: ")
-            update_admin(logged_in_admin)
-            print("Full Name updated successfully!")
-            input("Press [ENTER] to continue.")
+            while True:
+                original_name = logged_in_admin.name
+                logged_in_admin.name = input("Enter new Full Name: ")
+
+                valid_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
+                is_valid = True
+
+                for char in logged_in_admin.name:
+                    if char not in valid_chars:
+                        is_valid = False
+                        break
+
+                name_only = ""
+                for char in logged_in_admin.name:
+                    if char != ' ':
+                        name_only += char
+
+                if not is_valid or len(name_only) < 2:
+                    print("Invalid name. Name must have at least 2 letters and contain only letters and spaces.")
+                    continue
+
+                update_admin(logged_in_admin, original_name)
+                print("Full Name updated successfully!")
+                input("Press [ENTER] to continue.")
+                break
+
 
         elif choice == "2":
             while True:
