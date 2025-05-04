@@ -1024,8 +1024,9 @@ def admin_menu():
         print(" [3] Manage Admin List")
         print(" [4] Manage Feedback and Rating")
         print(" [5] View Dashboard")
-        print(" [6] My profile")
-        print(" [7] Log Out")
+        print(" [6] View Purchase History")
+        print(" [7] My Profile")
+        print(" [8] Log Out")
         print("===============================================================")
 
         choice = input("Enter your choice: ")
@@ -1041,8 +1042,10 @@ def admin_menu():
         elif choice == '5':
             return
         elif choice == '6':
-            admin_profile()
+            view_order_history()
         elif choice == '7':
+            admin_profile()
+        elif choice == '8':
             input("\nPress [ENTER] to logout.")
             clear_screen()
             return login_menu()
@@ -2133,6 +2136,104 @@ def main_menu():
             return login_menu()
         else:
             input("\nInvalid choice. Press [ENTER] to try again.")
+
+# ===================================VIEW PURCHASE HISTORY===================================
+def view_order_history():
+    try:
+        with open(PURCHASE_HISTORY_FILE, "r") as file:
+            content = file.read()
+            
+        if not content:
+            print("No purchase history found.")
+            input("Press [ENTER] to continue")
+            return
+        
+        records = content.split("\n\n")
+        
+        clear_screen()
+        print("===============================================================")
+        print("                       PURCHASE HISTORY                        ")
+        print("===============================================================")
+        
+        for record in records:
+            if not record.strip():
+                continue
+            
+            lines = record.split("\n")
+            if len(lines) < 2:
+                continue
+            
+            header = lines[0].split(',')
+            if len(header) < 5:
+                continue
+            
+            member_id = header[0]
+            member_name = header[1]
+            order_id = header[2]
+            purchase_time = header[3]
+            payment_method = header[4]
+            
+            print("________________________________________________________________")
+            print(f"|Member ID       : {member_id}                                 ")
+            print("|_______________________________________________________________")
+            print(f"|Name            : {member_name}                               ")
+            print(f"|Order ID        : {order_id}                                  ")
+            print(f"|Date n Time     : {purchase_time}                             ")
+            print(f"|Payment         : {payment_method}                            ")
+            print("|_______________________________________________________________")
+            
+            total_payment = 0.0
+            
+            for line in lines[1:-1]:
+                parts = line.split(',')
+                if len(parts) < 9:
+                    continue
+                
+                product_id   = parts[3]
+                product_name = parts[4]
+                category     = parts[5]
+                price        = parts[6]
+                quantity     = parts[7]
+                total        = parts[8]
+                
+                print(f"|Product ID      : {product_id}")
+                print(f"|Product Name    : {product_name}")
+                print(f"|Category        : {category}")
+                print(f"|Price           : RM {price}")
+                print(f"|Quantity        : {quantity}")
+                print(f"|Total           : RM {total}")
+                print("|---------------------------------------------------------------")
+                
+                total_payment += float(total) if total else 0.0
+                
+            # Get actual total from the last line
+            total_line = lines[-1].split(',')
+            if len(total_line) >= 5 and total_line[3] == "TOTAL":
+                total_payment = float(total_line[4])
+            
+            has_discount = False
+            for line in lines[1:-1]:
+                here = line.split(',')
+                if len(here) < 9:
+                    continue
+                
+                if float(here[8]) > 120.00:
+                    has_discount = True
+                    break
+            
+            if has_discount:        
+                print(f"|Total Purchase: RM {total_payment:.2f} [after 5% discount]")
+                print("|===============================================================\n\n")
+            else:
+                print(f"|Total Purchase: RM {total_payment:.2f}")
+                print("|===============================================================\n\n")
+            
+        input("\nPress [ENTER] to return to admin menu.")
+        
+    except FileNotFoundError:
+        print("Purchase history file not found.")
+        input("Press [ENTER] to continue")
+# ===================================END OF VIEW PURCHASE HISTORY===================================
 
 def main():
     global logged_in_member
