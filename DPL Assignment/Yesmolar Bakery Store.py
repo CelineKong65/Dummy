@@ -1469,7 +1469,7 @@ def proceed_to_payment(products, cart):
                 proceed = input("Enter 0 to back to product list, 1 to continue proceed to payment: ").strip()
             
             if proceed == '0':
-                filter_products(products, cart)
+                filter_products()
                 return
         
         if actual_total >= 120: 
