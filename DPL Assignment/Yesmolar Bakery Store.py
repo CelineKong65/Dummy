@@ -1040,7 +1040,7 @@ def admin_menu():
         elif choice == '4':
             return
         elif choice == '5':
-            return
+            view_dashboard()
         elif choice == '6':
             view_order_history()
         elif choice == '7':
@@ -2234,6 +2234,100 @@ def view_order_history():
         print("Purchase history file not found.")
         input("Press [ENTER] to continue")
 # ===================================END OF VIEW PURCHASE HISTORY===================================
+
+
+
+
+# ==========================================VIEW DASHBOARD==========================================
+def view_dashboard():
+    product_count = 0
+    active_product = 0
+    inactive_product = 0
+    out_of_stock = 0
+    
+    try:
+        with open(PRODUCT_FILE, 'r') as file:
+            for line in file:
+                line = line.strip()
+                if line:
+                    product_count += 1
+                    parts = line.split(',')
+                    if len(parts) >= 6:
+                        stock = int(parts[4]) if parts[4].isdigit() else 0
+                        
+                        status = parts[5]
+                        if status == "Active":
+                            active_product += 1
+                            if stock <= 0:
+                                out_of_stock += 1
+                        else: 
+                            inactive_product += 1
+    
+    except FileNotFoundError:
+        pass
+    
+    member_count = 0
+    active_member = 0
+    inactive_member = 0
+    
+    try:
+        with open (MEMBERS_FILE, 'r') as file:
+            lines = []
+            for line in file:
+                line = line.strip()
+                if line:
+                    lines.append(line)
+                    
+            member_count = len(lines) // 8
+            for i in range(0, len(lines), 8):
+                if i + 7 < len(lines) and lines[i+7] == "Active":
+                    active_member += 1
+                else :
+                    inactive_member += 1
+    except FileNotFoundError:
+        pass
+    
+    order_count = 0
+    total_sales = 0.0
+    
+    try:
+        with open(PURCHASE_HISTORY_FILE, 'r') as file:
+            content = file.read()
+            records = content.split("\n\n")
+            order_count = len([r for r in records if r.strip()])
+            
+            for record in records:
+                if not record.strip():
+                    continue
+                lines = record.split("\n")
+                if len(lines) < 2:
+                    continue
+                total_line = lines[-1].split(',')
+                if len(total_line) >= 5 and total_line[3] == "TOTAL":
+                    total_sales += float(total_line[4])
+    except FileNotFoundError:
+        pass
+    
+    clear_screen()
+    print("===============================================================")
+    print("                       ADMIN DASHBOARD                         ")
+    print("===============================================================")
+    print(f"\nTotal Products               : {product_count}")
+    print(f"Active Products              : {active_product}")
+    print(f"Inactive Products            : {inactive_product}")
+    print(f"Out of Stock                 : {out_of_stock}")
+    print("_______________________________________________________________")
+    print(f"Total Members                : {member_count}")
+    print(f"Active Members               : {active_member}")
+    print(f"Inactive Members             : {inactive_member}")
+    print("_______________________________________________________________")
+    print(f"Total Orders                 : {order_count}")
+    print(f"Total Sales                  : RM {total_sales:.2f}")
+    print("===============================================================")
+    
+    
+    input("\nPress [ENTER] to return to admin menu.")
+# =======================================END OF VIEW DASHBOARD=======================================
 
 def main():
     global logged_in_member
