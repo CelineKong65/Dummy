@@ -1398,6 +1398,31 @@ def proceed_to_payment(products, cart):
         return
 
     clear_screen()
+    
+    unavailable_items = []
+    for item in cart:
+        product = None
+        for p in products:
+            if p.product_id == (item.product_id if item.product_id else (item.product.product_id if item.product else "")):
+                product = p
+                break
+        
+        if product:
+            if product.status == "Inactive" or product.stock <= 0:
+                unavailable_items.append(item.name if item.name else (product.name if product else "Unknown"))
+    
+    if unavailable_items:
+        print("------------------------------------------------------------------")
+        print("                  CANNOT PROCEED TO PAYMENT                       ")
+        print("------------------------------------------------------------------")
+        print("The following items in your cart are unavailable:")
+        for item in unavailable_items:
+            print(f"- {item}")
+        print("\nPlease remove these items or wait until they become available.")
+        print("------------------------------------------------------------------")
+        input("Press [ENTER] to return to cart.")
+        return
+    
     total_payment = 0.00
     
     print("------------------------------------------------------------------")
