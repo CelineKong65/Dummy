@@ -99,7 +99,7 @@ def load_members():
 def get_next_member_id():
     try:
         with open(MEMBERS_ID_FILE, "r", encoding='utf-8') as file:
-            read_current_id = file.readlines()
+            read_current_id = file.read().splitlines()
             if read_current_id:
                 last_id = read_current_id[-1].strip()
                 last_id_number = int(last_id[1:])
@@ -114,8 +114,29 @@ def get_next_member_id():
         return "U0001"
 
 def save_member(member):
-    with open(MEMBERS_FILE, "a", encoding='utf-8') as file:
-        file.write(f"\n\n{member.member_id}\n{member.full_name}\n{member.email}\n{member.password}\n{member.age}\n{member.gender}\n{member.contact}\n\n")
+    with open(MEMBERS_FILE, "a+", encoding='utf-8') as file:
+        file.seek(0)
+        
+        content = ""
+        while True:
+            char = file.read(1)
+            if not char:
+                break
+            content += char
+
+        if len(content) == 0 or content[-1] != '\n':
+            file.write("\n")
+
+        file.write("\n")
+        file.write(member.member_id + "\n")
+        file.write(member.full_name + "\n")
+        file.write(member.email + "\n")
+        file.write(member.password + "\n")
+        file.write(member.age + "\n")
+        file.write(member.gender + "\n")
+        file.write(member.contact + "\n")
+        file.write(member.status + "\n")
+
 
 def signup():
     global logged_in_member 
@@ -313,22 +334,27 @@ def signup():
         new_member = Member(full_name=full_name, member_id=member_id, email=email, password=password, age=age, gender=gender, contact=contact,status=status)
         members.append(new_member)
 
-        with open(MEMBERS_ID_FILE, "a", encoding='utf-8') as file:
-            file.write(member_id + "\n")
+        with open(MEMBERS_ID_FILE, "a+", encoding='utf-8') as file:
+            file.seek(0)
+
+            content = ""
+            while True:
+                c = file.read(1)
+                if not c:
+                    break
+                content += c
+
+            if len(content) == 0 or content[-1] != '\n':
+                file.write("\n")
+
+            for ch in member_id:
+                file.write(ch)
+            file.write("\n")
             
         save_member(new_member)
         print(f"Registration successful! Your Member ID: {member_id}")
         input("\nPress [ENTER] to return to login menu.")
         clear_screen()
-
-def to_lower_case(s):
-    result = ""
-    for char in s:
-        if 'A' <= char <= 'Z':
-            result += chr(ord(char) + 32)
-        else:
-            result += char
-    return result
 
 def to_lower_case(s):
     result = ""
@@ -1024,9 +1050,8 @@ def admin_menu():
         print(" [3] Manage Admin List")
         print(" [4] Manage Feedback and Rating")
         print(" [5] View Dashboard")
-        print(" [6] View Purchase History")
-        print(" [7] My Profile")
-        print(" [8] Log Out")
+        print(" [6] My profile")
+        print(" [7] Log Out")
         print("===============================================================")
 
         choice = input("Enter your choice: ")
@@ -1040,12 +1065,10 @@ def admin_menu():
         elif choice == '4':
             return
         elif choice == '5':
-            view_dashboard()
+            return
         elif choice == '6':
-            view_order_history()
-        elif choice == '7':
             admin_profile()
-        elif choice == '8':
+        elif choice == '7':
             input("\nPress [ENTER] to logout.")
             clear_screen()
             return login_menu()
@@ -1246,14 +1269,9 @@ def delete_cart(cart):
         item_num = int(item_num_input)
 
         if item_num == 0:
-            print("Cancel successful!")
-            input("Press [ENTER] to refresh cart.")
             return False
         elif item_num < 1 or item_num > len(cart):
-            if len(cart) == 1:
-                print("Invalid item number. Please enter 1")
-            else:
-                print(f"Invalid item number. Please enter between 1 and {len(cart)}")
+            print(f"Invalid item number. Please enter between 1 and {len(cart)}")
             continue
         else:
             break
@@ -1311,14 +1329,9 @@ def edit_cart(cart):
         item_num = int(item_num_input)
 
         if item_num == 0:
-            print("Cancel successful!")
-            input("Press [ENTER] to continue.")
             return False
         elif item_num < 1 or item_num > len(cart):
-            if len(cart) == 1:
-                print("Invalid item number. Please enter 1")
-            else:
-                print(f"Invalid item number. Please enter between 1 and {len(cart)}")
+            print(f"Invalid item number. Please enter between 1 and {len(cart)}")
             continue
         else:
             break
@@ -1334,7 +1347,7 @@ def edit_cart(cart):
             break
 
     if not product:
-        print("Product not found in inventory.")
+        print("Error: Product not found in inventory.")
         input("Press [ENTER] to continue.")
         return False
 
@@ -1401,69 +1414,29 @@ def proceed_to_payment(products, cart):
         return
 
     clear_screen()
-    
-    unavailable_items = []
-    for item in cart:
-        product = None
-        for p in products:
-            if p.product_id == (item.product_id if item.product_id else (item.product.product_id if item.product else "")):
-                product = p
-                break
-        
-        if product:
-            if product.status == "Inactive" or product.stock <= 0:
-                unavailable_items.append(item.name if item.name else (product.name if product else "Unknown"))
-    
-    if unavailable_items:
-        print("------------------------------------------------------------------")
-        print("                  CANNOT PROCEED TO PAYMENT                       ")
-        print("------------------------------------------------------------------")
-        print("The following items in your cart are unavailable:")
-        for item in unavailable_items:
-            print(f"- {item}")
-        print("\nPlease remove these items or wait until they become available.")
-        print("------------------------------------------------------------------")
-        input("Press [ENTER] to return to cart.")
-        return
-    
     total_payment = 0.00
     
     print("------------------------------------------------------------------")
     print("                              RECEIPT                             ")
     
-    payable_items = []
-    actual_total = 0.0
-    
-    for item in cart:
-        status = item.product.status if item.product else "Active"
-        if status == "Active":
-            payable_items.append(item)
-            actual_total += item.total
-    
-    for i, item in enumerate(cart, 1):
-        status = item.product.status if item.product else "Active"
-        
+    for i in range(len(cart)):
         print("------------------------------------------------------------------")
-        print(f"Item {i}:")
-        print(f"Title    : {item.product.name}")
-        print(f"Price    : RM {item.price:.2f}")
-        print(f"Quantity : {item.quantity}")
+        print(f"Title    : {cart[i].product.name}")
+        print(f"Price    : RM {cart[i].price:.2f}")
+        print(f"Quantity : {cart[i].quantity}")
+        print(f"Total    : RM {cart[i].total:.2f}")
         
-        if status == "Inactive":
-            print("STATUS   : UNAVAILABLE (Not charged)")
-            print(f"Total    : RM 0.00")
-        else:
-            print(f"Total    : RM {item.total:.2f}")
+        total_payment += cart[i].total
 
     print("==================================================================")
-    print(f"Payment Amount: RM {actual_total:.2f}")
+    print(f"Payment Amount: RM {total_payment:.2f}")
     print("==================================================================")
     
     if logged_in_member:
-        if actual_total >= 100 and actual_total < 120: 
+        if total_payment >= 100 and total_payment < 120:
             add_on = 0.00
             proceed = ''
-            add_on = 120 - actual_total
+            add_on = 120 - total_payment
             print(f"\nAdd-on RM {add_on:.2f} to get 5% discount!")
             proceed = input("\nEnter [0] to back to product list, enter [1] to proceed the payment: ").strip()
             
@@ -1472,17 +1445,17 @@ def proceed_to_payment(products, cart):
                 proceed = input("Enter 0 to back to product list, 1 to continue proceed to payment: ").strip()
             
             if proceed == '0':
-                filter_products()
+                filter_products(products, cart)
                 return
         
-        if actual_total >= 120: 
+        if total_payment >= 120:
             discount = 0.05
-            discount_amount = actual_total * discount
-            actual_total -= discount_amount
+            discount_amount = total_payment * discount
+            total_payment -= discount_amount
             print("\nCongratulations, you get 5% discount!")
             print("_________________________")
             print(f"|Discount: RM {discount_amount:.2f}\t|")
-            print(f"|Total   : RM {actual_total:.2f}\t|")
+            print(f"|Total   : RM {total_payment:.2f}\t|")
             print("|_______________________|")
     
     payment_method = ''
@@ -1501,9 +1474,9 @@ def proceed_to_payment(products, cart):
         clear_screen()
         main_menu()
     elif payment_method == '1':
-        cash_payment(products, payable_items, actual_total)  
+        cash_payment(products, cart, total_payment)
     elif payment_method == '2':
-        debit_card_payment(payable_items, actual_total)  
+        debit_card_payment(cart, total_payment)
 
 def debit_card_payment(cart, total_payment):
     card_number = input("Credit card number (13-16 digits): ").strip()
@@ -1526,94 +1499,67 @@ def debit_card_payment(cart, total_payment):
     
     print("\n\nPayment successful! Thank you for your purchase.")
     
-    purchase_history(cart, total_payment, "Debit Card")
+    purchase_history(cart, total_payment)
 
     cart.clear()
     clear_cart(logged_in_member.member_id)
     
+    try:
+        with open(f"{logged_in_member.member_id}_cart.txt", "w") as output_file:
+            pass
+    except:
+        print("Error: Could not open the cart file for writing!")
+        return
+    
     print("\nYour cart has been cleared.")
-    while True:
-        more_purchase = input("\nDo you want to make more purchase [Y/N]?: ").strip()
-        if more_purchase == 'Y' or more_purchase == 'y': 
-            print("\nPress [ENTER] to continue...")
-            input()
-            clear_screen()
-            main_menu()
-            break
-        elif more_purchase == 'N' or more_purchase == 'n': 
-            print("\nPress [ENTER] to log out...")
-            input()
-            clear_screen()
-            login_menu()
-            break
-        else:
-            print("Invalid input. Please enter Y or N.")
+    more_purchase = input("\nDo you want to make more purchase[Y/N]?: ").strip()
+    
+    if more_purchase == 'Y' or more_purchase == 'y':
+        print("\nPress [ENTER] to continue...")
+        input()
+        clear_screen()
+        main_menu()
+    elif more_purchase == 'N'or more_purchase == 'n':
+        print("\nPress [ENTER] to log out...")
+        input()
+        clear_screen()
+        login_menu()
 
 def cash_payment(products, cart, total_payment):
+    cash = 0.0
+
+    cash = float(input("\nCash  : RM "))
     
-    while True:
-        cash_input = (input("\nCash  : RM ")).strip()
-        if len(cash_input) == 0:
-                print("Please enter a valid amount.")
-                continue
-
-        has_invalid_char = False
-        dot_count = 0
-
-        for i in range(len(cash_input)):
-            char = cash_input[i]
-            if char == '.':
-                dot_count += 1
-            elif char < '0' or char > '9': 
-                has_invalid_char = True
-                break
-
-           
-        if (has_invalid_char or dot_count > 1
-            or (len(cash_input) > 0 and cash_input[0] == '.')
-            or (len(cash_input) > 0 and cash_input[len(cash_input) - 1] == '.')):
-            print("Only numbers and one decimal point allowed (e.g., 50 or 50.50).")
-            continue
-
-        try:
-            cash = float(cash_input)
-            if cash <= 0:
-                print("Amount must be positive.")
-            elif cash < total_payment:
-                    print("Your cash is not enough!")
-            else:
-                    break
-        except:
-            print(" Invalid number format.")
+    while cash < total_payment:
+        print("Your cash is not enough!")
+        cash = float(input("\nCash  : RM "))
     
     if cash > total_payment:
         change = cash - total_payment
         print(f"Change: RM {change:.2f}")
     
     print("\n\nProcessing payment", end='')
+    
     print("\nPayment successful! Thank you for your purchase.")
     
-    purchase_history(cart, total_payment, "Cash")
+    purchase_history(cart, total_payment)
+
     cart.clear()
     clear_cart(logged_in_member.member_id)
     
     print("\nYour cart has been cleared.")
-    while True:
-        more_purchase = input("\nDo you want to make more purchase [Y/N]?: ").strip()
-        if more_purchase == 'Y' or more_purchase == 'y': 
-            print("\nPress [ENTER] to continue...")
-            input()
-            clear_screen()
-            main_menu()
-            break
-        elif more_purchase == 'N' or more_purchase == 'n': 
-            print("\nPress [ENTER] to log out...")
-            input()
-            clear_screen()
-            login_menu()
-            break
-        else:
-            print("Invalid input. Please enter Y or N.")
+    more_purchase = input("\nDo you want to make more purchase[Y/N]?: ").strip()
+    
+    if more_purchase == 'Y' or more_purchase == 'y':
+        print("\nPress [ENTER] to continue...")
+        input()
+        clear_screen()
+        main_menu()
+    elif more_purchase == 'N' or more_purchase == 'n':
+        print("\nPress [ENTER] to log out...")
+        input()
+        clear_screen()
+        login_menu()
 
 def is_valid_card_number(card_number):
     length = len(card_number)
@@ -1670,7 +1616,7 @@ def is_valid_cvv(cvv):
     
     return True
 
-def purchase_history(cart, total_payment, payment_method):
+def purchase_history(cart, total_payment):
     global logged_in_member
     
     if not logged_in_member:
@@ -1678,7 +1624,7 @@ def purchase_history(cart, total_payment, payment_method):
         return False
     
     if not cart:
-        print("Cart is empty. No purchase to record.")
+        print("Error: Cart is empty. No purchase to record.")
         return False
     
     try:
@@ -1687,7 +1633,7 @@ def purchase_history(cart, total_payment, payment_method):
         order_id = get_order_id()
 
         with open(PURCHASE_HISTORY_FILE, "a", encoding="utf-8") as file:
-            file.write(f"{logged_in_member.member_id},{logged_in_member.full_name},{order_id},{purchase_time},{payment_method}\n")
+            file.write(f"{logged_in_member.member_id},{logged_in_member.full_name},{order_id},{purchase_time}\n")
 
             for item in cart:
                 product_id = item.product_id if item.product_id else (item.product.product_id if item.product else "")
@@ -1727,7 +1673,7 @@ def view_purchase_history():
     global logged_in_member
     
     if not logged_in_member:
-        print("No member logged in to view purchase history.")
+        print("Error: No member logged in to view purchase history.")
         input("Press [ENTER] to continue.")
         return
     
@@ -1762,10 +1708,8 @@ def view_purchase_history():
             found = True
             order_id = header[2]
             purchase_time = header[3]
-            payment_method = header[4]
             
-            print(f"Purchase Time : {purchase_time}")
-            print(f"Payment Method: {payment_method}")
+            print(f"Purchase Time: {purchase_time}")
             print("------------------------------------------------------------------")
             
             total_payment = 0.0
@@ -2136,198 +2080,6 @@ def main_menu():
             return login_menu()
         else:
             input("\nInvalid choice. Press [ENTER] to try again.")
-
-# ===================================VIEW PURCHASE HISTORY===================================
-def view_order_history():
-    try:
-        with open(PURCHASE_HISTORY_FILE, "r") as file:
-            content = file.read()
-            
-        if not content:
-            print("No purchase history found.")
-            input("Press [ENTER] to continue")
-            return
-        
-        records = content.split("\n\n")
-        
-        clear_screen()
-        print("===============================================================")
-        print("                       PURCHASE HISTORY                        ")
-        print("===============================================================")
-        
-        for record in records:
-            if not record.strip():
-                continue
-            
-            lines = record.split("\n")
-            if len(lines) < 2:
-                continue
-            
-            header = lines[0].split(',')
-            if len(header) < 5:
-                continue
-            
-            member_id = header[0]
-            member_name = header[1]
-            order_id = header[2]
-            purchase_time = header[3]
-            payment_method = header[4]
-            
-            print("________________________________________________________________")
-            print(f"|Member ID       : {member_id}                                 ")
-            print("|_______________________________________________________________")
-            print(f"|Name            : {member_name}                               ")
-            print(f"|Order ID        : {order_id}                                  ")
-            print(f"|Date n Time     : {purchase_time}                             ")
-            print(f"|Payment         : {payment_method}                            ")
-            print("|_______________________________________________________________")
-            
-            total_payment = 0.0
-            
-            for line in lines[1:-1]:
-                parts = line.split(',')
-                if len(parts) < 9:
-                    continue
-                
-                product_id   = parts[3]
-                product_name = parts[4]
-                category     = parts[5]
-                price        = parts[6]
-                quantity     = parts[7]
-                total        = parts[8]
-                
-                print(f"|Product ID      : {product_id}")
-                print(f"|Product Name    : {product_name}")
-                print(f"|Category        : {category}")
-                print(f"|Price           : RM {price}")
-                print(f"|Quantity        : {quantity}")
-                print(f"|Total           : RM {total}")
-                print("|---------------------------------------------------------------")
-                
-                total_payment += float(total) if total else 0.0
-                
-            # Get actual total from the last line
-            total_line = lines[-1].split(',')
-            if len(total_line) >= 5 and total_line[3] == "TOTAL":
-                total_payment = float(total_line[4])
-            
-            has_discount = False
-            for line in lines[1:-1]:
-                here = line.split(',')
-                if len(here) < 9:
-                    continue
-                
-                if float(here[8]) > 120.00:
-                    has_discount = True
-                    break
-            
-            if has_discount:        
-                print(f"|Total Purchase: RM {total_payment:.2f} [after 5% discount]")
-                print("|===============================================================\n\n")
-            else:
-                print(f"|Total Purchase: RM {total_payment:.2f}")
-                print("|===============================================================\n\n")
-            
-        input("\nPress [ENTER] to return to admin menu.")
-        
-    except FileNotFoundError:
-        print("Purchase history file not found.")
-        input("Press [ENTER] to continue")
-# ===================================END OF VIEW PURCHASE HISTORY===================================
-
-
-
-
-# ==========================================VIEW DASHBOARD==========================================
-def view_dashboard():
-    product_count = 0
-    active_product = 0
-    inactive_product = 0
-    out_of_stock = 0
-    
-    try:
-        with open(PRODUCT_FILE, 'r') as file:
-            for line in file:
-                line = line.strip()
-                if line:
-                    product_count += 1
-                    parts = line.split(',')
-                    if len(parts) >= 6:
-                        stock = int(parts[4]) if parts[4].isdigit() else 0
-                        
-                        status = parts[5]
-                        if status == "Active":
-                            active_product += 1
-                            if stock <= 0:
-                                out_of_stock += 1
-                        else: 
-                            inactive_product += 1
-    
-    except FileNotFoundError:
-        pass
-    
-    member_count = 0
-    active_member = 0
-    inactive_member = 0
-    
-    try:
-        with open (MEMBERS_FILE, 'r') as file:
-            lines = []
-            for line in file:
-                line = line.strip()
-                if line:
-                    lines.append(line)
-                    
-            member_count = len(lines) // 8
-            for i in range(0, len(lines), 8):
-                if i + 7 < len(lines) and lines[i+7] == "Active":
-                    active_member += 1
-                else :
-                    inactive_member += 1
-    except FileNotFoundError:
-        pass
-    
-    order_count = 0
-    total_sales = 0.0
-    
-    try:
-        with open(PURCHASE_HISTORY_FILE, 'r') as file:
-            content = file.read()
-            records = content.split("\n\n")
-            order_count = len([r for r in records if r.strip()])
-            
-            for record in records:
-                if not record.strip():
-                    continue
-                lines = record.split("\n")
-                if len(lines) < 2:
-                    continue
-                total_line = lines[-1].split(',')
-                if len(total_line) >= 5 and total_line[3] == "TOTAL":
-                    total_sales += float(total_line[4])
-    except FileNotFoundError:
-        pass
-    
-    clear_screen()
-    print("===============================================================")
-    print("                       ADMIN DASHBOARD                         ")
-    print("===============================================================")
-    print(f"\nTotal Products               : {product_count}")
-    print(f"Active Products              : {active_product}")
-    print(f"Inactive Products            : {inactive_product}")
-    print(f"Out of Stock                 : {out_of_stock}")
-    print("_______________________________________________________________")
-    print(f"Total Members                : {member_count}")
-    print(f"Active Members               : {active_member}")
-    print(f"Inactive Members             : {inactive_member}")
-    print("_______________________________________________________________")
-    print(f"Total Orders                 : {order_count}")
-    print(f"Total Sales                  : RM {total_sales:.2f}")
-    print("===============================================================")
-    
-    
-    input("\nPress [ENTER] to return to admin menu.")
-# =======================================END OF VIEW DASHBOARD=======================================
 
 def main():
     global logged_in_member
