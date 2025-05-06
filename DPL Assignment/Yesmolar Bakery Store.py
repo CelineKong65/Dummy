@@ -63,6 +63,7 @@ class CartItem:
 # Global variables
 products = []
 members = []
+admins = []
 logged_in_member = ""
 logged_in_admin = ""
 
@@ -80,7 +81,7 @@ def load_members():
                 if line != "":
                     data_lines.append(line)
 
-                if len(data_lines) == 7:
+                if len(data_lines) == 8:
                     member = Member(
                         member_id=data_lines[0],
                         full_name=data_lines[1],
@@ -88,13 +89,37 @@ def load_members():
                         password=data_lines[3],
                         age=data_lines[4],
                         gender=data_lines[5],
-                        contact=data_lines[6]
+                        contact=data_lines[6],
+                        status=data_lines[7]
                     )
                     members.append(member)
                     data_lines = []
     except FileNotFoundError:
         open(MEMBERS_FILE, "w", encoding='utf-8').close()
 
+def load_admins():
+    global admins
+    admins = []
+    try:
+        with open(ADMINS_FILE, "r", encoding="utf-8") as file:
+            lines = [line.strip() for line in file if line.strip()]
+            
+            i = 0
+            while i < len(lines):
+                if i + 4 < len(lines):
+                    admin = Admin(
+                        name=lines[i],
+                        password=lines[i+1],
+                        contact=lines[i+2],
+                        position=lines[i+3],
+                        status=lines[i+4]
+                    )
+                    admins.append(admin)
+                    i += 5
+                else:
+                    i += 1
+    except FileNotFoundError:
+        open(ADMINS_FILE, "w", encoding="utf-8").close()
 
 def get_next_member_id():
     try:
@@ -117,16 +142,10 @@ def save_member(member):
     with open(MEMBERS_FILE, "a+", encoding='utf-8') as file:
         file.seek(0)
         
-        content = ""
-        while True:
-            char = file.read(1)
-            if not char:
-                break
-            content += char
-
-        if len(content) == 0 or content[-1] != '\n':
-            file.write("\n")
-
+        content = file.read()
+        if content and not content.endswith('\n'):
+            file.write("\n") 
+        
         file.write("\n")
         file.write(member.member_id + "\n")
         file.write(member.full_name + "\n")
@@ -135,7 +154,7 @@ def save_member(member):
         file.write(member.age + "\n")
         file.write(member.gender + "\n")
         file.write(member.contact + "\n")
-        file.write(member.status + "\n")
+        file.write(member.status + "\n") 
 
 
 def signup():
@@ -145,7 +164,11 @@ def signup():
     status = "Active"
     
     while True:
-        full_name = input("Enter your full name: ")
+        full_name = input("Enter your full name, [R] to return to the main menu :").strip()
+
+        if full_name == 'R' or full_name == 'r':
+            clear_screen()
+            return main_menu()
 
         valid_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
         is_valid = True
@@ -162,6 +185,24 @@ def signup():
 
         if not is_valid or len(name_only) < 2:
             print("Invalid name. Name must have at least 2 letters and contain only letters and spaces.")
+            continue
+
+        same = False
+        for member in members:
+            stored_name = member.full_name
+
+            if len(stored_name) == len(full_name):
+                match = True
+                for i in range(len(full_name)):
+                    if full_name[i] != stored_name[i]:
+                        match = False
+                        break
+                if match:
+                    same = True
+                    break
+
+        if same:
+            print("This name is already registered. Please use a different name!")
             continue
 
         break 
@@ -368,7 +409,13 @@ def to_lower_case(s):
 def login():
     global logged_in_member 
     
-    email = input("\nEnter your email :").strip()
+    email = input("\nEnter your email, [R] to return to the main menu: ").strip()
+
+    if email == 'R' or email == 'r':
+        clear_screen()
+        main_menu()
+        return
+    
     password = input("Enter your password :").strip()
 
     try:
@@ -491,6 +538,7 @@ def member_profile():
 
 def edit_member_profile():
     global logged_in_member 
+    load_members()
 
     while True:
         clear_screen()
@@ -514,25 +562,55 @@ def edit_member_profile():
 
         elif choice == "2":
             while True:
-                logged_in_member.full_name = input("Enter new Full Name: ")
+                new_name = input("Enter new Full Name: ")
 
-                valid_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
+                letter_count = 0
                 is_valid = True
-
-                for char in logged_in_member.full_name:
-                    if char not in valid_chars:
+                for char in new_name:
+                    if not (
+                        ('A' <= char <= 'Z') or
+                        ('a' <= char <= 'z') or
+                        char == ' '
+                    ):
                         is_valid = False
                         break
-
-                name_only = ""
-                for char in logged_in_member.full_name:
                     if char != ' ':
-                        name_only += char
+                        letter_count += 1
 
-                if not is_valid or len(name_only) < 2:
-                    print("Invalid name. Name must have at least 2 letters and contain only letters and spaces.")
+                if not is_valid or letter_count < 2:
+                    print("Invalid name. Must contain only letters and spaces, with at least 2 letters.")
                     continue
 
+                cleaned_new_name = ""
+                for char in new_name:
+                    if char != ' ':
+                        if 'A' <= char <= 'Z':
+                            cleaned_new_name += chr(ord(char) + 32)
+                        else:
+                            cleaned_new_name += char
+
+                name_exists = False
+                for member in members:
+                    if member.member_id == logged_in_member.member_id:
+                        continue
+
+                    cleaned_existing = ""
+                    for char in member.full_name:
+                        if char != ' ':
+                            if 'A' <= char <= 'Z':
+                                cleaned_existing += chr(ord(char) + 32)
+                            else:
+                                cleaned_existing += char
+
+                    if cleaned_existing == cleaned_new_name:
+                        name_exists = True
+                        break
+
+                if name_exists:
+                    print("This name is already registered. Please use a different name!")
+                    continue
+
+                logged_in_member.full_name = new_name
                 update_member(logged_in_member)
                 print("Full Name updated successfully!")
                 input("Press [ENTER] to continue.")
@@ -540,24 +618,50 @@ def edit_member_profile():
 
         elif choice == "3":
             while True:
-                logged_in_member.email = input("Enter your new email (example: xuanting@example.com): ")
+                new_email = input("Enter new email: ")
 
-                clean_email = ""
-                
-                at = False
-                dot = False
-                for char in logged_in_member.email:
-                    if char != ' ' and char != '\n':
-                        clean_email += char
+                has_at = False
+                has_dot = False
+                for char in new_email:
                     if char == '@':
-                        at = True
+                        has_at = True
                     if char == '.':
-                        dot = True
+                        has_dot = True
 
-                if not at or not dot:
-                    print("Invalid email format. Please include @ and . in your email!")
+                if not has_at or not has_dot:
+                    print("Invalid email format. Must contain @ and .")
                     continue
 
+                cleaned_new_email = ""
+                for char in new_email:
+                    if char != ' ':
+                        if 'A' <= char <= 'Z':
+                            cleaned_new_email += chr(ord(char) + 32)
+                        else:
+                            cleaned_new_email += char
+
+                email_exists = False
+                for member in members:
+                    if member.member_id == logged_in_member.member_id:
+                        continue
+
+                    cleaned_existing = ""
+                    for char in member.email:
+                        if char != ' ':
+                            if 'A' <= char <= 'Z':
+                                cleaned_existing += chr(ord(char) + 32)
+                            else:
+                                cleaned_existing += char
+
+                    if cleaned_existing == cleaned_new_email:
+                        email_exists = True
+                        break
+
+                if email_exists:
+                    print("This email is already registered. Please use a different email!")
+                    continue
+
+                logged_in_member.email = new_email
                 update_member(logged_in_member)
                 print("Email updated successfully!")
                 input("Press [ENTER] to continue.")
@@ -715,7 +819,13 @@ def edit_member_profile():
 def admin_login():
     global logged_in_admin
 
-    name = input("\nEnter your name :").strip()
+    name = input("\nEnter your name, [R] to return to the main menu:").strip()
+
+    if name == 'R' or name == 'r':
+        clear_screen()
+        main_menu()
+        return
+    
     password = input("Enter your password :").strip()
 
     try:
@@ -770,7 +880,6 @@ def admin_login():
         print("Error: Admins file not found!")
         return False
     
-#only update admin have not any .strip() and .append() buildin function
 def update_admin(updated_admin, original_name):
     try:
         with open(ADMINS_FILE, "r", encoding="utf-8") as file:
@@ -892,31 +1001,67 @@ def edit_admin_profile():
 
         if choice == "1":
             while True:
-                original_name = logged_in_admin.name
-                logged_in_admin.name = input("Enter new Full Name: ")
+                new_name = input("Enter new Full Name: ")
 
-                valid_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
+                letter_count = 0
                 is_valid = True
-
-                for char in logged_in_admin.name:
-                    if char not in valid_chars:
+                for char in new_name:
+                    if not (
+                        ('A' <= char <= 'Z') or
+                        ('a' <= char <= 'z') or
+                        char == ' '
+                    ):
                         is_valid = False
                         break
-
-                name_only = ""
-                for char in logged_in_admin.name:
                     if char != ' ':
-                        name_only += char
+                        letter_count += 1
 
-                if not is_valid or len(name_only) < 2:
-                    print("Invalid name. Name must have at least 2 letters and contain only letters and spaces.")
+                if not is_valid or letter_count < 2:
+                    print("Invalid name. Must contain only letters and spaces, with at least 2 letters.")
                     continue
 
+                load_admins()
+
+                cleaned_new = ""
+                for char in new_name:
+                    if char != ' ':
+                        if 'A' <= char <= 'Z':
+                            cleaned_new += chr(ord(char) + 32)
+                        else:
+                            cleaned_new += char
+
+                cleaned_current_admin = ""
+                for char in logged_in_admin.name:
+                    if char != ' ':
+                        if 'A' <= char <= 'Z':
+                            cleaned_current_admin += chr(ord(char) + 32)
+                        else:
+                            cleaned_current_admin += char
+
+                name_exists = False
+                for admin in admins:
+                    cleaned_admin_name = ""
+                    for char in admin.name:
+                        if char != ' ':
+                            if 'A' <= char <= 'Z':
+                                cleaned_admin_name += chr(ord(char) + 32)
+                            else:
+                                cleaned_admin_name += char
+
+                    if cleaned_admin_name == cleaned_new and cleaned_admin_name != cleaned_current_admin:
+                        name_exists = True
+                        break
+
+                if name_exists:
+                    print("This name is already registered. Please use a different name!")
+                    continue
+
+                original_name = logged_in_admin.name
+                logged_in_admin.name = new_name
                 update_admin(logged_in_admin, original_name)
-                print("Full Name updated successfully!")
+                print("Name updated successfully!")
                 input("Press [ENTER] to continue.")
                 break
-
 
         elif choice == "2":
             while True:
@@ -1026,10 +1171,22 @@ def login_menu():
 
         if choice == '1':
             load_members()
+            clear_screen()
+            print("\n===============================================================")
+            print("                    Signing Up As Member...                    ")
+            print("===============================================================")
             signup()
         elif choice == '2':
+            clear_screen()
+            print("\n===============================================================")
+            print("                    Logging In As Member...                    ")
+            print("===============================================================")
             login()
         elif choice == '3':
+            clear_screen()
+            print("\n===============================================================")
+            print("                    Logging In As Admin...                    ")
+            print("===============================================================")
             admin_login()
         elif choice == '4':
             print("\nThank you for visiting Yesmolar Bakery!\n")
@@ -2043,7 +2200,6 @@ def filter_products():
 def main_menu():
     global logged_in_member
     if not logged_in_member:
-        print("Error: No user logged in.")
         return
 
     while True:
