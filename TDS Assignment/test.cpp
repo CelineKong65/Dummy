@@ -14,7 +14,9 @@ void sortSearchProduct();
 // --------------------- STRUCTURES ---------------------
 struct Product {
     int id;
-    char name[50];
+    string name;
+    double price;
+    string description;
 };
 
 // --------------------- SHELL SORT ---------------------
@@ -53,11 +55,18 @@ int jumpSearch(T arr[], int size, int targetID) {
 
 // --------------------- READ FROM FILE ---------------------
 int loadProducts(Product products[]) {
-    ifstream file("product.txt");
+    ifstream file("raw_product.txt");
     int count = 0;
-    while (file >> products[count].id >> products[count].name) {
-        count++;
-    }
+    while (file >> products[count].id) {
+	    file.ignore(); // Ignore the whitespace after ID
+	    getline(file, products[count].name, '"');
+	    getline(file, products[count].name, '"'); // Read name inside quotes
+	    file >> products[count].price;
+	    file.ignore(); // Ignore space after price
+	    getline(file, products[count].description, '"');
+	    getline(file, products[count].description, '"'); // Read description inside quotes
+	    count++;
+	}
     file.close();
     return count;
 }
@@ -166,7 +175,7 @@ void teamBMenu(){
     	case 1:
     		{
     			system("cls");
-    			cout<<"Successfully enter page hashing customer";
+    			sortSearchProduct();
     			break;
 			}
 		case 2:
@@ -203,7 +212,11 @@ void sortSearchProduct(){
 
     cout << "\nSorted Products by ID:\n";
     for (int i = 0; i < productCount; i++) {
-        cout << products[i].id << " " << products[i].name << endl;
+        cout << "ID   : " << products[i].id << endl;
+        cout << "Name : " << products[i].name << endl;
+        cout << "Price: " << products[i].price << endl;
+		cout << products[i].description << endl;
+        cout <<"______________________________________________________________________________________________________________________________"<< endl;
     }
 
     int searchProdID;
@@ -213,7 +226,13 @@ void sortSearchProduct(){
     int prodIndex = jumpSearch(products, productCount, searchProdID);
 
     if (prodIndex != -1)
-        cout << "Product Found: " << products[prodIndex].name << endl;
+    {
+    	cout << "Product Found:\n";
+		cout << "ID: " << products[prodIndex].id << "\n";
+		cout << "Name: " << products[prodIndex].name << "\n";
+		cout << "Price: " << products[prodIndex].price << "\n";
+		cout << "Description: " << products[prodIndex].description << "\n";
+    }
     else
         cout << "Product not found.\n";
 }
