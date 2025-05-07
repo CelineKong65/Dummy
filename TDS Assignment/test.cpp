@@ -1,17 +1,17 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include <cstdlib>
 using namespace std;
-
-const int MAX_CUSTOMERS = 100;
 const int MAX_PRODUCTS = 100;
 
-// --------------------- STRUCTURES ---------------------
-struct Customer {
-    int id;
-    char name[50];
-};
+// --------------------- FUNCTION PROTOTYPE ---------------------
+void mainMenu();
+void teamAMenu();
+void teamBMenu();
+void sortSearchProduct();
 
+// --------------------- STRUCTURES ---------------------
 struct Product {
     int id;
     char name[50];
@@ -52,16 +52,6 @@ int jumpSearch(T arr[], int size, int targetID) {
 }
 
 // --------------------- READ FROM FILE ---------------------
-int loadCustomers(Customer customers[]) {
-    ifstream file("customer.txt");
-    int count = 0;
-    while (file >> customers[count].id >> customers[count].name) {
-        count++;
-    }
-    file.close();
-    return count;
-}
-
 int loadProducts(Product products[]) {
     ifstream file("product.txt");
     int count = 0;
@@ -71,37 +61,152 @@ int loadProducts(Product products[]) {
     file.close();
     return count;
 }
+//---------------------- MAIN MENU ------------------------
+void mainMenu(){
+	int choice;
+	
+	cout<<"=================================================="<<endl;
+    cout<<"                  TDS Assignment                  "<<endl;
+    cout<<"=================================================="<<endl;
+    cout<<"1. Team A"<<endl;
+    cout<<"2. Team B"<<endl;
+    cout<<"3. Exit System"<<endl;
+    cout<<"--------------------------------------------------"<<endl;
+    cout<<"Enter your choice: ";
+    cin>>choice;
+    
+    switch(choice){
+    	case 1:
+    		{
+    			system("cls");
+    			teamAMenu();
+    			break;
+			}
+		case 2:
+			{
+				system("cls");
+				teamBMenu();
+				break;
+			}
+		case 3:
+			{
+				cout<<"\nThank you for using the system. Goodbye!"<<endl;
+				exit(1);
+				break;
+			}
+		default:
+			{
+				cout<<"Invalid choice. Press Enter to try again"<<endl;
+				cin.ignore();
+				cin.get();
+				mainMenu();
+				break;
+			}
+	}
+}
 
-// --------------------- MAIN PROGRAM ---------------------
-int main() {
-    Customer customers[MAX_CUSTOMERS];
-    Product products[MAX_PRODUCTS];
+//---------------------- TEAM A MENU ------------------------
+void teamAMenu(){
+	int choice;
+	
+	cout<<"=================================================="<<endl;
+    cout<<"                    Team A Menu                   "<<endl;
+    cout<<"=================================================="<<endl;
+    cout<<"1. Hashing Customer"<<endl;
+    cout<<"2. Hashing Rating"<<endl;
+    cout<<"3. Return to Main Menu"<<endl;
+    cout<<"--------------------------------------------------"<<endl;
+    cout<<"Enter your choice: ";
+    cin>>choice;
+    switch(choice){
+    	case 1:
+    		{
+    			system("cls");
+    			cout<<"Successfully enter page hashing customer";
+    			break;
+			}
+		case 2:
+			{
+				system("cls");
+    			cout<<"Successfully enter page hashing rating";
+				break;
+			}
+		case 3:
+			{
+				system("cls");
+				mainMenu();
+				break;
+			}
+		default:
+			{
+				cout<<"Invalid choice. Press Enter to try again"<<endl;
+				cin.ignore();
+				cin.get();
+				system("cls");
+				teamAMenu();
+				break;
+			}
+	}
+}
 
-    int customerCount = loadCustomers(customers);
-    int productCount = loadProducts(products);
+//---------------------- TEAM B MENU ------------------------
+void teamBMenu(){
+	int choice;
+	
+	cout<<"=================================================="<<endl;
+    cout<<"                    Team B Menu                   "<<endl;
+    cout<<"=================================================="<<endl;
+    cout<<"1. Product"<<endl;
+    cout<<"2. Order History"<<endl;
+    cout<<"3. Return to Main Menu"<<endl;
+    cout<<"--------------------------------------------------"<<endl;
+    cout<<"Enter your choice: ";
+    cin>>choice;
+    switch(choice){
+    	case 1:
+    		{
+    			system("cls");
+    			cout<<"Successfully enter page hashing customer";
+    			break;
+			}
+		case 2:
+			{
+				system("cls");
+    			cout<<"Successfully enter page hashing rating";
+				break;
+			}
+		case 3:
+			{
+				system("cls");
+				mainMenu();
+				break;
+			}
+		default:
+			{
+				cout<<"Invalid choice. Press Enter to try again"<<endl;
+				cin.ignore();
+				cin.get();
+				system("cls");
+				teamBMenu();
+				break;
+			}
+	}
+}
 
-    shellSort(customers, customerCount);
+//---------------------- SORT & SEARCH PRODUCT-------------------
+void sortSearchProduct(){
+	Product products[MAX_PRODUCTS];
+	
+	int productCount = loadProducts(products);
+
     shellSort(products, productCount);
-
-    cout << "Sorted Customers by ID:\n";
-    for (int i = 0; i < customerCount; i++) {
-        cout << customers[i].id << " " << customers[i].name << endl;
-    }
 
     cout << "\nSorted Products by ID:\n";
     for (int i = 0; i < productCount; i++) {
         cout << products[i].id << " " << products[i].name << endl;
     }
 
-    int searchCustID, searchProdID;
-    cout << "\nEnter Customer ID to search: ";
-    cin >> searchCustID;
-    int custIndex = jumpSearch(customers, customerCount, searchCustID);
-
-    if (custIndex != -1)
-        cout << "Customer Found: " << customers[custIndex].name << endl;
-    else
-        cout << "Customer not found.\n";
+    int searchProdID;
 
     cout << "\nEnter Product ID to search: ";
     cin >> searchProdID;
@@ -111,6 +216,11 @@ int main() {
         cout << "Product Found: " << products[prodIndex].name << endl;
     else
         cout << "Product not found.\n";
+}
+
+// --------------------- MAIN PROGRAM ---------------------
+int main() {
+    mainMenu();
 
     return 0;
 }
