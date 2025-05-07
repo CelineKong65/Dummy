@@ -10,6 +10,7 @@ void mainMenu();
 void teamAMenu();
 void teamBMenu();
 void sortSearchProduct();
+void printWrappedText(const string& text);
 
 // --------------------- STRUCTURES ---------------------
 struct Product {
@@ -212,11 +213,12 @@ void sortSearchProduct(){
 
     cout << "\nSorted Products by ID:\n";
     for (int i = 0; i < productCount; i++) {
-        cout << "ID   : " << products[i].id << endl;
+        cout << "\nID   : " << products[i].id << endl;
         cout << "Name : " << products[i].name << endl;
         cout << "Price: " << products[i].price << endl;
-		cout << products[i].description << endl;
-        cout <<"______________________________________________________________________________________________________________________________"<< endl;
+		cout << "\n";
+        printWrappedText(products[i].description);
+        cout <<"_________________________________________________________________________________________"<< endl;
     }
 
     int searchProdID;
@@ -231,10 +233,28 @@ void sortSearchProduct(){
 		cout << "ID: " << products[prodIndex].id << "\n";
 		cout << "Name: " << products[prodIndex].name << "\n";
 		cout << "Price: " << products[prodIndex].price << "\n";
-		cout << "Description: " << products[prodIndex].description << "\n";
+		cout << "Description:\n";
+        printWrappedText(products[prodIndex].description);
     }
     else
         cout << "Product not found.\n";
+}
+
+//---------------------- function to wrapped the description----------
+void printWrappedText(const string& text) {
+	int lineLength = 60;
+    int count = 0;
+    for (size_t i = 0; i < text.length(); ++i) {
+        cout << text[i];
+        count++;
+
+        // Wrap at space only
+        if (count >= lineLength && text[i] == ' ') {
+            cout << '\n';
+            count = 0;
+        }
+    }
+    cout << endl;
 }
 
 // --------------------- MAIN PROGRAM ---------------------
