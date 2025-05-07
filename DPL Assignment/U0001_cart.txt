@@ -1,2 +1,1 @@
-U0001,100,White Bread,4.50,5,22.50
-U0001,103,Baguette,4.20,10,42.00
+U0001,600,Chocolate Chip Cookie,2.00,12,24.00
