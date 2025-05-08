@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -1154,6 +1155,92 @@ def edit_admin_profile():
             input("\nInvalid choice. Press [ENTER] to try again.")
             clear_screen()
 
+def filter_feedback_rating(rate_filter):
+    clear_screen()
+    print("------------------------------------------------------------------")
+    print(f"|                 Filtered Feedback (Rating = {rate_filter})                  |")
+    print("------------------------------------------------------------------")
+
+    found = False
+
+    try:
+        with open(RATING_FILE, 'r', encoding='utf-8') as file:
+            for line in file:
+                parts = line.strip().split(', ', 3)
+                if len(parts) == 4:
+                    name, rating, comment, timestamp = parts
+                    if str(rate_filter) == rating:
+                        found = True
+                        print(f"| Name         : {name:<49}|")
+                        print(f"| Rating       : {rating:<49}|")
+                        print(f"| Comment      : {comment:<49}|")
+                        print(f"| Date & Time  : {timestamp:<49}|")
+                        print("------------------------------------------------------------------")
+        
+        if not found:
+            print(f"No records found for rating level {rate_filter}.")
+
+    except FileNotFoundError:
+        print("Feedback file not found.")
+
+    input("\nPress [Enter] to return to the admin menu.")
+    clear_screen()
+    return admin_menu()
+
+def view_feedback_rating():
+    global logged_in_admin
+
+    clear_screen()
+
+    print("------------------------------------------------------------------")
+    print("|                  Feedback and Rating Records                    |")
+    print("------------------------------------------------------------------")
+
+    try:
+        with open(RATING_FILE, 'r', encoding='utf-8') as file:
+            lines = file.readlines()
+
+        if not lines:
+            print("No feedback records found.")
+            input("Press [Enter] to return to the admin menu.")
+            return admin_menu()
+
+        for line in lines:
+            parts = line.strip().split(', ', 3)
+            if len(parts) == 4:
+                name, rating, comment, timestamp = parts
+                print(f"| Name         : {name:<49}|")
+                print(f"| Rating       : {rating:<49}|")
+                print(f"| Comment      : {comment:<49}|")
+                print(f"| Date & Time  : {timestamp:<49}|")
+                print("------------------------------------------------------------------")
+
+    except FileNotFoundError:
+        print("Feedback file not found.")
+        input("Press [Enter] to return to the admin menu.")
+        return admin_menu()
+
+    while True:
+        choice = input("\nDo you want to filter feedback by rate level? (Y/N): ").strip().lower()
+
+        if choice in ['y', 'yes']:
+            try:
+                rate_filter = int(input("Enter the rating level to filter by (1 to 5): "))
+                if 1 <= rate_filter <= 5:
+                    return filter_feedback_rating(rate_filter)
+                else:
+                    print("Invalid rating. Please enter a number between 1 and 5.")
+            except ValueError:
+                print("Invalid input. Please enter a valid number.")
+
+        elif choice in ['n', 'no']:
+            input("Press [Enter] to return to the admin menu.")
+            clear_screen()
+            return admin_menu()
+
+        else:
+            print("Invalid choice. Please enter Y or N.")
+
 def login_menu():
     global logged_in_member 
 
@@ -1220,6 +1307,7 @@ def admin_menu():
         elif choice == '3':
             return
         elif choice == '4':
+            view_feedback_rating()
             return
         elif choice == '5':
             return
@@ -1258,6 +1346,38 @@ def get_quoted_field(ss):
         ss = split[1] if len(split) > 1 else ""
 
     return field.strip(), ss.strip()
+
+def feedback_rating():
+    if not logged_in_member:
+        print("Error: No user logged in.")
+        input("Press [ENTER] to continue.")
+        return
+
+    clear_screen()
+    print("------------------------------------------------------------------")
+    print("|                        FEEDBACK & RATING                        |")
+    print("------------------------------------------------------------------")
+
+    while True:
+        try:
+            rate = int(input("Enter your rating for our system (1 to 5): "))
+            if 1 <= rate <= 5:
+                break
+            else:
+                print("Invalid rating. Please enter a number between 1 and 5.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
+    comment = input("Enter your comment: ")
+    print("Thank you for your feedback!")
+
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with open(RATING_FILE, "a", encoding="utf-8") as file:
+        file.write(f"{logged_in_member.full_name}, {rate}, {comment}, {now}\n")
+
+    input("\nPress [ENTER] to return to main menu.")
+    clear_screen()
+    return main_menu()
 
 def display_product(product):
     if product.status == "Active":
@@ -2229,6 +2349,7 @@ def main_menu():
             view_purchase_history()
             return
         elif choice == '5':
+            feedback_rating()
             return
         elif choice == '6':
             input("\nPress [ENTER] to logout.")
