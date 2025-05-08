@@ -2000,64 +2000,124 @@ def get_order_id():
 
 def view_purchase_history():
     global logged_in_member
-    
+
     if not logged_in_member:
         print("No member logged in to view purchase history.")
         input("Press [ENTER] to continue.")
         return
-    
+
     try:
         clear_screen()
         print("------------------------------------------------------------------")
         print("                      YOUR PURCHASE HISTORY                      ")
         print("==================================================================")
-        
+
+        if not os.path.exists(PURCHASE_HISTORY_FILE):
+            with open(PURCHASE_HISTORY_FILE, "w", encoding="utf-8") as file:
+                pass  
+
         with open(PURCHASE_HISTORY_FILE, "r", encoding="utf-8") as file:
             content = file.read()
-        
+
+        if not content.strip():
+            print("No purchase history found.")
+            input("Press [ENTER] to continue.")
+            return
+
+        from datetime import datetime
         records = content.strip().split("\n\n")
-        found = False
-        
+        user_records = []
+
         for record in records:
             if not record.strip():
                 continue
-                
+
             lines = record.strip().split("\n")
             if len(lines) < 2:
                 continue
-                
+
             header = lines[0].split(',')
-            if len(header) < 4:
+            if len(header) < 5:
                 continue
-                
+
             member_id = header[0]
             if member_id != logged_in_member.member_id:
                 continue
-                
-            found = True
-            order_id = header[2]
-            purchase_time = header[3]
-            payment_method = header[4]
-            
-            print(f"Purchase Time : {purchase_time}")
-            print(f"Payment Method: {payment_method}")
+
+            try:
+                order_id = header[2]
+                purchase_time = header[3]
+                payment_method = header[4]
+
+                total_line = lines[-1].split(',')
+                total_payment = float(total_line[4]) if len(total_line) >= 5 and total_line[3] == "TOTAL" else 0.0
+
+                user_records.append({
+                    "lines": lines,
+                    "datetime": purchase_time,
+                    "datetime_obj": datetime.strptime(purchase_time, "%Y-%m-%d %H:%M:%S"),
+                    "total": total_payment,
+                    "order_id": order_id,
+                    "payment_method": payment_method
+                })
+
+            except Exception as e:
+                print(f"Error processing record: {e}")
+                continue
+
+        if not user_records:
+            print("No purchase history found for your account.")
+            input("\nPress [ENTER] to return to main menu.")
+            clear_screen()
+            main_menu()
+            return
+        
+        print("How would you like to sort your purchase history?")
+        print("[1] By Date/Time (Latest First)")
+        print("[2] By Total Purchase Amount (Highest First)")
+        print("[3] Back To Main Menu")
+
+        while True:
+            choice = input("\nEnter your choice: ")
+            try:
+                choice = int(choice)  
+                if choice == 3:
+                    clear_screen()
+                    main_menu()
+                    return
+                elif choice == 1:
+                    user_records.sort(key=lambda x: x["datetime_obj"], reverse=True)
+                    break
+                elif choice == 2:
+                    user_records.sort(key=lambda x: x["total"], reverse=True)
+                    break
+                else:
+                    print("Invalid choice. Please try again.")
+            except ValueError:
+                print("Invalid choice. Please try again.")
+
+        clear_screen()
+
+        print("------------------------------------------------------------------")
+        print("                      YOUR PURCHASE HISTORY                      ")
+        print("==================================================================")
+        for record in user_records:
+            print(f"Purchase Time : {record['datetime']}")
+            print(f"Payment Method: {record['payment_method']}")
             print("------------------------------------------------------------------")
-            
-            total_payment = 0.0
-            items = []
-            
-            for line in lines[1:-1]:
+
+            for line in record["lines"][1:-1]:
                 parts = line.split(',')
                 if len(parts) < 9:
                     continue
-                    
+
                 product_id = parts[3]
                 name = parts[4]
                 category = parts[5]
                 price = float(parts[6])
                 quantity = int(parts[7])
                 total = float(parts[8])
-                
+
                 print(f"Product ID : {product_id}")
                 print(f"Name       : {name}")
                 print(f"Category   : {category}")
@@ -2065,33 +2125,24 @@ def view_purchase_history():
                 print(f"Quantity   : {quantity}")
                 print(f"Total      : RM {total:.2f}")
                 print("------------------------------------------------------------------")
-                
-                items.append((name, price, quantity, total))
-                total_payment += total
-            
-            # Get the actual total from the last line
-            total_line = lines[-1].split(',')
-            if len(total_line) >= 5 and total_line[3] == "TOTAL":
-                total_payment = float(total_line[4])
-            
-            print(f"Total Purchase: RM {total_payment:.2f}")
+
+            print(f"Total Purchase: RM {record['total']:.2f}")
             print("==================================================================\n")
-        
-        if not found:
-            print("No purchase history found for your account.")
-        
-        input("\nPress [ENTER] to return to main menu.")
+
+        input("\nPress [ENTER] to return.")
         clear_screen()
-        main_menu()
-    
+        view_purchase_history()
+
     except FileNotFoundError:
-        print("No purchase history found.")
+        print("Purchase history file not found. Creating a new one.")
+        open(PURCHASE_HISTORY_FILE, "w", encoding="utf-8").close()
         input("Press [ENTER] to continue.")
         clear_screen()
         main_menu()
     except Exception as e:
-        print(f"Error viewing purchase history: {e}")
+        print(f"Error viewing purchase history: {str(e)}")
         input("Press [ENTER] to continue.")
+
 
 def display_cart(cart):
     if not logged_in_member:
