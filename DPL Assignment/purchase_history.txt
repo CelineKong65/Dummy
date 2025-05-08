@@ -45,3 +45,16 @@ U0002,Kong lee ching,ORD0010,102,Sourdough,Bread,5.50,2,11.00
 U0002,Kong lee ching,ORD0010,301,Cheesecake,Cakes,16.50,20,330.00
 U0002,Kong lee ching,ORD0010,TOTAL,323.95
 
+U0002,Kong lee ching,ORD0011,2025-05-08 19:08:43
+U0002,Kong lee ching,ORD0011,102,Sourdough,Bread,5.50,12,66.00
+U0002,Kong lee ching,ORD0011,TOTAL,66.00
+
+U0002,Kong lee ching,ORD0012,2025-05-08 19:34:16,Cash
+U0002,Kong lee ching,ORD0012,102,Sourdough,Bread,5.50,12,66.00
+U0002,Kong lee ching,ORD0012,404,Sugar Donut,Donuts,2.50,22,55.00
+U0002,Kong lee ching,ORD0012,TOTAL,114.95
+
+U0002,Kong lee ching,ORD0013,2025-05-08 19:35:33,Debit Card
+U0002,Kong lee ching,ORD0013,202,Puff Pastry,Pastries,3.80,2,7.60
+U0002,Kong lee ching,ORD0013,TOTAL,7.60
+

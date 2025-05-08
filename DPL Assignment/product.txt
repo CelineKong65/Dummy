@@ -1,11 +1,11 @@
 100,White Bread,Bread,4.5,90,Inactive
 101,Whole Wheat Bread,Bread,4.8,0,Active
-102,Sourdough,Bread,5.5,42,Active
+102,Sourdough,Bread,5.5,19,Active
 103,Baguette,Bread,4.2,78,Inactive
 104,Rye Bread,Bread,5.0,100,Inactive
 200,Croissant,Pastries,3.5,79,Inactive
 201,Danish Pastry,Pastries,4.0,46,Active
-202,Puff Pastry,Pastries,3.8,19,Active
+202,Puff Pastry,Pastries,3.8,17,Active
 203,Pain au Chocolat,Pastries,4.2,3,Active
 204,Apple Turnover,Pastries,4.0,77,Active
 300,Chocolate Cake,Cakes,15.0,100,Active
@@ -17,7 +17,7 @@
 401,Chocolate Donut,Donuts,2.8,100,Active
 402,Custard-Filled Donut,Donuts,3.0,100,Active
 403,Jam-Filled Donut,Donuts,2.9,100,Active
-404,Sugar Donut,Donuts,2.5,96,Active
+404,Sugar Donut,Donuts,2.5,74,Active
 500,Vanilla Cupcake,Cupcakes & Muffins,3.5,100,Active
 501,Chocolate Muffin,Cupcakes & Muffins,3.8,100,Active
 502,Blueberry Muffin,Cupcakes & Muffins,4.0,20,Active
