@@ -1294,8 +1294,10 @@ def admin_menu():
         print(" [3] Manage Admin List")
         print(" [4] Manage Feedback and Rating")
         print(" [5] View Dashboard")
-        print(" [6] My profile")
-        print(" [7] Log Out")
+        print(" [6] View Order History")
+        print(" [7] View Sales Report")
+        print(" [8] My profile")
+        print(" [9] Log Out")
         print("===============================================================")
 
         choice = input("Enter your choice: ")
@@ -1310,19 +1312,22 @@ def admin_menu():
             view_feedback_rating()
             return
         elif choice == '5':
-            return
+            view_dashboard()
         elif choice == '6':
-            admin_profile()
+            view_order_history()
         elif choice == '7':
+            view_sales_report()
+        elif choice == '8':
+            admin_profile()
+        elif choice == '9':
             input("\nPress [ENTER] to logout.")
             clear_screen()
             return login_menu()
         else:
             input("\nInvalid choice. Press [ENTER] to try again.")
             clear_screen()
-
-
-
+            
+            
 def get_quoted_field(ss):
     field = ""
     ss = ss.strip()
@@ -2421,6 +2426,276 @@ def filter_products():
                         break
                 except ValueError:
                     print("Invalid input. Please enter a number.")
+
+
+# ==========================================VIEW DASHBOARD==========================================
+def view_dashboard():
+    product_count = 0
+    active_product = 0
+    inactive_product = 0
+    out_of_stock = 0
+    
+    try:
+        with open(PRODUCT_FILE, 'r') as file:
+            for line in file:
+                line = line.strip()
+                if line:
+                    product_count += 1
+                    parts = line.split(',')
+                    if len(parts) >= 6:
+                        stock = int(parts[4]) if parts[4].isdigit() else 0
+                        
+                        status = parts[5]
+                        if status == "Active":
+                            active_product += 1
+                            if stock <= 0:
+                                out_of_stock += 1
+                        else: 
+                            inactive_product += 1
+    
+    except FileNotFoundError:
+        pass
+    
+    member_count = 0
+    active_member = 0
+    inactive_member = 0
+    
+    try:
+        with open (MEMBERS_FILE, 'r') as file:
+            lines = []
+            for line in file:
+                line = line.strip()
+                if line:
+                    lines.append(line)
+                    
+            member_count = len(lines) // 8
+            for i in range(0, len(lines), 8):
+                if i + 7 < len(lines) and lines[i+7] == "Active":
+                    active_member += 1
+                else :
+                    inactive_member += 1
+    except FileNotFoundError:
+        pass
+    
+    order_count = 0
+    total_sales = 0.0
+    
+    try:
+        with open(PURCHASE_HISTORY_FILE, 'r') as file:
+            content = file.read()
+            records = content.split("\n\n")
+            order_count = len([r for r in records if r.strip()])
+            
+            for record in records:
+                if not record.strip():
+                    continue
+                lines = record.split("\n")
+                if len(lines) < 2:
+                    continue
+                total_line = lines[-1].split(',')
+                if len(total_line) >= 5 and total_line[3] == "TOTAL":
+                    total_sales += float(total_line[4])
+    except FileNotFoundError:
+        pass
+    
+    clear_screen()
+    print("===============================================================")
+    print("                       ADMIN DASHBOARD                         ")
+    print("===============================================================")
+    print(f"\nTotal Products               : {product_count}")
+    print(f"Active Products              : {active_product}")
+    print(f"Inactive Products            : {inactive_product}")
+    print(f"Out of Stock                 : {out_of_stock}")
+    print("_______________________________________________________________")
+    print(f"Total Members                : {member_count}")
+    print(f"Active Members               : {active_member}")
+    print(f"Inactive Members             : {inactive_member}")
+    print("_______________________________________________________________")
+    print(f"Total Orders                 : {order_count}")
+    print(f"Total Sales                  : RM {total_sales:.2f}")
+    print("===============================================================")
+    
+    
+    input("\nPress [ENTER] to return to admin menu.")
+# =======================================END OF VIEW DASHBOARD=======================================
+
+# ===================================VIEW ORDER HISTORY===================================
+def view_order_history():
+    try:
+        with open(PURCHASE_HISTORY_FILE, "r") as file:
+            content = file.read()
+            
+        if not content:
+            print("No purchase history found.")
+            input("Press [ENTER] to continue")
+            return
+        
+        records = content.split("\n\n")
+        
+        clear_screen()
+        print("===============================================================")
+        print("                        ORDER HISTORY                          ")
+        print("===============================================================")
+        
+        for record in records:
+            if not record.strip():
+                continue
+            
+            lines = record.split("\n")
+            if len(lines) < 2:
+                continue
+            
+            header = lines[0].split(',')
+            if len(header) < 5:
+                continue
+            
+            member_id = header[0]
+            member_name = header[1]
+            order_id = header[2]
+            purchase_time = header[3]
+            payment_method = header[4]
+            
+            print("________________________________________________________________")
+            print(f"|Member ID       : {member_id}                                 ")
+            print("|_______________________________________________________________")
+            print(f"|Name            : {member_name}                               ")
+            print(f"|Order ID        : {order_id}                                  ")
+            print(f"|Date n Time     : {purchase_time}                             ")
+            print(f"|Payment         : {payment_method}                            ")
+            print("|_______________________________________________________________")
+            
+            total_payment = 0.0
+            
+            for line in lines[1:-1]:
+                parts = line.split(',')
+                if len(parts) < 9:
+                    continue
+                
+                product_id   = parts[3]
+                product_name = parts[4]
+                category     = parts[5]
+                price        = parts[6]
+                quantity     = parts[7]
+                total        = parts[8]
+                
+                print(f"|Product ID      : {product_id}")
+                print(f"|Product Name    : {product_name}")
+                print(f"|Category        : {category}")
+                print(f"|Price           : RM {price}")
+                print(f"|Quantity        : {quantity}")
+                print(f"|Total           : RM {total}")
+                print("|---------------------------------------------------------------")
+                
+                total_payment += float(total) if total else 0.0
+                
+            # Get actual total from the last line
+            total_line = lines[-1].split(',')
+            if len(total_line) >= 5 and total_line[3] == "TOTAL":
+                total_payment = float(total_line[4])
+            
+            has_discount = False
+            for line in lines[1:-1]:
+                here = line.split(',')
+                if len(here) < 9:
+                    continue
+                
+                if float(here[8]) > 120.00:
+                    has_discount = True
+                    break
+            
+            if has_discount:        
+                print(f"|Total Purchase: RM {total_payment:.2f} [after 5% discount]")
+                print("|===============================================================\n\n")
+            else:
+                print(f"|Total Purchase: RM {total_payment:.2f}")
+                print("|===============================================================\n\n")
+            
+        input("\nPress [ENTER] to return to admin menu.")
+        
+    except FileNotFoundError:
+        print("Order history file not found.")
+        input("Press [ENTER] to continue")
+# ===================================END OF VIEW ORDER HISTORY===================================
+
+# =======================================VIEW SALES REPORT=======================================
+def view_sales_report():
+    category_sales = {}
+    category_count = {}
+    
+    try:
+        products = {}
+        with open(PRODUCT_FILE, 'r') as file:
+            for line in file:
+                line = line.strip()
+                if line:
+                    parts = line.split(',')
+                    if len(parts) >= 3:
+                        product_id = parts[0]
+                        name = parts[1]
+                        category = parts[2]
+                        products[product_id] = (name, category)
+        
+        with open(PURCHASE_HISTORY_FILE, 'r') as file:
+            content = file.read()
+            records = content.split('\n\n')
+
+            for record in records:
+                if not record.strip():
+                    continue
+                
+                lines = record.split("\n")
+                if len(lines) < 2:
+                    continue
+                
+                for line in lines[1:-1]:
+                    parts = line.split(',')
+                    if len(parts) >= 9:
+                        product_id = parts[3]
+                        quantity = int(parts[7]) if parts[7].isdigit else 0
+                        total = float(parts[8]) if parts[8].isdigit else 0
+                        
+                        if product_id in products:
+                            category = products[product_id][1]
+                            if category not in category_sales:
+                                category_sales[category] = 0.0
+                                category_count[category] = 0
+                            category_sales[category] += total
+                            category_count[category] += quantity
+                            
+        clear_screen()
+        print
+        
+        print("===============================================================")
+        print("                        ORDER HISTORY                          ")
+        print("===============================================================")
+        
+        if not category_sales:
+            print("No sales data available.")
+        else:
+            sorted_category = []
+            for category in category_sales:
+                inserted = False
+                for i in range(len(sorted_category)):
+                    if category_sales[category] > category_sales[sorted_category[i]]:
+                        sorted_category.insert(i, category)
+                        inserted = True
+                        break
+                if not inserted:
+                    sorted_category.append(category)
+                    
+            for category in sorted_category:
+                print(f"Category: {category}")
+                print(f"Items Sold: {category_count[category]}")
+                print(f"Total Sales: RM {category_sales[category]:.2f}")
+                print("----------------------------------------------------------------")
+
+        print("===============================================================")
+        input("\nPress [ENTER] to return to admin menu.")
+        
+    except FileNotFoundError:
+        print("Required data files not found.")
+        input("Press [ENTER] to continue.")
+# ====================================END OF VIEW SALES REPORT===================================
 
 def main_menu():
     global logged_in_member
