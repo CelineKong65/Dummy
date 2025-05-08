@@ -2,6 +2,9 @@
 #include <fstream>
 #include <cmath>
 #include <cstdlib>
+#include <string>
+#include <sstream>
+
 using namespace std;
 const int MAX_PRODUCTS = 100;
 
@@ -18,6 +21,267 @@ struct Product {
     string name;
     double price;
     string description;
+};
+
+struct Customer {
+    string id;
+    string name;
+    string email;
+    string phone;
+};
+
+// --------------------- HASHING + LINKED LIST QUEUE ---------------------
+class HashCustomer {
+	private:
+		struct Node {
+			Customer data;
+			Node* next;
+		};
+	
+		Node* front;
+		Node* rear;
+		string filename;
+		
+		
+		bool isValidPhone(const string& phone) {
+			const char* p = phone.c_str();
+			int i = 0;
+			int digitCount = 0;
+		
+			while (p[i] != '\0') {
+				if (i == 3 && p[i] != '-') {
+					return false;
+				}
+		
+				char c = p[i];
+		
+				if (!((c >= '0' && c <= '9') || c == '-' )) {
+					return false;
+				}
+		
+				if (c >= '0' && c <= '9') {
+					digitCount++;
+				}
+		
+				i++;
+			}
+		
+			if (digitCount < 10 || digitCount > 11) {
+				return false;
+			}
+		
+			if (i < 4) {
+				return false;
+			}
+		
+			return true;
+		}
+	
+		
+		bool isValidEmail(const string& email) {
+			if(email[0] == '\0') return false;
+			
+			bool hasAt = false;
+			int atPos = -1;
+			int i = 0;
+			while(email[i] != '0') {
+				if(email[i] == '@'){
+					hasAt = true;
+					atPos = i;
+					break;
+				}
+				i++;
+			}
+			
+			if(!hasAt) return false;
+			
+			if (atPos == 0 || email[atPos + 1] == '\0') return false;
+		
+			bool hasDot = false;
+			i = atPos + 1;
+			while (email[i] != '\0') {
+				if (email[i] == '.') {
+					hasDot = true;
+					if (email[i + 1] == '\0') return false;
+					break;
+				}
+				i++;
+			}
+			return hasDot;
+		}
+	
+	public:
+		HashCustomer() : front(NULL), rear(NULL), filename("customer.txt") {}
+	
+		~HashCustomer() {
+			Node* current = front;
+			while (current != NULL) {
+				Node* next = current->next;
+				delete current;
+				current = next;
+			}
+		}
+	
+		void enqueue(const Customer& customer) {
+			Node* newNode = new Node;
+			newNode->data = customer;
+			newNode->next = NULL;
+			
+			if (isEmpty()) {
+				front = rear = newNode;
+			} else {
+				rear->next = newNode;
+				rear = newNode;
+			}
+		}
+		
+		Customer parseCustomer(const string& line) {
+			Customer c;
+			stringstream ss(line);
+			ss >> c.id >> c.name >> c.email >> c.phone;
+			return c;
+		}
+	
+		bool isEmpty() const {
+			return front == NULL;
+		}
+	
+		void saveToFile() {
+			ofstream file("customer.txt");
+			if (!file) {
+				cout << "File fail to connect" << endl;
+				return;
+			}
+	
+			Node* current = front;
+			while (current != NULL) {
+				file << current->data.id << " "
+					 << current->data.name << " "
+					 << current->data.email << " "
+					 << current->data.phone << endl;
+				current = current->next;
+			}
+	
+			file.close();
+		}
+	
+		void loadFromFile() {
+			ifstream file("customer.txt");
+			if (!file) {
+				cout << "File fail to connect" << endl;
+				return;
+			}
+	
+			string line;
+			while (getline(file, line)) {
+				if(!line.empty()) {
+					Customer c = parseCustomer(line);
+					enqueue(c);
+				}
+			}
+	
+			file.close();
+		}
+	
+		void display() {
+			Node* current = front;
+			int i = 1;
+			while (current != NULL) {
+				cout << i << "." << current->data.id << " " 
+								 << current->data.name << " " 
+								 << current->data.email << " "
+								 << current->data.phone << endl;
+				current = current->next;
+				i++;
+			}
+		}
+	
+		void hashingCustomer() {
+			loadFromFile();
+			
+			int choice;
+			Customer cus;
+			
+			do {
+				cout << "==================================================" << endl;
+				cout << "                  Hashing Customer                " << endl;
+				cout << "==================================================" << endl;
+				cout << "1. Display Customer Information";
+				cout << "\n2. Add Customer Information";
+				cout << "\n3. Search Customer Information";
+				cout << "\n4. Save Customer Information";
+				cout << "\n5. Return to Team A Menu";
+				cout << "\n--------------------------------------------------" << endl;
+				cout << "\nEnter your choice: ";
+				cin >> choice;
+				cin.ignore();
+				cout << endl;
+				
+				switch(choice) {
+					case 1:
+						display();
+						cout << "\nPress [Enter] back to menu...";
+						cin.get(); 
+						system("cls");
+						break;
+						
+					case 2: 
+						cout << "Enter customer ID : ";
+						getline(cin, cus.id);
+						
+						cout << "Enter customer name : ";
+						getline(cin, cus.name);
+						
+						do {
+							cout << "Enter customer phone number (e.g. 010-1234567) : ";
+							getline(cin, cus.phone);
+							if (!isValidPhone(cus.phone)) {
+								cout << "Invalid phone number! Please try again.\n";
+							}
+						} while (!isValidPhone(cus.phone));
+						
+						do {
+							cout << "Enter customer email (e.g. john@example.com) : ";
+							getline(cin, cus.email);
+							if (!isValidEmail(cus.email)) {
+								cout << "Invalid email address! Please try again.\n";
+							}
+						} while (!isValidEmail(cus.email));
+						
+						enqueue(cus);
+						cout << "\nPress [Enter] back to menu...";
+						cin.get(); 
+						system("cls");
+						break;
+						
+					case 3: 
+						saveToFile();
+						cout << "Search Customer Information" << endl;
+						cout << "\nPress [Enter] back to menu...";
+						cin.get(); 
+						system("cls");
+						break;
+						
+					case 4: 
+						saveToFile();
+						cout << "Saved the customer information to " << filename << endl;
+						cout << "\nPress [Enter] back to menu...";
+						cin.get(); 
+						system("cls");
+						break;
+						
+					case 5: 
+						system("cls");
+						teamAMenu();
+						break;
+						
+					default:
+						cout << "Invalid choice." << endl;
+						break;
+				}
+				
+			} while (true);
+		}
 };
 
 // --------------------- SHELL SORT ---------------------
@@ -117,6 +381,7 @@ void mainMenu(){
 
 //---------------------- TEAM A MENU ------------------------
 void teamAMenu(){
+	HashCustomer HC;
 	int choice;
 	
 	cout<<"=================================================="<<endl;
@@ -132,7 +397,7 @@ void teamAMenu(){
     	case 1:
     		{
     			system("cls");
-    			cout<<"Successfully enter page hashing customer";
+    			HC.hashingCustomer();
     			break;
 			}
 		case 2:
