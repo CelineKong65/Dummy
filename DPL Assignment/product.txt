@@ -3,6 +3,7 @@
 102,Sourdough,Bread,5.5,19,Active
 103,Baguette,Bread,4.2,78,Inactive
 104,Rye Bread,Bread,5.0,100,Inactive
+105,Supa Mega Bread,Bread,5.0,100,Active
 200,Croissant,Pastries,3.5,79,Inactive
 201,Danish Pastry,Pastries,4.0,46,Active
 202,Puff Pastry,Pastries,3.8,17,Active
@@ -21,7 +22,7 @@
 500,Vanilla Cupcake,Cupcakes & Muffins,3.5,100,Active
 501,Chocolate Muffin,Cupcakes & Muffins,3.8,100,Active
 502,Blueberry Muffin,Cupcakes & Muffins,4.0,20,Active
-503,Red Velvet Cupcake,Cupcakes & Muffins,4.2,88,Active
+503,Red Velvet Cupcake,Cupcakes & Muffins,4.2,85,Active
 600,Chocolate Chip Cookie,Cookies,2.0,88,Active
 601,Oatmeal Raisin Cookie,Cookies,2.2,100,Active
 602,Butter Cookie,Cookies,1.8,100,Active
