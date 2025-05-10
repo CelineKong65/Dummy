@@ -7,12 +7,15 @@
 
 using namespace std;
 const int MAX_PRODUCTS = 100;
+const int MAX_ORDERS = 100;
+const int MAX_LINE_LENGTH = 256;
 
 // --------------------- FUNCTION PROTOTYPE ---------------------
 void mainMenu();
 void teamAMenu();
 void teamBMenu();
 void sortSearchProduct();
+void sortOrder();
 void printWrappedText(const string& text);
 
 // --------------------- STRUCTURES ---------------------
@@ -28,6 +31,14 @@ struct Customer {
     string name;
     string email;
     string phone;
+};
+
+struct Order {
+    string orderID;
+    string customerID;
+    string productID;
+    string dateTime; 
+    double totalAmount;
 };
 
 // --------------------- HASHING + LINKED LIST QUEUE ---------------------
@@ -285,13 +296,56 @@ class HashCustomer {
 };
 
 // --------------------- SHELL SORT ---------------------
-template<typename T>
-void shellSort(T arr[], int size) {
-    for (int gap = size / 2; gap > 0; gap /= 2) {
-        for (int i = gap; i < size; i++) {
-            T temp = arr[i];
+void shellSort(Product arr[], int n)
+{
+    // Start with a big gap, then reduce the gap
+    for (int gap = n/2; gap > 0; gap /= 2)
+    {
+        // Do a gapped insertion sort for this gap size.
+        // The first gap elements a[0..gap-1] are already in gapped order
+        // keep adding one more element until the entire array is gap sorted 
+        for (int i = gap; i < n; i += 1)
+        {
+            // add a[i] to the elements that have been gap sorted
+            // save a[i] in temp and make a hole at position i
+            Product temp = arr[i];
+
+            // shift earlier gap-sorted elements up until the correct 
+            // location for a[i] is found
+            int j;            
+            for (j = i; j >= gap && arr[j - gap].id > temp.id; j -= gap)
+                arr[j] = arr[j - gap];
+            
+            //  put temp (the original a[i]) in its correct location
+            arr[j] = temp;
+        }
+    }
+}
+
+void shellSortOrdersByDateTime(Order arr[], int n) {
+    // Convert datetime strings to comparable format and sort
+    for (int gap = n/2; gap > 0; gap /= 2) {
+        for (int i = gap; i < n; i += 1) {
+            Order temp = arr[i];
             int j;
-            for (j = i; j >= gap && arr[j - gap].id > temp.id; j -= gap) {
+            
+            // Compare datetime strings (newest first)
+            for (j = i; j >= gap && arr[j - gap].dateTime < temp.dateTime; j -= gap) {
+                arr[j] = arr[j - gap];
+            }
+            arr[j] = temp;
+        }
+    }
+}
+
+void shellSortOrdersByAmount(Order arr[], int n) {
+    // Sort by total amount (highest first)
+    for (int gap = n/2; gap > 0; gap /= 2) {
+        for (int i = gap; i < n; i += 1) {
+            Order temp = arr[i];
+            int j;
+            
+            for (j = i; j >= gap && arr[j - gap].totalAmount < temp.totalAmount; j -= gap) {
                 arr[j] = arr[j - gap];
             }
             arr[j] = temp;
@@ -332,6 +386,29 @@ int loadProducts(Product products[]) {
 	    getline(file, products[count].description, '"'); // Read description inside quotes
 	    count++;
 	}
+    file.close();
+    return count;
+}
+
+int loadOrders(Order orders[]) {
+    ifstream file("order.txt");
+	if (!file) {
+	    cout << "Error opening order file!\n";
+	    return 0;
+	}
+	int count = 0;
+    while (file >> orders[count].orderID) {
+        file.ignore(); // Ignore the whitespace after orderID
+        getline(file, orders[count].customerID, '"');
+        getline(file, orders[count].customerID, '"'); // Read customerID inside quotes
+        getline(file, orders[count].productID, '"');
+        getline(file, orders[count].productID, '"'); // Read productID inside quotes
+        getline(file, orders[count].dateTime, '"');
+        getline(file, orders[count].dateTime, '"'); // Read dateTime inside quotes
+        file >> orders[count].totalAmount;
+        count++;
+    }
+    
     file.close();
     return count;
 }
@@ -447,7 +524,7 @@ void teamBMenu(){
 		case 2:
 			{
 				system("cls");
-    			cout<<"Successfully enter page hashing rating";
+    			sortOrder();
 				break;
 			}
 		case 3:
@@ -468,41 +545,167 @@ void teamBMenu(){
 	}
 }
 
+//----------------------DIPLAY UNSORTED PRODUCT------------------
+void displayUnsortedProducts() {
+    Product products[MAX_PRODUCTS];
+    int productCount = loadProducts(products);
+    
+    cout << "\nUnsorted Products:\n";
+    for (int i = 0; i < productCount; i++) {
+        cout << "\nID   : " << products[i].id << endl;
+        cout << "Name : " << products[i].name << endl;
+        cout << "Price: " << products[i].price << endl;
+        cout << "\n";
+        printWrappedText(products[i].description);
+        cout << "_________________________________________________________________________________________" << endl;
+    }
+}
+
+//----------------------DIPLAY UNSORTED ORDER------------------
+void displayUnsortedOrders() {
+    Order orders[MAX_ORDERS];
+    int orderCount = loadOrders(orders);
+    
+    cout << "\nUnsorted Orders:\n";
+    for (int i = 0; i < orderCount; i++) {
+        cout << "\nOrder ID : " << orders[i].orderID << endl;
+        cout << "Customer ID: " << orders[i].customerID << endl;
+        cout << "Product ID: " << orders[i].productID << endl;
+        cout << "Date/Time: " << orders[i].dateTime << endl;
+        cout << "Total Amount: " << orders[i].totalAmount << endl;
+        cout << "\n";
+        
+        cout << "_________________________________________________________________________________________" << endl;
+    }
+}
+
+//---------------------- SAVE SORTED PRODUCTS ------------------------
+void saveSortedProducts(Product products[], int productCount) {
+    ofstream outFile("sorted_product.txt");
+    if (!outFile) {
+        cout << "Error opening file for writing!" << endl;
+        return;
+    }
+    
+    for (int i = 0; i < productCount; i++) {
+        outFile << products[i].id << " \"" 
+                << products[i].name << "\" " 
+                << products[i].price << " \"" 
+                << products[i].description << "\"\n";
+    }
+    
+    outFile.close();
+    cout << "Sorted products saved to sorted_product.txt\n";
+}
+
+//---------------------- SAVE SORTED ORDERS ------------------------
+void saveSortedOrders(Order orders[], int orderCount) {
+    ofstream outFile("sorted_order.txt");
+    if (!outFile) {
+        cout << "Error opening file for writing!" << endl;
+        return;
+    }
+    
+    for (int i = 0; i < orderCount; i++) {
+        outFile << orders[i].orderID << ","
+                << orders[i].customerID << ","
+                << orders[i].productID << ","
+                << orders[i].dateTime << ","
+                << orders[i].totalAmount << "\n";
+    }
+    
+    outFile.close();
+    cout << "Sorted orders saved to sorted_order.txt\n";
+}
+
 //---------------------- SORT & SEARCH PRODUCT-------------------
 void sortSearchProduct(){
 	Product products[MAX_PRODUCTS];
 	
 	int productCount = loadProducts(products);
-
-    shellSort(products, productCount);
-
-    cout << "\nSorted Products by ID:\n";
-    for (int i = 0; i < productCount; i++) {
-        cout << "\nID   : " << products[i].id << endl;
-        cout << "Name : " << products[i].name << endl;
-        cout << "Price: " << products[i].price << endl;
-		cout << "\n";
-        printWrappedText(products[i].description);
-        cout <<"_________________________________________________________________________________________"<< endl;
-    }
-
-    int searchProdID;
-
-    cout << "\nEnter Product ID to search: ";
-    cin >> searchProdID;
-    int prodIndex = jumpSearch(products, productCount, searchProdID);
-
-    if (prodIndex != -1)
-    {
-    	cout << "Product Found:\n";
-		cout << "ID: " << products[prodIndex].id << "\n";
-		cout << "Name: " << products[prodIndex].name << "\n";
-		cout << "Price: " << products[prodIndex].price << "\n";
-		cout << "Description:\n";
-        printWrappedText(products[prodIndex].description);
-    }
-    else
-        cout << "Product not found.\n";
+	int choice;
+	
+	do {
+        cout << "\n==================================================" << endl;
+        cout << "                        Product                    " << endl;
+        cout << "==================================================" << endl;
+        cout << "1. Display Unsorted Product List" << endl;
+        cout << "2. Add New Product (min. 5 entries)" << endl;
+        cout << "3. Delete Product" << endl;
+        cout << "4. Sort Data by ID" << endl;
+        cout << "5. Search Data by ID" << endl;
+        cout << "6. Save Sorted Data" << endl;
+        cout << "7. Return to Team B Menu" << endl;
+        cout << "--------------------------------------------------" << endl;
+        cout << "Enter your choice: ";
+        cin >> choice;
+        
+        switch(choice) {
+        	case 1:
+                system("cls");
+                displayUnsortedProducts();
+                break;
+            case 2:
+                system("cls");
+                //function
+                break;
+             case 3:
+                system("cls");
+                //function
+                break;
+            case 4:
+                system("cls");
+                shellSort(products, productCount);
+                cout << "Products sorted by ID:\n";
+                for (int i = 0; i < productCount; i++) {
+                    cout << "\nID   : " << products[i].id << endl;
+                    cout << "Name : " << products[i].name << endl;
+                    cout << "Price: " << products[i].price << endl;
+                    cout << "\n";
+                    printWrappedText(products[i].description);
+                    cout << "_________________________________________________________________________________________" << endl;
+                }
+                break;
+            case 5:
+			{
+			    int searchProdID;
+			
+			    cout << "\nEnter Product ID to search: ";
+			    cin >> searchProdID;
+			    int prodIndex = jumpSearch(products, productCount, searchProdID);
+			
+			    if (prodIndex != -1)
+			    {
+			    	cout << "Product Found:\n";
+					cout << "ID: " << products[prodIndex].id << "\n";
+					cout << "Name: " << products[prodIndex].name << "\n";
+					cout << "Price: " << products[prodIndex].price << "\n";
+					cout << "Description:\n";
+			        printWrappedText(products[prodIndex].description);
+			    }
+			    else
+			    {
+					cout << "Product not found.\n";
+				}
+			    break;
+			}
+			case 6:
+	            system("cls");
+	            saveSortedProducts(products, productCount);
+	            break;
+	        case 7:
+                system("cls");
+                teamBMenu();
+                return;
+            default:
+                cout << "Invalid choice. Please try again.\n";
+                break;   
+		}
+		cout << "\nPress [Enter] to continue...";
+        cin.ignore();
+        cin.get();
+        system("cls");
+	}while (true);
 }
 
 //---------------------- function to wrapped the description----------
@@ -520,6 +723,67 @@ void printWrappedText(const string& text) {
         }
     }
     cout << endl;
+}
+
+//---------------------- SORT ORDER-------------------
+void sortOrder(){
+	Order orders[MAX_ORDERS];
+	
+	int  orderCount = loadOrders(orders);
+	int choice;
+	
+	do {
+        cout << "\n==================================================" << endl;
+        cout << "                    Order History                  " << endl;
+        cout << "==================================================" << endl;
+        cout << "1. Display Unsorted Order List" << endl;
+        cout << "2. Add New Order (min. 5 entries)" << endl;
+        cout << "3. Sort Data by Date & Time" << endl;
+        cout << "4. Save Sorted Data" << endl;
+        cout << "5. Return to Team B Menu" << endl;
+        cout << "--------------------------------------------------" << endl;
+        cout << "Enter your choice: ";
+        cin >> choice;
+        
+        switch(choice) {
+        	case 1:
+                system("cls");
+                displayUnsortedOrders();
+                break;
+            case 2:
+                system("cls");
+                //function
+                break;
+             case 3:
+                system("cls");
+                shellSortOrdersByDateTime(orders, orderCount);
+                cout << "Orders sorted by Date/Time:\n";
+                for (int i = 0; i < orderCount; i++) {
+                    cout << "\nOrder ID: " << orders[i].orderID << endl;
+                    cout << "Date/Time: " << orders[i].dateTime << endl;
+                    cout << "Customer: " << orders[i].customerID << endl;
+                    cout << "Product: " << orders[i].productID << endl;
+                    cout << "Amount: RM" << orders[i].totalAmount << endl;
+                    cout << "----------------------------------------" << endl;
+                }
+                break;
+            case 4:
+                system("cls");
+	            saveSortedOrders(orders, orderCount);
+	            break;
+            case 5:
+				system("cls");
+                teamBMenu();
+                return;
+            default:
+                cout << "Invalid choice. Please try again.\n";
+                break;   
+		}
+		cout << "\nPress [Enter] to continue...";
+        cin.ignore();
+        cin.get();
+        system("cls");
+	}while (true);
 }
 
 // --------------------- MAIN PROGRAM ---------------------
