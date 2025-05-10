@@ -3,7 +3,8 @@
 102,Sourdough,Bread,5.5,19,Active
 103,Baguette,Bread,4.2,78,Inactive
 104,Rye Bread,Bread,5.0,100,Inactive
-105,Supa Mega Bread,Bread,5.0,100,Active
+105,Supa Mega Jumbo Bread uwu,Bread,10.5,100,Active
+106,Lawrence Miguel,Bread,20.0,90,Active
 200,Croissant,Pastries,3.5,79,Inactive
 201,Danish Pastry,Pastries,4.0,46,Active
 202,Puff Pastry,Pastries,3.8,17,Active

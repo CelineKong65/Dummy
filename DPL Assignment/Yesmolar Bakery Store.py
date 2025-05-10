@@ -1437,7 +1437,6 @@ def get_quoted_field(ss):
 #filter product admin
 def filter_product_admin():
     global products
-    cart = []
 
     if not load_products():
         print("Failed to load products.")
@@ -1516,10 +1515,7 @@ def add_product(products, category):
             
         # Check if ID already exists
         id_exists = False
-        for p in products:
-            if p.product_id == new_product.product_id:
-                id_exists = True
-                break
+        id_exists = jump_search(products, new_product.product_id, key='product_id')
                 
         if id_exists:
             print("Product ID already exists! Please enter a different ID.")
@@ -1586,10 +1582,7 @@ def edit_product(products, category):
     
     # Find product to edit
     product_to_edit = None
-    for p in products:
-        if p.product_id == product_id and p.category == category:
-            product_to_edit = p
-            break
+    product_to_edit = jump_search(products, product_id, key='product_id')
     
     if not product_to_edit:
         print("\nNo product found with that ID in this category!")
@@ -1675,10 +1668,7 @@ def restock_product(products, category):
     
     # Find product to restock
     product_to_restock = None
-    for p in products:
-        if p.product_id == product_id and p.category == category:
-            product_to_restock = p
-            break
+    product_to_restock = jump_search(products, product_id, key='product_id')
     
     if not product_to_restock:
         print("\nNo product found with that ID in this category!")
@@ -2776,11 +2766,7 @@ def filter_products():
 
             product_id = selection
             product = None
-            # Check all products (not just filtered) to see if ID exists
-            for p in products:
-                if p.product_id == product_id:
-                    product = p
-                    break
+            product = jump_search(products, selection, key='product_id')
 
             if not product:
                 print(f"\nProduct with ID '{product_id}' not found.")
