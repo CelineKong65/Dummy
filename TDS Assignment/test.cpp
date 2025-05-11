@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <string>
 #include <sstream>
+#include <iomanip>
 
 using namespace std;
 const int MAX_PRODUCTS = 100;
@@ -572,9 +573,9 @@ void saveSortedProducts(Product products[], int productCount) {
     }
     
     for (int i = 0; i < productCount; i++) {
-        outFile << products[i].id << " \"" 
+        outFile << setw(3) << setfill('0') << products[i].id << " \"" 
                 << products[i].name << "\" " 
-                << products[i].price << " \"" 
+                << fixed << setprecision(2) << products[i].price << " \"" 
                 << products[i].description << "\"\n";
     }
     
@@ -591,10 +592,10 @@ void saveSortedOrders(Order orders[], int orderCount) {
     }
     
     for (int i = 0; i < orderCount; i++) {
-        outFile << orders[i].orderID << ","
-                << orders[i].customerID << ","
-                << orders[i].productID << ","
-                << orders[i].dateTime << ","
+        outFile << orders[i].orderID << " "
+                << orders[i].customerID << " "
+                << orders[i].productID << " "
+                << "\"" << orders[i].dateTime << "\" " 
                 << orders[i].totalAmount << "\n";
     }
     
