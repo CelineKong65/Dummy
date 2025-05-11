@@ -10,12 +10,13 @@ using namespace std;
 const int MAX_PRODUCTS = 100;
 const int MAX_ORDERS = 100;
 const int MAX_LINE_LENGTH = 256;
+int productCount = 0;
 
 // --------------------- FUNCTION PROTOTYPE ---------------------
 void mainMenu();
 void teamAMenu();
 void teamBMenu();
-void sortSearchProduct();
+void productMenu();
 void sortOrder();
 void printWrappedText(const string& text);
 
@@ -358,7 +359,7 @@ int jumpSearch(T arr[], int size, int targetID) {
     return -1;
 }
 
-// --------------------- READ FROM FILE ---------------------
+// ------------------------------------------- READ FROM FILE (load function)-------------------------------------------
 int loadProducts(Product products[]) {
     ifstream file("raw_product.txt");
     int count = 0;
@@ -397,7 +398,7 @@ int loadOrders(Order orders[]) {
     file.close();
     return count;
 }
-//---------------------- MAIN MENU ------------------------
+//-------------------------------------------------------- MAIN MENU ------------------------------------------------------
 void mainMenu(){
 	int choice;
 	
@@ -441,7 +442,7 @@ void mainMenu(){
 	}
 }
 
-//---------------------- TEAM A MENU ------------------------
+//--------------------------------------------------- TEAM A MENU -----------------------------------------------------
 void teamAMenu(){
 	HashCustomer HC;
 	int choice;
@@ -486,7 +487,7 @@ void teamAMenu(){
 	}
 }
 
-//---------------------- TEAM B MENU ------------------------
+//-------------------------------------------------- TEAM B MENU ----------------------------------------------
 void teamBMenu(){
 	int choice;
 	
@@ -503,7 +504,7 @@ void teamBMenu(){
     	case 1:
     		{
     			system("cls");
-    			sortSearchProduct();
+    			productMenu();
     			break;
 			}
 		case 2:
@@ -530,23 +531,7 @@ void teamBMenu(){
 	}
 }
 
-//----------------------DIPLAY UNSORTED PRODUCT------------------
-void displayUnsortedProducts() {
-    Product products[MAX_PRODUCTS];
-    int productCount = loadProducts(products);
-    
-    cout << "\nUnsorted Products:\n";
-    for (int i = 0; i < productCount; i++) {
-        cout << "\nID   : " << products[i].id << endl;
-        cout << "Name : " << products[i].name << endl;
-        cout << "Price: " << products[i].price << endl;
-        cout << "\n";
-        printWrappedText(products[i].description);
-        cout << "_________________________________________________________________________________________" << endl;
-    }
-}
-
-//----------------------DIPLAY UNSORTED ORDER------------------
+//---------------------------------------------------DIPLAY UNSORTED ORDER------------------------------------------
 void displayUnsortedOrders() {
     Order orders[MAX_ORDERS];
     int orderCount = loadOrders(orders);
@@ -564,7 +549,25 @@ void displayUnsortedOrders() {
     }
 }
 
-//---------------------- SAVE SORTED PRODUCTS ------------------------
+//----------------------------------------------------save products to raw product.txt----------------------------------------
+void saveRawProducts(Product products[], int productCount) {
+    ofstream outFile("raw_product.txt");
+    if (!outFile) {
+        cout << "Error opening file for writing!" << endl;
+        return;
+    }
+    
+    for (int i = 0; i < productCount; i++) {
+        outFile << setw(3) << setfill('0') << products[i].id << " \"" 
+                << products[i].name << "\" " 
+                << fixed << setprecision(2) << products[i].price << " \"" 
+                << products[i].description << "\"\n";
+    }
+    
+    outFile.close();
+}
+
+//---------------------------------------------------- SAVE SORTED PRODUCTS --------------------------------------------------
 void saveSortedProducts(Product products[], int productCount) {
     ofstream outFile("sorted_product.txt");
     if (!outFile) {
@@ -580,10 +583,13 @@ void saveSortedProducts(Product products[], int productCount) {
     }
     
     outFile.close();
-    cout << "Sorted products saved to sorted_product.txt\n";
+    cout << "Sorted products saved to sorted_product.txt" << endl;
+    cout << "Press [ENTER] to return to Product Menu.";
+	cin.ignore();
+	cin.get();    
 }
 
-//---------------------- SAVE SORTED ORDERS ------------------------
+//----------------------------------------------------------- SAVE SORTED ORDERS -----------------------------------------------
 void saveSortedOrders(Order orders[], int orderCount) {
     ofstream outFile("sorted_order.txt");
     if (!outFile) {
@@ -603,8 +609,178 @@ void saveSortedOrders(Order orders[], int orderCount) {
     cout << "Sorted orders saved to sorted_order.txt\n";
 }
 
-//---------------------- SORT & SEARCH PRODUCT-------------------
-void sortSearchProduct(){
+//----------------------------------------------------------- ADD PRODUCT-------------------------------------------------------
+void addProducts(Product products[]) {
+    productCount = loadProducts(products);
+    Product newProduct;
+    bool idExist = false;
+    int choice;
+    int addCount = 0;
+    const int MAX_ADD = 5;
+    
+    system("cls");
+    
+    do {
+    	
+    	// Sort and display current products
+	    shellSort(products, productCount);
+	    cout << "\nCurrent Products:\n";
+	    for(int i = 0; i < productCount; i++) {
+	        cout << setw(3) << setfill('0') << products[i].id << " - " << products[i].name << endl;
+	    }
+	    
+        cout << endl;
+        do {
+            idExist = false;
+            int idToAdd;
+            // Check if the Product id is 3 digits        
+            do {
+                cout << "Enter ID in 3 digits [Press 0 to return to Product Menu] : ";
+                cin >> idToAdd;
+                if(idToAdd == 0){
+                	return;
+				}
+                else if(idToAdd<000 || idToAdd>999) {
+                    cout << "ID must be exactly 3 digits!\n";
+                }
+            } while(idToAdd<000 || idToAdd>999);
+
+            // Convert string ID to integer
+            newProduct.id = idToAdd;
+
+            // Check if the ID already exists
+            shellSort(products, productCount);
+            int prodIndex = jumpSearch(products, productCount, newProduct.id);
+            
+            if (prodIndex != -1) {
+                cout << "This Product ID already exists! Please re-enter.\n";
+                idExist = true;
+            }
+        } while (idExist);
+
+        // If ID is valid, move forward with other product details
+        cout << "Enter Product Name      : ";
+        cin.ignore(); // Clear the buffer
+        getline(cin, newProduct.name);
+        cout << "Enter Price             : ";
+        cin >> newProduct.price;
+        cout << "Enter Description       : ";
+        cin.ignore();
+        getline(cin, newProduct.description);
+
+        // Add the new product to the array
+        products[productCount] = newProduct;
+        productCount++;
+        addCount++;
+
+        // Save to raw file immediately
+        ofstream outFile("raw_product.txt", ios::app); // Append mode
+        if (!outFile) {
+            cout << "Error opening file for writing!" << endl;
+            return;
+        }
+        
+        outFile << setw(3) << setfill('0') << newProduct.id << " \"" 
+                << newProduct.name << "\" " 
+                << fixed << setprecision(2) << newProduct.price << " \"" 
+                << newProduct.description << "\"\n";
+        outFile.close();
+
+        cout << "\nProduct added successfully!" << endl;
+        
+        if(addCount < MAX_ADD) {
+            cout << "Do you want to continue adding other products? [" << (MAX_ADD-addCount) << " times left]" << endl;
+            cout << "__________" << endl;
+            cout << "| 1. YES |" << endl;
+            cout << "| 2. NO  |" << endl;
+            cout << "|________|" << endl;
+            cout << "\nEnter your choice : ";
+            cin >> choice;
+        } else {
+            cout << "Maximum of 5 products added.\n";
+            choice = 2;
+        }
+    } while(choice == 1 && addCount < MAX_ADD);
+
+    // Wait for the user to press Enter before returning
+    cout << "Press [ENTER] to return to Product Menu.";
+    cin.ignore(); 
+    cin.get();     
+    system("cls");
+}
+
+//----------------------------------------------------------------------------Delete PRODUCTS----------------------------------------------------------------------------
+void deleteProducts(Product products[]) {
+    productCount = loadProducts(products);
+    int idToDelete;
+    bool productFound = false;
+
+    // Sort and display current products
+    shellSort(products, productCount);
+    cout << "\nCurrent Products:\n";
+    for(int i = 0; i < productCount; i++) {
+        cout << setw(3) << setfill('0') << products[i].id << " - " << products[i].name << endl;
+    }
+
+    while (!productFound) {
+    	cout << "\nEnter ID in 3 digits [Press 0 to return to Product Menu] : ";
+        cin >> idToDelete;
+            if(idToDelete == 0){
+                return;
+			}
+        
+        //jump search
+        int prodIndex = jumpSearch(products, productCount, idToDelete);
+            
+        if (prodIndex != -1) {
+            cout << "\nProduct Selected: " << setw(3) << setfill('0') << products[prodIndex].id << " - " << products[prodIndex].name << endl;
+            
+            cout << "\nAre you sure you want to delete this product? (1=Yes, 2=No): ";
+            int confirm;
+            cin >> confirm;
+            
+            if(confirm == 1) {
+                // Shift all elements after the index left by one
+                for(int i = prodIndex; i < productCount - 1; i++) {
+                    products[i] = products[i+1];
+                }
+                productCount--;
+                
+                // Rewrite the entire file
+                ofstream outFile("raw_product.txt");
+                if (!outFile) {
+                    cout << "Error opening file for writing!" << endl;
+                    return;
+                }
+                
+                for(int i = 0; i < productCount; i++) {
+                    outFile << setw(3) << setfill('0') << products[i].id << " \"" 
+                            << products[i].name << "\" " 
+                            << fixed << setprecision(2) << products[i].price << " \"" 
+                            << products[i].description << "\"\n";
+                }
+                outFile.close();
+                
+                cout << "\nProduct deleted successfully!";
+                productFound = true;
+            } else {
+                cout << "\nDeletion cancelled.\n";
+                productFound = true;
+            }
+        } else {
+            cout << "Product not found. Please re-enter!\n";
+        }
+    }
+
+    // Wait for the user to press Enter before returning
+    cout << "Press [ENTER] to return to Product Menu.";
+    cin.ignore();
+    cin.get();     
+    return;
+}
+
+//-------------------------------------------------------- PRODUCT MENU ----------------------------------------------------
+void productMenu(){
 	Product products[MAX_PRODUCTS];
 	
 	int productCount = loadProducts(products);
@@ -614,13 +790,12 @@ void sortSearchProduct(){
         cout << "\n==================================================" << endl;
         cout << "                        Product                    " << endl;
         cout << "==================================================" << endl;
-        cout << "1. Display Unsorted Product List" << endl;
-        cout << "2. Add New Product (min. 5 entries)" << endl;
-        cout << "3. Delete Product" << endl;
-        cout << "4. Sort Data by ID" << endl;
-        cout << "5. Search Data by ID" << endl;
-        cout << "6. Save Sorted Data" << endl;
-        cout << "7. Return to Team B Menu" << endl;
+        cout << "1. Add New Product (min. 5 entries)" << endl;
+        cout << "2. Delete Product" << endl;
+        cout << "3. Search Data by ID" << endl;
+        cout << "4. Display Sorted Data" << endl;
+        cout << "5. Save Sorted Data" << endl;
+        cout << "6. Return to Team B Menu" << endl;
         cout << "--------------------------------------------------" << endl;
         cout << "Enter your choice: ";
         cin >> choice;
@@ -628,31 +803,14 @@ void sortSearchProduct(){
         switch(choice) {
         	case 1:
                 system("cls");
-                displayUnsortedProducts();
+                addProducts(products);
                 break;
             case 2:
                 system("cls");
-                //function
+                deleteProducts(products);
                 break;
              case 3:
-                system("cls");
-                //function
-                break;
-            case 4:
-                system("cls");
-                shellSort(products, productCount);
-                cout << "Products sorted by ID:\n";
-                for (int i = 0; i < productCount; i++) {
-                    cout << "\nID   : " << products[i].id << endl;
-                    cout << "Name : " << products[i].name << endl;
-                    cout << "Price: " << products[i].price << endl;
-                    cout << "\n";
-                    printWrappedText(products[i].description);
-                    cout << "_________________________________________________________________________________________" << endl;
-                }
-                break;
-            case 5:
-			{
+                {
 			    int searchProdID;
 			
 			    cout << "\nEnter Product ID to search: ";
@@ -661,24 +819,45 @@ void sortSearchProduct(){
 			
 			    if (prodIndex != -1)
 			    {
-			    	cout << "Product Found:\n";
-					cout << "ID: " << products[prodIndex].id << "\n";
-					cout << "Name: " << products[prodIndex].name << "\n";
-					cout << "Price: " << products[prodIndex].price << "\n";
-					cout << "Description:\n";
+			    	cout << "\nProduct Found:" << endl;
+			    	cout << "==================================================================" << endl;
+					cout << "ID: " << products[prodIndex].id << endl;
+					cout << "Name: " << products[prodIndex].name << endl;
+					cout << "Price: " << products[prodIndex].price << endl;
+					cout << "Description:" << endl;
 			        printWrappedText(products[prodIndex].description);
+			        cout << "==================================================================" << endl;
 			    }
 			    else
 			    {
 					cout << "Product not found.\n";
 				}
+				cout << "Press [ENTER] to Refresh.";
+			    cin.ignore();
+			    cin.get();     
 			    break;
 			}
-			case 6:
+            case 4:
+                system("cls");
+                shellSort(products, productCount);
+                cout << "Products sorted by ID:\n";
+                for (int i = 0; i < productCount; i++) {
+                    cout << "\nID   : " << setw(3) << setfill('0') << products[i].id << endl;
+                    cout << "Name : " << products[i].name << endl;
+                    cout << "Price: " << products[i].price << endl;
+                    cout << "\n";
+                    printWrappedText(products[i].description);
+                    cout << "_________________________________________________________________________________________" << endl;
+                }
+                cout << "\nPress [Enter] to continue...";
+		        cin.ignore();
+		        cin.get();
+                break;
+			case 5:
 	            system("cls");
 	            saveSortedProducts(products, productCount);
 	            break;
-	        case 7:
+	        case 6:
                 system("cls");
                 teamBMenu();
                 return;
@@ -686,9 +865,6 @@ void sortSearchProduct(){
                 cout << "Invalid choice. Please try again.\n";
                 break;   
 		}
-		cout << "\nPress [Enter] to continue...";
-        cin.ignore();
-        cin.get();
         system("cls");
 	}while (true);
 }
