@@ -35,8 +35,8 @@ struct Customer {
 
 struct Order {
     string orderID;
-    string customerID;
-    string productID;
+    int customerID;
+    int productID;
     string dateTime; 
     double totalAmount;
 };
@@ -338,21 +338,6 @@ void shellSortOrdersByDateTime(Order arr[], int n) {
     }
 }
 
-void shellSortOrdersByAmount(Order arr[], int n) {
-    // Sort by total amount (highest first)
-    for (int gap = n/2; gap > 0; gap /= 2) {
-        for (int i = gap; i < n; i += 1) {
-            Order temp = arr[i];
-            int j;
-            
-            for (j = i; j >= gap && arr[j - gap].totalAmount < temp.totalAmount; j -= gap) {
-                arr[j] = arr[j - gap];
-            }
-            arr[j] = temp;
-        }
-    }
-}
-
 // --------------------- JUMP SEARCH ---------------------
 template<typename T>
 int jumpSearch(T arr[], int size, int targetID) {
@@ -392,23 +377,22 @@ int loadProducts(Product products[]) {
 
 int loadOrders(Order orders[]) {
     ifstream file("order.txt");
-	if (!file) {
-	    cout << "Error opening order file!\n";
-	    return 0;
-	}
-	int count = 0;
+    if (!file) {
+        cout << "Error opening order file!\n";
+        return 0;
+    }
+
+    int count = 0;
     while (file >> orders[count].orderID) {
-        file.ignore(); // Ignore the whitespace after orderID
-        getline(file, orders[count].customerID, '"');
-        getline(file, orders[count].customerID, '"'); // Read customerID inside quotes
-        getline(file, orders[count].productID, '"');
-        getline(file, orders[count].productID, '"'); // Read productID inside quotes
-        getline(file, orders[count].dateTime, '"');
-        getline(file, orders[count].dateTime, '"'); // Read dateTime inside quotes
+        file >> orders[count].customerID;
+        file >> orders[count].productID;
+        file.ignore(); // Ignore space before datetime
+        getline(file, orders[count].dateTime, '"'); // Read until opening quote
+        getline(file, orders[count].dateTime, '"'); // Read actual datetime
         file >> orders[count].totalAmount;
         count++;
     }
-    
+
     file.close();
     return count;
 }
