@@ -6,6 +6,8 @@
 #include <sstream>
 #include <iomanip>
 
+#define TABLE_SIZE 10
+
 using namespace std;
 const int MAX_PRODUCTS = 100;
 const int MAX_ORDERS = 100;
@@ -54,7 +56,7 @@ class HashCustomer {
 		Node* front;
 		Node* rear;
 		string filename;
-		
+		Node* table[TABLE_SIZE];
 		
 		bool isValidPhone(const string& phone) {
 			const char* p = phone.c_str();
@@ -122,9 +124,22 @@ class HashCustomer {
 			}
 			return hasDot;
 		}
+		
+		
+		int hashFunction(string key) {
+	        unsigned int hash = 0;
+	        for (char ch : key) {
+	            hash = (hash << 5) + ch;
+	        }
+	        return hash % TABLE_SIZE;
+	    }
 	
 	public:
-		HashCustomer() : front(NULL), rear(NULL), filename("customer.txt") {}
+		HashCustomer() : filename("customer.txt"), front(NULL), rear(NULL) {
+		    for(int i = 0; i < TABLE_SIZE; i++) {
+		        table[i] = NULL;
+		    }
+		}
 	
 		~HashCustomer() {
 			Node* current = front;
@@ -134,19 +149,38 @@ class HashCustomer {
 				current = next;
 			}
 		}
-	
-		void enqueue(const Customer& customer) {
-			Node* newNode = new Node;
-			newNode->data = customer;
-			newNode->next = NULL;
-			
-			if (isEmpty()) {
-				front = rear = newNode;
-			} else {
-				rear->next = newNode;
-				rear = newNode;
-			}
+		
+		void insert(const Customer& customer) {
+		    Node* newNode = new Node;
+		    newNode->data = customer;
+		    newNode->next = NULL;
+		
+		    if (isEmpty()) {
+		        front = rear = newNode;
+		    } else {
+		        rear->next = newNode;
+		        rear = newNode;
+		    }
+		
+		    int index = hashFunction(customer.id);
+		    newNode = new Node;
+		    newNode->data = customer;
+		    newNode->next = table[index];
+		    table[index] = newNode;
 		}
+		
+	    Customer* search(const string& customerId) {
+	        int index = hashFunction(customerId);
+	        Node* current = table[index];
+	        
+	        while(current != NULL) {
+	            if(current->data.id == customerId) {
+	                return &(current->data);
+	            }
+	            current = current->next;
+	        }
+	        return NULL;
+	    }
 		
 		Customer parseCustomer(const string& line) {
 			Customer c;
@@ -189,7 +223,7 @@ class HashCustomer {
 			while (getline(file, line)) {
 				if(!line.empty()) {
 					Customer c = parseCustomer(line);
-					enqueue(c);
+					insert(c);
 				}
 			}
 	
@@ -261,20 +295,36 @@ class HashCustomer {
 							}
 						} while (!isValidEmail(cus.email));
 						
-						enqueue(cus);
+						insert(cus);
 						cout << "\nPress [Enter] back to menu...";
 						cin.get(); 
 						system("cls");
 						break;
 						
 					case 3: 
-						saveToFile();
-						cout << "Search Customer Information" << endl;
-						cout << "\nPress [Enter] back to menu...";
-						cin.get(); 
-						system("cls");
-						break;
-						
+					{
+						string searchID;
+	                    cout << "Search Customer Information" << endl;
+	                    cout << "Enter customer ID: ";
+	                    getline(cin, searchID);
+	                    
+	                    Customer* foundCustomer = search(searchID);
+	                    if (foundCustomer != NULL) {
+	                        cout << "\nCustomer Found:" << endl;
+	                        cout << "ID: " << foundCustomer->id << endl;
+	                        cout << "Name: " << foundCustomer->name << endl;
+	                        cout << "Email: " << foundCustomer->email << endl;
+	                        cout << "Phone: " << foundCustomer->phone << endl;
+	                    } else {
+	                        cout << "\nCustomer not found!" << endl;
+	                    }
+	                    
+	                    cout << "\nPress [Enter] back to menu...";
+	                    cin.get(); 
+	                    system("cls");
+	                    break;
+					}
+	                    
 					case 4: 
 						saveToFile();
 						cout << "Saved the customer information to " << filename << endl;
