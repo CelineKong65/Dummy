@@ -58,48 +58,111 @@ class HashCustomer {
 		string filename;
 		Node* table[TABLE_SIZE];
 		
-		bool isValidPhone(const string& phone) {
+		// ID validate
+		bool isValidID(const string& id){
+			if (id.length() == 0) return false;
+
+		    for (int i = 0; i < id.length(); i++){
+		        if (id[i] < '0' || id[i] > '9'){
+		            return false; 
+		        }
+		    }
+		    return true; 
+		}
+		
+		// Id existing validate
+		bool isIDExists(const string& id){
+			return search(id) != NULL;
+		}
+		
+		// Name validate
+		bool isValidName(const string& name){
+		    const int MAX_LENGTH = 30;
+		    const int MIN_LENGTH = 3;
+		    int length = 0;
+		    bool hasLetter = false;
+		
+		    for (int i = 0; name[i] != '\0'; ++i){
+		        char c = name[i];
+		        length++;
+		
+		        if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == ' ')){
+		            return false;
+		        }
+		
+		        if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')){
+		            hasLetter = true;
+		        }
+		
+		        if (length > MAX_LENGTH){
+		            return false;
+		        }
+		    }
+		
+		    if (length < MIN_LENGTH || !hasLetter){
+		        return false;
+		    }
+		
+		    return true;
+		}
+		
+		// Name existing validate
+		bool isNameExists(const string& name){
+		    for (int i = 0; i < TABLE_SIZE; i++){
+		        Node* current = table[i];
+		        while (current != NULL) {
+		            if (current->data.name == name){
+		                return true;
+		            }
+		            current = current->next;
+		        }
+		    }
+		    return false;
+		}
+		
+		// Phone number validate
+		bool isValidPhone(const string& phone){
 			const char* p = phone.c_str();
 			int i = 0;
 			int digitCount = 0;
 		
 			while (p[i] != '\0') {
-				if (i == 3 && p[i] != '-') {
+				if (i == 3 && p[i] != '-'){
 					return false;
 				}
 		
 				char c = p[i];
 		
-				if (!((c >= '0' && c <= '9') || c == '-' )) {
+				if (!((c >= '0' && c <= '9') || c == '-' )){
 					return false;
 				}
 		
-				if (c >= '0' && c <= '9') {
+				if (c >= '0' && c <= '9'){
 					digitCount++;
 				}
 		
 				i++;
 			}
 		
-			if (digitCount < 10 || digitCount > 11) {
+			if (digitCount < 10 || digitCount > 11){
 				return false;
 			}
 		
-			if (i < 4) {
+			if (i < 4){
 				return false;
 			}
 		
 			return true;
 		}
-	
 		
-		bool isValidEmail(const string& email) {
+		// Email validate
+		bool isValidEmail(const string& email){
 			if(email[0] == '\0') return false;
 			
 			bool hasAt = false;
 			int atPos = -1;
 			int i = 0;
-			while(email[i] != '0') {
+			while(email[i] != '0'){
 				if(email[i] == '@'){
 					hasAt = true;
 					atPos = i;
@@ -126,7 +189,7 @@ class HashCustomer {
 		}
 		
 		
-		int hashFunction(string key) {
+		int hashFunction(string key){
 	        unsigned int hash = 0;
 	        for (char ch : key) {
 	            hash = (hash << 5) + ch;
@@ -243,6 +306,7 @@ class HashCustomer {
 			}
 		}
 	
+		// Hashing Customer main menu
 		void hashingCustomer() {
 			loadFromFile();
 			
@@ -266,40 +330,59 @@ class HashCustomer {
 				
 				switch(choice) {
 					case 1:
+					{
 						display();
 						cout << "\nPress [Enter] back to menu...";
 						cin.get(); 
 						system("cls");
 						break;
+					}
 						
 					case 2: 
-						cout << "Enter customer ID : ";
-						getline(cin, cus.id);
+					{
+						do{
+							cout << "Enter customer ID : ";
+							getline(cin, cus.id);
+							if (!isValidID(cus.id)){
+						        cout << "ID must contain digits only! Please try again.\n";
+						    }else if (isIDExists(cus.id)){
+						        cout << "This ID already exists! Please enter a different ID.\n";
+						    }
+						}while (!isValidID(cus.id) || isIDExists(cus.id));
 						
-						cout << "Enter customer name : ";
-						getline(cin, cus.name);
+						do{
+							cout << "Enter customer name : ";
+							getline(cin, cus.name);
+							if (!isValidName(cus.name)){
+						        cout << "Invalid name! Only letters and spaces are allowed, name must be 3 to 30 characters.\n";
+						    }else if (isNameExists(cus.name)){
+						        cout << "This name already exists! Please enter a different name.\n";
+						    }
+						}while (!isValidName(cus.name) || isNameExists(cus.name));
 						
-						do {
+						
+						do{
 							cout << "Enter customer phone number (e.g. 010-1234567) : ";
 							getline(cin, cus.phone);
-							if (!isValidPhone(cus.phone)) {
-								cout << "Invalid phone number! Please try again.\n";
+							if (!isValidPhone(cus.phone)){
+								cout << "Invalid phone number! Make sure it follows the format 010-1234567 and contains only digits with 10 or 11 numbers.\n";
 							}
-						} while (!isValidPhone(cus.phone));
+						}while(!isValidPhone(cus.phone));
 						
-						do {
+						do{
 							cout << "Enter customer email (e.g. john@example.com) : ";
 							getline(cin, cus.email);
-							if (!isValidEmail(cus.email)) {
-								cout << "Invalid email address! Please try again.\n";
+							if (!isValidEmail(cus.email)){
+								cout << "Invalid email address! Make sure it contains '@' and a '.' and they are not at the beginning or end.\n";
 							}
-						} while (!isValidEmail(cus.email));
+						}while(!isValidEmail(cus.email));
 						
 						insert(cus);
 						cout << "\nPress [Enter] back to menu...";
 						cin.get(); 
 						system("cls");
 						break;
+					}
 						
 					case 3: 
 					{
@@ -326,17 +409,21 @@ class HashCustomer {
 					}
 	                    
 					case 4: 
+					{
 						saveToFile();
 						cout << "Saved the customer information to " << filename << endl;
 						cout << "\nPress [Enter] back to menu...";
 						cin.get(); 
 						system("cls");
 						break;
+					}
 						
 					case 5: 
+					{
 						system("cls");
 						teamAMenu();
 						break;
+					}
 						
 					default:
 						cout << "Invalid choice." << endl;
