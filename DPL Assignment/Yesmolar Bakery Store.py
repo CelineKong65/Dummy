@@ -1236,37 +1236,125 @@ def edit_admin_profile():
             input("\nInvalid choice. Press [ENTER] to try again.")
             clear_screen()
 
-def filter_feedback_rating(rate_filter):
-    clear_screen()
-    print("------------------------------------------------------------------")
-    print(f"|                 Filtered Feedback (Rating = {rate_filter})                  |")
-    print("------------------------------------------------------------------")
-
-    found = False
-
+def filter_feedback_rating():
     try:
+        rate_filter = int(input("Enter the rating level to filter by (1 to 5): "))
+        if 1 <= rate_filter <= 5:       
+            clear_screen()
+            print("------------------------------------------------------------------")
+            print(f"|                 Filtered Feedback (Rating = {rate_filter})                  |")
+            print("------------------------------------------------------------------")
+
+            found = False
+
+            try:
+                with open(RATING_FILE, 'r', encoding='utf-8') as file:
+                    for line in file:
+                        parts = line.strip().split(', ', 3)
+                        if len(parts) == 4:
+                            name, rating, comment, timestamp = parts
+                            if str(rate_filter) == rating:
+                                found = True
+                                print(f"| Name         : {name:<49}|")
+                                print(f"| Rating       : {rating:<49}|")
+                                print(f"| Comment      : {comment:<49}|")
+                                print(f"| Date & Time  : {timestamp:<49}|")
+                                print("------------------------------------------------------------------")
+                if not found:
+                    print(f"               No records found for rating level {rate_filter}               ")
+                    print("------------------------------------------------------------------")
+
+            except FileNotFoundError:
+                print("Feedback file not found.")
+        else:
+            print("Invalid rating. Please enter a number between 1 and 5.")
+            return filter_feedback_rating()
+    except ValueError:
+        print("Invalid input. Please enter a valid number.")
+    input("\nPress [Enter] to return rating menu.")
+    clear_screen()
+    return view_feedback_rating()
+
+def sort_feedback_rating():
+    try:
+        feedback_rating = []
         with open(RATING_FILE, 'r', encoding='utf-8') as file:
             for line in file:
-                parts = line.strip().split(', ', 3)
-                if len(parts) == 4:
-                    name, rating, comment, timestamp = parts
-                    if str(rate_filter) == rating:
-                        found = True
-                        print(f"| Name         : {name:<49}|")
-                        print(f"| Rating       : {rating:<49}|")
-                        print(f"| Comment      : {comment:<49}|")
-                        print(f"| Date & Time  : {timestamp:<49}|")
-                        print("------------------------------------------------------------------")
-        
-        if not found:
-            print(f"No records found for rating level {rate_filter}.")
+                line = line.strip()
+                if line:
+                    parts = line.split(', ', 3)
+                    if len(parts) == 4:
+                        name, rating, comment, timestamp = parts
+                        feedback_rating.append({
+                            'name': name,
+                            'rating': int(rating),
+                            'comment': comment,
+                            'timestamp': timestamp,
+                            'datetime': datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
+                        })
 
+        if not feedback_rating:
+            print("No feedback records found to sort.")
+            input("\nPress [ENTER] to return rating menu.")
+            clear_screen()
+            return view_feedback_rating()
+        
+        print("\nSort feedback by:")
+        print("1. Rating (Highest First)")
+        print("2. Rating (Lowest First)")
+        print("3. Date (Newest First)")
+        print("4. Date (Oldest First)")
+        print("5. Cancel")
+
+        choice = input("\nEnter your choice (1-5): ")
+
+        if choice == '1':
+            clear_screen()
+            print("----------------------------------------------------------------------------")
+            print("|            SORTED FEEDBACK & RATING (Rating - Highest First)             |")
+            print("----------------------------------------------------------------------------")
+            feedback_rating.sort(key=lambda x: x['rating'], reverse=True)
+        elif choice == '2':
+            clear_screen()
+            print("----------------------------------------------------------------------------")
+            print("|            SORTED FEEDBACK & RATING (Rating - Lowest First)              |")
+            print("----------------------------------------------------------------------------")
+            feedback_rating.sort(key=lambda x: x['rating'])
+        elif choice == '3':
+            clear_screen()
+            print("----------------------------------------------------------------------------")
+            print("|             SORTED FEEDBACK & RATING (Date – Newest First)               |")
+            print("----------------------------------------------------------------------------")
+            feedback_rating.sort(key=lambda x: x['datetime'], reverse=True)
+        elif choice == '4':
+            clear_screen()
+            print("----------------------------------------------------------------------------")
+            print("|             SORTED FEEDBACK & RATING (Date – Oldest First)               |")
+            print("----------------------------------------------------------------------------")
+            feedback_rating.sort(key=lambda x: x['datetime'])
+        elif choice == '5':
+            input("\nPress [ENTER] to return rating menu.")
+            clear_screen()
+            return view_feedback_rating()
+        else:
+            print("Invalid rating. Please enter a number between 1 and 5.")
+            return sort_feedback_rating()
+
+        for record in feedback_rating:
+            print(f" Name         : {record['name']}")
+            print(f" Rating       : {record['rating']}")
+            print(f" Comment      : {record['comment']}")
+            print(f" Date & Time  : {record['timestamp']}")
+            print("----------------------------------------------------------------------------")
+
+        input("\nPress [ENTER] to return to feedback menu.")
+        return view_feedback_rating()
     except FileNotFoundError:
         print("Feedback file not found.")
-
-    input("\nPress [Enter] to return to the admin menu.")
-    clear_screen()
-    return admin_menu()
+        input("Press [ENTER] to return to the admin menu.")
+    except Exception as e:
+        print(f"Error sorting feedback: {e}")
+        input("Press [ENTER] to continue.")
 
 def view_feedback_rating():
     global logged_in_admin
@@ -1302,25 +1390,25 @@ def view_feedback_rating():
         return admin_menu()
 
     while True:
-        choice = input("\nDo you want to filter feedback by rate level? (Y/N): ").strip().lower()
+        print("1. Filter feedback by rate level")
+        print("2. Sort feedback by date")
+        choice = input("\nEnter your choice (R for return): ")
 
-        if choice in ['y', 'yes']:
-            try:
-                rate_filter = int(input("Enter the rating level to filter by (1 to 5): "))
-                if 1 <= rate_filter <= 5:
-                    return filter_feedback_rating(rate_filter)
-                else:
-                    print("Invalid rating. Please enter a number between 1 and 5.")
-            except ValueError:
-                print("Invalid input. Please enter a valid number.")
+        if choice == '1':
+            clear_screen()
+            filter_feedback_rating()
 
-        elif choice in ['n', 'no']:
+        elif choice == '2':
+            clear_screen()
+            sort_feedback_rating()
+        
+        elif choice in['R','r']:
             input("Press [Enter] to return to the admin menu.")
             clear_screen()
             return admin_menu()
 
         else:
-            print("Invalid choice. Please enter Y or N.")
+            print("Invalid choice. Please enter 1, 2 or R.")
 
 def login_menu():
     global logged_in_member 
