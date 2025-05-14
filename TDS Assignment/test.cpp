@@ -631,7 +631,7 @@ void teamBMenu(){
 	cout<<"=================================================="<<endl;
     cout<<"                    Team B Menu                   "<<endl;
     cout<<"=================================================="<<endl;
-    cout<<"1. Product"<<endl;
+    cout<<"1. Display Unsorted Products"<<endl;
     cout<<"2. Order History"<<endl;
     cout<<"3. Return to Main Menu"<<endl;
     cout<<"--------------------------------------------------"<<endl;
@@ -712,6 +712,7 @@ void saveSortedProducts(Product products[], int productCount) {
         return;
     }
     
+    shellSort(products, productCount);
     for (int i = 0; i < productCount; i++) {
         outFile << setw(3) << setfill('0') << products[i].id << " \"" 
                 << products[i].name << "\" " 
@@ -853,10 +854,17 @@ void deleteProducts(Product products[]) {
     bool productFound = false;
 
     // Sort and display current products
-    shellSort(products, productCount);
+    // this is a temporary sorted products, i add this to avoid the data in raw_product.txt will be sorted and return to the product menu
+    Product sortedProducts[MAX_PRODUCTS];
+    // this for loop will assign the data in products into the temporary copy
+    for(int i = 0; i < productCount; i++) {
+    	sortedProducts[i] = products[i];
+	}
+	//sort and display the copy, NOT the actual raw_product.txt
+	shellSort(sortedProducts, productCount);
     cout << "\nCurrent Products:\n";
     for(int i = 0; i < productCount; i++) {
-        cout << setw(3) << setfill('0') << products[i].id << " - " << products[i].name << endl;
+        cout << setw(3) << setfill('0') << sortedProducts[i].id << " - " << sortedProducts[i].name << endl;
     }
 
     while (!productFound) {
@@ -866,24 +874,33 @@ void deleteProducts(Product products[]) {
                 return;
 			}
         
-        //jump search
-        int prodIndex = jumpSearch(products, productCount, idToDelete);
+        //jump search in the temporary copy
+        int prodIndex = jumpSearch(sortedProducts, productCount, idToDelete);
             
         if (prodIndex != -1) {
-            cout << "\nProduct Selected: " << setw(3) << setfill('0') << products[prodIndex].id << " - " << products[prodIndex].name << endl;
+        	//find the actual data in the unsorted array with linear search
+        	int actualID = -1;
+        	for(int i = 0; i < productCount; i++) {
+        		if(products[i].id == sortedProducts[prodIndex].id) {
+        			actualID = i;
+        			break;
+				}
+			}
+			
+        cout << "\nProduct Selected: " << setw(3) << setfill('0') << products[actualID].id << " - " << products[actualID].name << endl;
             
-            cout << "\nAre you sure you want to delete this product? (1=Yes, 2=No): ";
-            int confirm;
-            cin >> confirm;
+        cout << "\nAre you sure you want to delete this product? (1=Yes, 2=No): ";
+        int confirm;
+        cin >> confirm;
             
             if(confirm == 1) {
                 // Shift all elements after the index left by one
-                for(int i = prodIndex; i < productCount - 1; i++) {
+                for(int i = actualID; i < productCount - 1; i++) {
                     products[i] = products[i+1];
                 }
                 productCount--;
                 
-                // Rewrite the entire file
+                // Save the new and unsorted data back to raw_product.txt
                 ofstream outFile("raw_product.txt");
                 if (!outFile) {
                     cout << "Error opening file for writing!" << endl;
@@ -919,21 +936,32 @@ void deleteProducts(Product products[]) {
 //-------------------------------------------------------- PRODUCT MENU ----------------------------------------------------
 void productMenu(){
 	Product products[MAX_PRODUCTS];
-	
-	int productCount = loadProducts(products);
 	int choice;
-	
+
 	do {
-        cout << "\n==================================================" << endl;
-        cout << "                        Product                    " << endl;
-        cout << "==================================================" << endl;
-        cout << "1. Add New Product (min. 5 entries)" << endl;
-        cout << "2. Delete Product" << endl;
-        cout << "3. Search Data by ID" << endl;
-        cout << "4. Display Sorted Data" << endl;
-        cout << "5. Save Sorted Data" << endl;
-        cout << "6. Return to Team B Menu" << endl;
-        cout << "--------------------------------------------------" << endl;
+		//display unsorted products first
+		int productCount = loadProducts(products);
+		
+	    cout << "\nUnsorted Products:\n";
+	    for (int i = 0; i < productCount; i++) {
+	                    cout << "\nID   : " << setw(3) << setfill('0') << products[i].id << endl;
+	                    cout << "Name : " << products[i].name << endl;
+	                    cout << "Price: " << products[i].price << endl;
+	                    cout << "\n";
+	                    printWrappedText(products[i].description);
+	                    cout << "_________________________________________________________________________________________" << endl;
+	    }
+	    
+        cout << "|================================================|" << endl;
+        cout << "|                 Available Actions              |" << endl;
+        cout << "|================================================|" << endl;
+        cout << "|1. Add New Product (min. 5 entries)             |" << endl;
+        cout << "|2. Delete Product                               |" << endl;
+        cout << "|3. Search Data by ID                            |" << endl;
+        cout << "|4. Display Sorted Data                          |" << endl;
+        cout << "|5. Save Sorted Data                             |" << endl;
+        cout << "|6. Return to Team B Menu                        |" << endl;
+        cout << "|________________________________________________|" << endl;
         cout << "Enter your choice: ";
         cin >> choice;
         
@@ -947,11 +975,15 @@ void productMenu(){
                 deleteProducts(products);
                 break;
              case 3:
-                {
+            {
+            	system("cls");
+            	productCount = loadProducts(products);
 			    int searchProdID;
 			
 			    cout << "\nEnter Product ID to search: ";
 			    cin >> searchProdID;
+			    
+			    shellSort(products, productCount);
 			    int prodIndex = jumpSearch(products, productCount, searchProdID);
 			
 			    if (prodIndex != -1)
