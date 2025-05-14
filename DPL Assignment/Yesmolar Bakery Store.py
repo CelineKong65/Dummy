@@ -479,15 +479,6 @@ def signup():
         input("\nPress [ENTER] to return to login menu.")
         clear_screen()
 
-def to_lower_case(s):
-    result = ""
-    for char in s:
-        if 'A' <= char <= 'Z':
-            result += chr(ord(char) + 32)
-        else:
-            result += char
-    return result
-
 def login():
     global logged_in_member 
     
@@ -510,7 +501,7 @@ def login():
             status = lines[i + 7]
 
             if email == stored_email:
-                if to_lower_case(status) != "active":
+                if status.lower() != "active":
                     print("Your account is inactive. Please contact admin.")
                     input("\nPress [ENTER] to return to login menu.")
                     clear_screen()
@@ -921,7 +912,7 @@ def admin_login():
             status = lines[i + 4]
 
             if name == stored_name:
-                if to_lower_case(status) != "active":
+                if status.lower() != "active":
                     print("Your account is inactive. Please contact superadmin.")
                     input("\nPress [ENTER] to return to login menu.")
                     clear_screen()
