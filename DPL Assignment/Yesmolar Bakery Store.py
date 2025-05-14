@@ -2711,23 +2711,25 @@ def add_to_cart(cart, product_id, quantity):
         return
 
     global products
-    if not products and not load_products():
-        print("Error: Could not load products.")
-        return
+    if not products:
+        if not load_products():
+            print("Error: Could not load products.")
+            return
 
-    selected_product = None
-    for p in products:
-        if p.product_id == product_id:
-            selected_product = p
-            break
+    # Sort products by product_id
+    bubble_sort(products, key='product_id')
+
+    # Search for product using the correct product_id
+    selected_product = jump_search(products, product_id, key='product_id')
 
     if not selected_product:
         print(f"Error: Product with ID {product_id} not found.")
         return
-    
+
     if selected_product.status == "Inactive":
         print("Error: This product is currently unavailable.")
         return
+
     if quantity <= 0:
         print("Error: Quantity must be positive.")
         return
@@ -2740,20 +2742,18 @@ def add_to_cart(cart, product_id, quantity):
         print("Error: Could not load current cart.")
         return
 
-    found = False
-    for item in cart:
-        if (item.product_id == product_id or 
-            (item.product and item.product.product_id == product_id)):
-            if selected_product.stock < item.quantity + quantity:
-                print(f"Error: Adding {quantity} would exceed stock.")
-                return
-            item.quantity += quantity
-            item.price = selected_product.price
-            item.total = item.quantity * item.price
-            found = True
-            break
+    # Check if item is already in the cart
+    bubble_sort(cart, key='product_id')
+    item = jump_search(cart, product_id, key='product_id')
 
-    if not found:
+    if item:
+        if selected_product.stock < item.quantity + quantity:
+            print(f"Error: Adding {quantity} would exceed stock.")
+            return
+        item.quantity += quantity
+        item.price = selected_product.price
+        item.total = item.quantity * item.price
+    else:
         cart.append(CartItem(
             product=selected_product,
             product_id=selected_product.product_id,
@@ -2768,6 +2768,7 @@ def add_to_cart(cart, product_id, quantity):
     if save_cart(cart) and update_product_file():
         print(f"\nSuccessfully added {quantity} x {selected_product.name} to cart!")
     else:
+        # Revert stock if saving failed
         selected_product.stock += quantity
         print("\nError: Could not save changes.")
 
