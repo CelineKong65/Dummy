@@ -250,7 +250,7 @@ def signup():
 
         if full_name == 'R' or full_name == 'r':
             clear_screen()
-            return main_menu()
+            login_menu()
 
         valid_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
         is_valid = True
@@ -266,7 +266,7 @@ def signup():
                 name_only += char
 
         if not is_valid or len(name_only) < 2:
-            print("Invalid name. Name must have at least 2 letters and contain only letters and spaces.")
+            print("Invalid name. Name must have at least 2 letters and contain only letters and spaces.\n")
             continue
 
         same = False
@@ -305,7 +305,7 @@ def signup():
                 dot = True
 
         if not at or not dot:
-            print("Invalid email format. Please include @ and . in your email!")
+            print("Invalid email format. Please include @ and . in your email!\n")
             continue
 
         same = False
@@ -333,7 +333,7 @@ def signup():
         password = input("Enter your new password (example: Xuanting123): ")
 
         if len(password) < 8:
-            print("Password must be at least 8 characters!")
+            print("Password must be at least 8 characters!\n")
             continue
 
         upper = False
@@ -349,18 +349,18 @@ def signup():
                 digit = True
 
         if not upper:
-            print("Password must contain at least one uppercase letter!")
+            print("Password must contain at least one uppercase letter!\n")
             continue
         if not lower:
-            print("Password must contain at least one lowercase letter!")
+            print("Password must contain at least one lowercase letter!\n")
             continue
         if not digit:
-            print("Password must contain at least one digit!")
+            print("Password must contain at least one digit!\n")
             continue
         
         confirm_password = input("Confrim your password: ")
         if confirm_password != password:
-            print("Passwords do not match!")
+            print("Passwords do not match!\n")
             continue
     
         break
@@ -369,7 +369,7 @@ def signup():
         age = input("Enter your age: ")
 
         if len(age) != 2:
-            print("Age must be exactly 2 digits!")
+            print("Age must be exactly 2 digits!\n")
             continue
 
         is_digit = True
@@ -378,11 +378,11 @@ def signup():
                 is_digit = False
 
         if not is_digit:
-            print("Age must contain only digits!")
+            print("Age must contain only digits!\n")
             continue
 
         if age[0] == '0':
-            print("Age cannot start with 0!")
+            print("Age cannot start with 0!\n")
             continue
 
         break
@@ -409,7 +409,7 @@ def signup():
                 is_valid = True
 
         if not is_valid:
-            print("Please enter 'Male', 'Female', 'male' or 'female'!")
+            print("Please enter 'Male', 'Female', 'male' or 'female'!\n")
             continue
         break
 
@@ -417,7 +417,7 @@ def signup():
         contact = input("Enter your contact number (example: 012-34567890): ")
 
         if len(contact) < 4 or contact[3] != '-':
-            print("Format must be like 012-34567890 with a dash at the 4th position!")
+            print("Format must be like 012-34567890 with a dash at the 4th position!\n")
             continue
 
         part1 = ""
@@ -430,7 +430,7 @@ def signup():
 
 
         if not (part1[0] == '0' and part1[1] == '1'):
-            print("Phone number must start with '01'!")
+            print("Phone number must start with '01'!\n")
             continue
 
         combined = part1 + part2
@@ -440,11 +440,11 @@ def signup():
                 only_digits = False
                 break
         if not only_digits:
-            print("Phone number cannot contain symbols or space!")
+            print("Phone number cannot contain symbols or space!\n")
             continue
 
         if len(combined) != 10 and len(combined) != 11:
-            print("Phone number must be 10 or 11 digits!")
+            print("Phone number must be 10 or 11 digits!\n")
             continue
     
         break
@@ -475,7 +475,7 @@ def signup():
             file.write("\n")
             
         save_member(new_member)
-        print(f"Registration successful! Your Member ID: {member_id}")
+        print(f"\nRegistration successful! Your Member ID: {member_id}")
         input("\nPress [ENTER] to return to login menu.")
         clear_screen()
 
@@ -486,7 +486,7 @@ def login():
 
     if email == 'R' or email == 'r':
         clear_screen()
-        main_menu()
+        login_menu()
         return
     
     password = input("Enter your password :").strip()
@@ -525,7 +525,7 @@ def login():
                         return main_menu()
                     else:
                         attempts += 1
-                        print(f"Incorrect password! Attempts left: {3 - attempts}")
+                        print(f"Incorrect password! Attempts left: {3 - attempts}\n")
                         password = input("Please enter your password again: ").strip()
 
                 print("Too many failed attempts. Login terminating.")
@@ -585,9 +585,9 @@ def member_profile():
     clear_screen()
 
     while True:
-        print("------------------------------------------------------------------")
+        print("==================================================================")
         print("|                         YOUR PROFILE                           |")
-        print("------------------------------------------------------------------")
+        print("==================================================================")
         print(f"| 1. Member ID         : {logged_in_member.member_id:<40}|")
         print(f"| 2. Full Name         : {logged_in_member.full_name:<40}|")
         print(f"| 3. Email             : {logged_in_member.email:<40}|")
@@ -595,14 +595,14 @@ def member_profile():
         print(f"| 5. Age               : {logged_in_member.age:<40}|")
         print(f"| 6. Gender            : {logged_in_member.gender:<40}|")
         print(f"| 7. Contact Number    : {logged_in_member.contact:<40}|")
-        print("------------------------------------------------------------------")
+        print("==================================================================")
 
         choice = input("\nDo you want to edit your profile? (Y/N) : ")
 
         if choice == "Y" or choice == "y" or choice == "yes":
             edit_member_profile()
         elif choice == "N" or choice == "n" or choice == "no":
-            input("Press [Enter] to return to the main menu.")
+            input("\nPress [Enter] to return to the main menu.")
             clear_screen()
             return main_menu()
         else:
@@ -615,9 +615,9 @@ def edit_member_profile():
 
     while True:
         clear_screen()
-        print("------------------------------------------------------------------")
+        print("==================================================================")
         print("|                       EDIT YOUR PROFILE                        |")
-        print("------------------------------------------------------------------")
+        print("==================================================================")
         print("| 1. Member ID (Not Editable)                                    |")
         print("| 2. Full Name                                                   |")
         print("| 3. Email                                                       |")
@@ -626,7 +626,7 @@ def edit_member_profile():
         print("| 6. Gender                                                      |")
         print("| 7. Contact Number                                              |")
         print("| 8. Return to Profile Menu                                      |")
-        print("------------------------------------------------------------------")
+        print("==================================================================")
 
         choice = input("\nSelect the number you want to edit (1-8): ")
 
@@ -651,7 +651,7 @@ def edit_member_profile():
                         letter_count += 1
 
                 if not is_valid or letter_count < 2:
-                    print("Invalid name. Must contain only letters and spaces, with at least 2 letters.")
+                    print("Invalid name. Must contain only letters and spaces, with at least 2 letters.\n")
                     continue
 
                 cleaned_new_name = ""
@@ -680,12 +680,12 @@ def edit_member_profile():
                         break
 
                 if name_exists:
-                    print("This name is already registered. Please use a different name!")
+                    print("This name is already registered. Please use a different name!\n")
                     continue
 
                 logged_in_member.full_name = new_name
                 update_member(logged_in_member)
-                print("Full Name updated successfully!")
+                print("Full Name updated successfully!\n")
                 input("Press [ENTER] to continue.")
                 break
 
@@ -702,7 +702,7 @@ def edit_member_profile():
                         has_dot = True
 
                 if not has_at or not has_dot:
-                    print("Invalid email format. Must contain @ and .")
+                    print("Invalid email format. Must contain @ and .\n")
                     continue
 
                 cleaned_new_email = ""
@@ -731,12 +731,12 @@ def edit_member_profile():
                         break
 
                 if email_exists:
-                    print("This email is already registered. Please use a different email!")
+                    print("This email is already registered. Please use a different email!\n")
                     continue
 
                 logged_in_member.email = new_email
                 update_member(logged_in_member)
-                print("Email updated successfully!")
+                print("Email updated successfully!\n")
                 input("Press [ENTER] to continue.")
                 break
 
@@ -746,7 +746,7 @@ def edit_member_profile():
                 logged_in_member.password = input("Enter your new password (example: Xuanting123): ")
 
                 if len(logged_in_member.password) < 8:
-                    print("Password must be at least 8 characters!")
+                    print("Password must be at least 8 characters!\n")
                     continue
 
                 upper = False
@@ -762,22 +762,22 @@ def edit_member_profile():
                         digit = True
 
                 if not upper:
-                    print("Password must contain at least one uppercase letter!")
+                    print("Password must contain at least one uppercase letter!\n")
                     continue
                 if not lower:
-                    print("Password must contain at least one lowercase letter!")
+                    print("Password must contain at least one lowercase letter!\n")
                     continue
                 if not digit:
-                    print("Password must contain at least one digit!")
+                    print("Password must contain at least one digit!\n")
                     continue
                 
                 confirm_password = input("Confrim your password: ")
                 if confirm_password != logged_in_member.password:
-                    print("Passwords do not match!")
+                    print("Passwords do not match!\n")
                     continue
             
                 update_member(logged_in_member)
-                print("Password updated successfully!")
+                print("Password updated successfully!\n")
                 input("Press [ENTER] to continue.")
                 break
 
@@ -787,7 +787,7 @@ def edit_member_profile():
                     logged_in_member.age = input("Enter new age: ")
 
                     if len(logged_in_member.age) != 2:
-                        print("Age must be exactly 2 digits!")
+                        print("Age must be exactly 2 digits!\n")
                         continue
 
                     is_digit = True
@@ -796,18 +796,18 @@ def edit_member_profile():
                             is_digit = False
 
                     if not is_digit:
-                        print("Age must contain only digits!")
+                        print("Age must contain only digits!\n")
                         continue
 
                     if logged_in_member.age[0] == '0':
-                        print("Age cannot start with 0!")
+                        print("Age cannot start with 0!\n")
                         continue
 
                     update_member(logged_in_member)
-                    print("Age updated successfully!")
+                    print("Age updated successfully!\n")
                     break
             except ValueError:
-                print("Invalid input! Age must be a number.")
+                print("Invalid input! Age must be a number.\n")
             input("Press [ENTER] to continue.")
 
         elif choice == "6":
@@ -833,11 +833,11 @@ def edit_member_profile():
                         is_valid = True
 
                 if not is_valid:
-                    print("Please enter 'Male', 'Female', 'male' or 'female'!")
+                    print("Please enter 'Male', 'Female', 'male' or 'female'!\n")
                     continue
 
                 update_member(logged_in_member)
-                print("Gender updated successfully!")
+                print("Gender updated successfully!\n")
                 input("Press [ENTER] to continue.")
                 break
 
@@ -846,7 +846,7 @@ def edit_member_profile():
                 logged_in_member.contact  = input("Enter your contact number (example: 012-34567890): ")
 
                 if len(logged_in_member.contact) < 4 or logged_in_member.contact[3] != '-':
-                    print("Format must be like 012-34567890 with a dash at the 4th position!")
+                    print("Format must be like 012-34567890 with a dash at the 4th position!\n")
                     continue
 
                 part1 = ""
@@ -859,7 +859,7 @@ def edit_member_profile():
 
 
                 if not (part1[0] == '0' and part1[1] == '1'):
-                    print("Phone number must start with '01'!")
+                    print("Phone number must start with '01'!\n")
                     continue
 
                 combined = part1 + part2
@@ -869,15 +869,15 @@ def edit_member_profile():
                         only_digits = False
                         break
                 if not only_digits:
-                    print("Phone number cannot contain symbols or space!")
+                    print("Phone number cannot contain symbols or space!\n")
                     continue
 
                 if len(combined) != 10 and len(combined) != 11:
-                    print("Phone number must be 10 or 11 digits!")
+                    print("Phone number must be 10 or 11 digits!\n")
                     continue
     
                 update_member(logged_in_member)
-                print("Contact Number updated successfully!")
+                print("Contact Number updated successfully!\n")
                 input("Press [ENTER] to continue.")
                 break
         
@@ -896,7 +896,7 @@ def admin_login():
 
     if name == 'R' or name == 'r':
         clear_screen()
-        main_menu()
+        login_menu()
         return
     
     password = input("Enter your password :").strip()
@@ -936,7 +936,7 @@ def admin_login():
                         
                     else:
                         attempts += 1
-                        print(f"Incorrect password! Attempts left: {3 - attempts}")
+                        print(f"Incorrect password! Attempts left: {3 - attempts}\n")
                         password = input("Please enter your password again: ").strip()
 
                 print("Too many failed attempts. Login terminating.")
@@ -1034,14 +1034,14 @@ def admin_profile():
     clear_screen()
 
     while True:
-        print("------------------------------------------------------------------")
+        print("==================================================================")
         print("|                         YOUR PROFILE                           |")
-        print("------------------------------------------------------------------")
+        print("==================================================================")
         print(f"| 1. Name              : {logged_in_admin.name:<40}|")
         print(f"| 2. Password          : {logged_in_admin.password:<40}|")
         print(f"| 3. Contact Number    : {logged_in_admin.contact:<40}|")
         print(f"| 4. Position          : {logged_in_admin.position:<40}|")
-        print("------------------------------------------------------------------")
+        print("==================================================================")
 
         choice = input("\nDo you want to edit your profile? (Y/N) : ")
 
@@ -1060,15 +1060,15 @@ def edit_admin_profile():
 
     while True:
         clear_screen()
-        print("------------------------------------------------------------------")
+        print("==================================================================")
         print("|                       EDIT YOUR PROFILE                        |")
-        print("------------------------------------------------------------------")
+        print("==================================================================")
         print("| 1. Name                                                        |")
         print("| 2. Password                                                    |")
         print("| 3. Contact Number                                              |")
         print("| 4. Position (Not Editable)                                     |")
         print("| 5. Return to Profile Menu                                      |")
-        print("------------------------------------------------------------------")
+        print("==================================================================")
 
         choice = input("\nSelect the number you want to edit (1-5): ")
 
@@ -1132,7 +1132,7 @@ def edit_admin_profile():
                 original_name = logged_in_admin.name
                 logged_in_admin.name = new_name
                 update_admin(logged_in_admin, original_name)
-                print("Name updated successfully!")
+                print("Name updated successfully!\n")
                 input("Press [ENTER] to continue.")
                 break
 
@@ -1142,7 +1142,7 @@ def edit_admin_profile():
                 logged_in_admin.password = input("Enter your new password (example: Xuanting123): ")
 
                 if len(logged_in_admin.password) < 8:
-                    print("Password must be at least 8 characters!")
+                    print("Password must be at least 8 characters!\n")
                     continue
 
                 upper = False
@@ -1158,10 +1158,10 @@ def edit_admin_profile():
                         digit = True
 
                 if not upper:
-                    print("Password must contain at least one uppercase letter!")
+                    print("Password must contain at least one uppercase letter!\n")
                     continue
                 if not lower:
-                    print("Password must contain at least one lowercase letter!")
+                    print("Password must contain at least one lowercase letter!\n")
                     continue
                 if not digit:
                     print("Password must contain at least one digit!")
@@ -1173,7 +1173,7 @@ def edit_admin_profile():
                     continue
             
                 update_admin(logged_in_admin)
-                print("Password updated successfully!")
+                print("Password updated successfully!\n")
                 input("Press [ENTER] to continue.")
                 break
 
@@ -1195,7 +1195,7 @@ def edit_admin_profile():
 
 
                 if not (part1[0] == '0' and part1[1] == '1'):
-                    print("Phone number must start with '01'!")
+                    print("Phone number must start with '01'!\n")
                     continue
 
                 combined = part1 + part2
@@ -1205,15 +1205,15 @@ def edit_admin_profile():
                         only_digits = False
                         break
                 if not only_digits:
-                    print("Phone number cannot contain symbols or space!")
+                    print("Phone number cannot contain symbols or space!\n")
                     continue
 
                 if len(combined) != 10 and len(combined) != 11:
-                    print("Phone number must be 10 or 11 digits!")
+                    print("Phone number must be 10 or 11 digits!\n")
                     continue
     
                 update_admin(logged_in_admin)
-                print("Contact Number updated successfully!")
+                print("Contact Number updated successfully!\n")
                 input("Press [ENTER] to continue.")
                 break
         elif choice == "4":
@@ -1232,9 +1232,9 @@ def filter_feedback_rating():
         rate_filter = int(input("Enter the rating level to filter by (1 to 5): "))
         if 1 <= rate_filter <= 5:       
             clear_screen()
-            print("------------------------------------------------------------------")
+            print("==================================================================")
             print(f"|                 Filtered Feedback (Rating = {rate_filter})                  |")
-            print("------------------------------------------------------------------")
+            print("==================================================================")
 
             found = False
 
@@ -1250,18 +1250,18 @@ def filter_feedback_rating():
                                 print(f"| Rating       : {rating:<49}|")
                                 print(f"| Comment      : {comment:<49}|")
                                 print(f"| Date & Time  : {timestamp:<49}|")
-                                print("------------------------------------------------------------------")
+                                print("==================================================================")
                 if not found:
                     print(f"               No records found for rating level {rate_filter}               ")
-                    print("------------------------------------------------------------------")
+                    print("==================================================================")
 
             except FileNotFoundError:
                 print("Feedback file not found.")
         else:
-            print("Invalid rating. Please enter a number between 1 and 5.")
+            print("Invalid rating. Please enter a number between 1 and 5.\n")
             return filter_feedback_rating()
     except ValueError:
-        print("Invalid input. Please enter a valid number.")
+        print("Invalid input. Please enter a valid number.\n")
     input("\nPress [Enter] to return rating menu.")
     clear_screen()
     return view_feedback_rating()
@@ -1301,27 +1301,27 @@ def sort_feedback_rating():
 
         if choice == '1':
             clear_screen()
-            print("----------------------------------------------------------------------------")
+            print("============================================================================")
             print("|            SORTED FEEDBACK & RATING (Rating - Highest First)             |")
-            print("----------------------------------------------------------------------------")
+            print("============================================================================")
             feedback_rating.sort(key=lambda x: x['rating'], reverse=True)
         elif choice == '2':
             clear_screen()
-            print("----------------------------------------------------------------------------")
+            print("============================================================================")
             print("|            SORTED FEEDBACK & RATING (Rating - Lowest First)              |")
-            print("----------------------------------------------------------------------------")
+            print("============================================================================")
             feedback_rating.sort(key=lambda x: x['rating'])
         elif choice == '3':
             clear_screen()
-            print("----------------------------------------------------------------------------")
+            print("============================================================================")
             print("|             SORTED FEEDBACK & RATING (Date – Newest First)               |")
-            print("----------------------------------------------------------------------------")
+            print("============================================================================")
             feedback_rating.sort(key=lambda x: x['datetime'], reverse=True)
         elif choice == '4':
             clear_screen()
-            print("----------------------------------------------------------------------------")
+            print("============================================================================")
             print("|             SORTED FEEDBACK & RATING (Date – Oldest First)               |")
-            print("----------------------------------------------------------------------------")
+            print("============================================================================")
             feedback_rating.sort(key=lambda x: x['datetime'])
         elif choice == '5':
             input("\nPress [ENTER] to return rating menu.")
@@ -1336,7 +1336,7 @@ def sort_feedback_rating():
             print(f" Rating       : {record['rating']}")
             print(f" Comment      : {record['comment']}")
             print(f" Date & Time  : {record['timestamp']}")
-            print("----------------------------------------------------------------------------")
+            print("============================================================================")
 
         input("\nPress [ENTER] to return to feedback menu.")
         return view_feedback_rating()
@@ -1352,9 +1352,9 @@ def view_feedback_rating():
 
     clear_screen()
 
-    print("------------------------------------------------------------------")
+    print("===================================================================")
     print("|                  Feedback and Rating Records                    |")
-    print("------------------------------------------------------------------")
+    print("===================================================================")
 
     try:
         with open(RATING_FILE, 'r', encoding='utf-8') as file:
@@ -1373,7 +1373,7 @@ def view_feedback_rating():
                 print(f"| Rating       : {rating:<49}|")
                 print(f"| Comment      : {comment:<49}|")
                 print(f"| Date & Time  : {timestamp:<49}|")
-                print("------------------------------------------------------------------")
+                print("===================================================================")
 
     except FileNotFoundError:
         print("Feedback file not found.")
@@ -1399,20 +1399,28 @@ def view_feedback_rating():
             return admin_menu()
 
         else:
-            print("Invalid choice. Please enter 1, 2 or R.")
+            print("Invalid choice. Please enter 1, 2 or R.\n")
 
 def login_menu():
     global logged_in_member 
 
     while True:
         print("\n===============================================================")
-        print("                   WELOCOME TO YESMOLAR BAKERY                 ")
+        print("|                                                             |")
+        print("|                     W E L C O M E   T O                     |")
+        print("|                 Y E S M O L A R   B A K E R Y               |")
+        print("|                                                             |")
         print("===============================================================")
-        print("1.    Sign Up  ")
-        print("2.    Login  ")
-        print("3.    Admin Login  ")
-        print("4.    Exit  ")
+        print("|                                                             |")
+        print("|                                                  .--.       |")
+        print("|                                           ✧     / _  \      |")
+        print("|  1.    Sign Up                                 / __  /      |")
+        print("|  2.    Login                                  / __  /  ✧    |")
+        print("|  3.    Admin Login                           '  _  /        |")
+        print("|  4.    Exit                               ✧   `..-'         |")
+        print("|                                                             |")
         print("===============================================================")
+
 
         choice = input("Enter your choice: ")
 
@@ -1420,19 +1428,19 @@ def login_menu():
             load_members()
             clear_screen()
             print("\n===============================================================")
-            print("                    Signing Up As Member...                    ")
-            print("===============================================================")
+            print("|                    Signing Up As Member...                  |")
+            print("===============================================================\n")
             signup()
         elif choice == '2':
             clear_screen()
             print("\n===============================================================")
-            print("                    Logging In As Member...                    ")
+            print("|                    Logging In As Member...                  |")
             print("===============================================================")
             login()
         elif choice == '3':
             clear_screen()
             print("\n===============================================================")
-            print("                    Logging In As Admin...                    ")
+            print("|                   Logging In As Admin...                    |")
             print("===============================================================")
             admin_login()
         elif choice == '4':
@@ -1448,17 +1456,17 @@ def admin_menu():
     while True:
         clear_screen()
         print("===============================================================")
-        print("                          ADMIN MENU                           ")
+        print("|                          ADMIN MENU                         |")
         print("===============================================================")
-        print(" [1] Manage Pastry Inventory")
-        print(" [2] Manage Member List")
-        print(" [3] Manage Admin List")
-        print(" [4] Manage Feedback and Rating")
-        print(" [5] View Dashboard")
-        print(" [6] View Order History")
-        print(" [7] View Sales Report")
-        print(" [8] My profile")
-        print(" [9] Log Out")
+        print("| [1] Manage Pastry Inventory                                 |")
+        print("| [2] Manage Member List                                      |")
+        print("| [3] Manage Admin List                                       |")
+        print("| [4] Manage Feedback and Rating                              |")
+        print("| [5] View Dashboard                                          |")
+        print("| [6] View Order History                                      |")
+        print("| [7] View Sales Report                                       |")
+        print("| [8] My profilet                                             |")
+        print("| [9] Log Out                                                 |")
         print("===============================================================")
 
         choice = input("Enter your choice: ")
@@ -1527,16 +1535,16 @@ def filter_product_admin():
     while True:
         clear_screen()
         print("===============================================================")
-        print("                YESMOLAR BAKERY STORE INVENTORY                ")
+        print("|                YESMOLAR BAKERY STORE INVENTORY              |")
         print("===============================================================")
-        print("Select a category:")
+        print(" Select a category:                                          ")
         categories = {
             '1': 'Bread', '2': 'Pastries', '3': 'Cakes', '4': 'Donuts',
             '5': 'Cupcakes & Muffins', '6': 'Cookies', '7': 'Pies & Tarts',
             '8': 'Savories & Sandwiches'
         }
         for key, value in categories.items():
-            print(f" [{key}] {value}")
+            print(f"| [{key}] {value}")
         print(" [9] Back to Admin Menu")
         print("===============================================================")
 
@@ -1553,7 +1561,7 @@ def filter_product_admin():
         selected_category = categories[choice]
         while True:
             clear_screen()
-            print(f"===== Products in Category: {selected_category} =====")
+            print(f"Products in Category: {selected_category}                ")
             load_products()
 
             display_product_admin(products, selected_category)
@@ -1644,7 +1652,7 @@ def add_product(products, category):
     # Add to products list and update file
     products.append(new_product)
     if update_product_file():
-        print("\nProduct added successfully!")
+        print("\nProduct added successfully!\n")
     else:
         print("\nError saving product to file!")
     
@@ -1730,7 +1738,7 @@ def edit_product(products, category):
     product_to_edit.status = new_status
     
     if update_product_file():
-        print("\nProduct updated successfully!")
+        print("\nProduct updated successfully!\n")
     else:
         print("\nError saving changes to file!")
     
@@ -1773,7 +1781,7 @@ def restock_product(products, category):
     product_to_restock.stock += add_stock
     
     if update_product_file():
-        print(f"\nProduct restocked successfully! New stock: {product_to_restock.stock}")
+        print(f"\nProduct restocked successfully! New stock: {product_to_restock.stock}\n")
     else:
         print("\nError saving changes to file!")
         product_to_restock.stock -= add_stock  # Revert if save failed
@@ -1788,22 +1796,28 @@ def feedback_rating():
         return
 
     clear_screen()
-    print("------------------------------------------------------------------")
-    print("|                        FEEDBACK & RATING                        |")
-    print("------------------------------------------------------------------")
+    print("===================================================================")
+    print("|                       FEEDBACK & RATING                         |")
+    print("===================================================================")
 
     while True:
-        try:
-            rate = int(input("Enter your rating for our system (1 to 5): "))
+        rate_input = input("Enter your rating for our system (1 to 5), [R] to return to the main menu: ").strip()
+
+        if rate_input in ["R", "r"]:
+            clear_screen()
+            main_menu()
+
+        if rate_input.isdigit():
+            rate = int(rate_input)
             if 1 <= rate <= 5:
                 break
             else:
-                print("Invalid rating. Please enter a number between 1 and 5.")
-        except ValueError:
-            print("Invalid input. Please enter a number.")
+                print("Invalid rating. Please enter a number between 1 and 5.\n")
+        else:
+            print("Invalid input. Please enter a number between 1 and 5, or 'R' to return.\n")
 
-    comment = input("Enter your comment: ")
-    print("Thank you for your feedback!")
+    comment = input("Enter your comment (optional): ")
+    print("\nThank you for your feedback!")
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     with open(RATING_FILE, "a", encoding="utf-8") as file:
@@ -1811,22 +1825,22 @@ def feedback_rating():
 
     input("\nPress [ENTER] to return to main menu.")
     clear_screen()
-    return main_menu()
+    main_menu()
 
 def display_product(product):
     if product.status == "Active":
-        print("---------------------------------------------------------------")
-        print(f"Product ID: {product.product_id}")
-        print("---------------------------------------------------------------")
-        print(f"| Name     : {product.name}")
-        print(f"| Category : {product.category}")
-        print(f"| Price    : RM {product.price:.2f}")
+        print("-----------------------------------------------------------------")
+        print(f"| Product ID: {product.product_id:<50}|")
+        print("-----------------------------------------------------------------")
+        print(f"| Name      : {product.name:<50}|")
+        print(f"| Category  : {product.category:<50}|")
+        print(f"| Price     : RM {product.price:<47.2f}|")
 
         if product.stock <= 0:
-            print("| WARNING  : SORRY! THIS PRODUCT IS CURRENTLY OUT OF STOCK!")
+            print("| WARNING   : SORRY! THIS PRODUCT IS CURRENTLY OUT OF STOCK!    |")
         else:
-            print(f"| Stock    : {product.stock}")
-        print("---------------------------------------------------------------")
+            print(f"| Stock     : {product.stock:<50}|")
+        print("-----------------------------------------------------------------")
 
 def display_product_admin(products, selected_category):
     for product in products:
@@ -1994,7 +2008,7 @@ def delete_cart(cart):
         item_num = int(item_num_input)
 
         if item_num == 0:
-            print("Cancel successful!")
+            print("Cancel successful!\n")
             input("Press [ENTER] to refresh cart.")
             return False
         elif item_num < 1 or item_num > len(cart):
@@ -2020,7 +2034,7 @@ def delete_cart(cart):
     cart[:] = new_cart  
 
     if save_cart(cart) and update_product_file():
-        print(f"'{deleted_item.name}' removed from cart successfully!")
+        print(f"'{deleted_item.name}' removed from cart successfully!\n")
     else:
         cart[:] = original_cart  
         for product in products:
@@ -2059,7 +2073,7 @@ def edit_cart(cart):
         item_num = int(item_num_input)
 
         if item_num == 0:
-            print("Cancel successful!")
+            print("Cancel successful!\n")
             input("Press [ENTER] to continue.")
             return False
         elif item_num < 1 or item_num > len(cart):
@@ -2088,7 +2102,7 @@ def edit_cart(cart):
 
     while True:
         print(f"\nCurrent quantity: {selected_item.quantity}")
-        print(f"Available stock: {product.stock + selected_item.quantity}")
+        print(f"Available stock: {product.stock + selected_item.quantity}\n")
         new_qty_input = input("Enter new quantity (or 0 to remove item): ").strip()
 
         if not is_integer(new_qty_input):
@@ -2102,7 +2116,7 @@ def edit_cart(cart):
             cart[:] = cart[:item_num - 1] + cart[item_num:]
             
             if save_cart(cart) and update_product_file():
-                print("Item removed from cart successfully!")
+                print("Item removed from cart successfully!\n")
             else:
                 product.stock -= selected_item.quantity
                 cart.insert(item_num - 1, selected_item)
@@ -2122,7 +2136,7 @@ def edit_cart(cart):
             selected_item.total = selected_item.price * new_qty
             
             if save_cart(cart) and update_product_file():
-                print("Cart updated successfully!")
+                print("Cart updated successfully!\n")
             else:
                 product.stock += diff
                 selected_item.quantity -= diff
@@ -2151,8 +2165,9 @@ def proceed_to_payment(products, cart):
     clear_screen()
     total_payment = 0.00
     
-    print("------------------------------------------------------------------")
-    print("                              RECEIPT                             ")
+    print("==================================================================")
+    print("|                             RECEIPT                            |")
+    print("==================================================================")
     
     payable_items = []
     actual_total = 0.0
@@ -2166,20 +2181,22 @@ def proceed_to_payment(products, cart):
     for i, item in enumerate(cart, 1):
         status = item.product.status if item.product else "Active"
         
-        print("------------------------------------------------------------------")
-        print(f"Item {i}:")
-        print(f"Title    : {item.product.name}")
-        print(f"Price    : RM {item.price:.2f}")
-        print(f"Quantity : {item.quantity}")
+        print(" ----------------------------------------------------------------")
+        print(f"| Item {i:<58}|")
+        print(f"| Title    : {item.product.name:<52}|")
+        print(f"| Price    : RM {item.price:<49.2f}|")
+        print(f"| Quantity : {item.quantity:<52}|")
         
         if status == "Inactive":
-            print("STATUS   : UNAVAILABLE (Not charged)")
-            print(f"Total    : RM 0.00")
+            print("| STATUS   : UNAVAILABLE (Not charged)                           |")
+            print(f"| Total    : RM 0.00                                             |")
+            print(" ----------------------------------------------------------------")
         else:
-            print(f"Total    : RM {item.total:.2f}")
+            print(f"| Total    : RM {item.total:<49.2f}|")
+            print(" ----------------------------------------------------------------")
 
     print("==================================================================")
-    print(f"Payment Amount: RM {actual_total:.2f}")
+    print(f"| Payment Amount: RM {actual_total:<44.2f}|")
     print("==================================================================")
     
     if logged_in_member:
@@ -2203,9 +2220,10 @@ def proceed_to_payment(products, cart):
             discount_amount = actual_total * discount
             actual_total -= discount_amount
             print("\nCongratulations, you get 5% discount!")
-            print("_________________________")
-            print(f"|Discount: RM {discount_amount:.2f}\t|")
-            print(f"|Total   : RM {actual_total:.2f}\t|")
+            print(" _______________________")
+            print("|                       |")
+            print(f"| Discount: RM {discount_amount:.2f}\t|")
+            print(f"| Total   : RM {actual_total:.2f}\t|")
             print("|_______________________|")
     
     payment_method = ''
@@ -2216,7 +2234,7 @@ def proceed_to_payment(products, cart):
     payment_method = input("\nYour choice [0 to cancel payment]: ").strip()
     
     while payment_method != '0' and payment_method != '1' and payment_method != '2':
-        payment_method = input("Invalid choice. Please enter again: ").strip()
+        payment_method = input("\nInvalid choice. Please enter again: ").strip()
     
     if payment_method == '0':
         print("Back to main menu...")
@@ -2313,8 +2331,8 @@ def cash_payment(products, cart, total_payment):
         change = cash - total_payment
         print(f"Change: RM {change:.2f}")
     
-    print("\n\nProcessing payment", end='')
-    print("\nPayment successful! Thank you for your purchase.")
+    print("\n\nProcessing payment...", end='')
+    print("\n\nPayment successful! Thank you for your purchase.")
     
     purchase_history(cart, total_payment, "Cash")
     cart.clear()
@@ -2456,8 +2474,8 @@ def view_purchase_history():
 
     try:
         clear_screen()
-        print("------------------------------------------------------------------")
-        print("                      YOUR PURCHASE HISTORY                      ")
+        print("==================================================================")
+        print("|                      YOUR PURCHASE HISTORY                     |")
         print("==================================================================")
 
         if not os.path.exists(PURCHASE_HISTORY_FILE):
@@ -2468,8 +2486,11 @@ def view_purchase_history():
             content = file.read()
 
         if not content.strip():
-            print("No purchase history found.")
-            input("Press [ENTER] to continue.")
+            print("|                                                                |")
+            print("|                    No purchase history found.                  |")
+            print("|                                                                |")
+            print("==================================================================")
+            input("\nPress [ENTER] to continue.")
             return
 
         from datetime import datetime
@@ -2514,16 +2535,20 @@ def view_purchase_history():
                 continue
 
         if not user_records:
-            print("No purchase history found for your account.")
+            print("|                                                                |")
+            print("|         No purchase history found for your account.            |")
+            print("|                                                                |")
+            print("==================================================================")
             input("\nPress [ENTER] to return to main menu.")
             clear_screen()
             main_menu()
             return
         
-        print("How would you like to sort your purchase history?")
-        print("[1] By Date/Time (Latest First)")
-        print("[2] By Total Purchase Amount (Highest First)")
-        print("[3] Back To Main Menu")
+        print("| How would you like to sort your purchase history?              |")
+        print(f"| {'1. By Date/Time (Latest First)':<63}|")
+        print(f"| {'2. By Total Purchase Amount (Highest First)':<63}|")
+        print(f"| {'3. Back To Main Menu':<63}|")
+        print("==================================================================")
 
         while True:
             choice = input("\nEnter your choice: ")
@@ -2558,13 +2583,13 @@ def view_purchase_history():
 
         clear_screen()
 
-        print("------------------------------------------------------------------")
-        print("                      YOUR PURCHASE HISTORY                      ")
         print("==================================================================")
+        print("|                      YOUR PURCHASE HISTORY                     |")
         for record in user_records:
-            print(f"Purchase Time : {record['datetime']}")
-            print(f"Payment Method: {record['payment_method']}")
-            print("------------------------------------------------------------------")
+            print("==================================================================")
+            print(f"| Purchase Time : {record['datetime']:<47}|")
+            print(f"| Payment Method: {record['payment_method']:<47}|")
+            print("==================================================================")
 
             for line in record["lines"][1:-1]:
                 parts = line.split(',')
@@ -2578,15 +2603,16 @@ def view_purchase_history():
                 quantity = int(parts[7])
                 total = float(parts[8])
 
-                print(f"Product ID : {product_id}")
-                print(f"Name       : {name}")
-                print(f"Category   : {category}")
-                print(f"Price      : RM {price:.2f}")
-                print(f"Quantity   : {quantity}")
-                print(f"Total      : RM {total:.2f}")
                 print("------------------------------------------------------------------")
+                print(f"| Product ID : {product_id:<50}|")
+                print(f"| Name       : {name:<50}|")
+                print(f"| Category   : {category:<50}|")
+                print(f"| Price      : RM {price:<47.2f}|")
+                print(f"| Quantity   : {quantity:<50}|")
+                print(f"| Total      : RM {total:<47.2f}|")
 
-            print(f"Total Purchase: RM {record['total']:.2f}")
+            print("==================================================================")
+            print(f"| Total Purchase: RM {record['total']:<44.2f}|")
             print("==================================================================\n")
 
         input("\nPress [ENTER] to return.")
@@ -2617,11 +2643,13 @@ def display_cart(cart):
         return
 
     if not cart:
-        print("------------------------------------------------------------------")
-        print("                              MY CART                             ")
-        print("------------------------------------------------------------------")
-        print("\n                          Your cart is empty.                   ")
-        print("\n------------------------------------------------------------------")
+        print("==================================================================")
+        print("|                            MY CART                             |")
+        print("==================================================================")
+        print("|                                                                |")
+        print("|                        Your cart is empty.                     |")
+        print("|                                                                |")
+        print("==================================================================")
         print("\n1. Return to product list")
         print("2. Return to main menu")
 
@@ -2638,9 +2666,9 @@ def display_cart(cart):
             else:
                 print("Invalid choice. Please enter 1 or 2.")
 
-    print("------------------------------------------------------------------")
-    print("                              MY CART                             ")
-    print("------------------------------------------------------------------")
+    print("==================================================================")
+    print("|                            MY CART                             |")
+    print("==================================================================")
     grand_total = 0.0
 
     for i, item in enumerate(cart, 1):
@@ -2652,28 +2680,31 @@ def display_cart(cart):
         total = item.total if item.total is not None else (price * quantity)
         status = item.product.status if item.product and item.product.status else "N/A"
 
-        print(f"Item {i}:")
-        print(f"Product ID : {pid}")
-        print(f"Name       : {name}")
+        print(" ----------------------------------------------------------------")
+        print(f"| Item {i:<58}|")
+        print(f"| Product ID : {pid:<50}|")
+        print(f"| Name       : {name:<50}|")
 
         if status=="Inactive":
             total=0.0
-            print("SORRY! This product is currently unavailable :(")
+            print("| SORRY! This product is currently unavailable :(                |")
+            print(" ----------------------------------------------------------------")
         else:
-            print(f"Category   : {category}")
-            print(f"Price      : RM {price:.2f}")
-            print(f"Quantity   : {quantity}")
-            print(f"Total      : RM {total:.2f}")
-
-        print("------------------------------------------------------------------")
-
+            print(f"| Category   : {category:<50}|")
+            print(f"| Price      : RM {price:<47.2f}|")
+            print(f"| Quantity   : {quantity:<50}|")
+            print(f"| Total      : RM {total:<47.2f}|")
+            print(" ----------------------------------------------------------------")
         grand_total += total
 
-    print(f"Total Price: RM {grand_total:.2f}")
+    print("==================================================================")
+    print(f"| Total Price: RM {grand_total:<47.2f}|")
+    print("==================================================================\n")
     print("------------------------------------------------------------------")
 
-    print("\n_____________________________________")
-    print("|Options:                            |")
+    print(" ____________________________________")
+    print("|                                    |")
+    print("|    Options:                        |")
     print("|  1. Delete an item from cart       |")
     print("|  2. Edit quantity of an item       |")
     print("|  3. Proceed to payment             |")
@@ -2727,7 +2758,7 @@ def add_to_cart(cart, product_id, quantity):
         return
 
     if selected_product.status == "Inactive":
-        print("Error: This product is currently unavailable.")
+        print("Error: This product is currently unavailable.\n")
         return
 
     if quantity <= 0:
@@ -2786,17 +2817,17 @@ def filter_products():
     while True:
         clear_screen()
         print("===============================================================")
-        print("                   WELCOME TO OUR PASTRY PAN!                  ")
+        print("|                   WELCOME TO OUR PASTRY PAN!                |")
         print("===============================================================")
-        print("Select a category:")
+        print("| Select a category:                                          |")
         categories = {
             '1': 'Bread', '2': 'Pastries', '3': 'Cakes', '4': 'Donuts',
             '5': 'Cupcakes & Muffins', '6': 'Cookies', '7': 'Pies & Tarts',
             '8': 'Savories & Sandwiches'
         }
         for key, value in categories.items():
-            print(f" [{key}] {value}")
-        print(" [9] Back to Main Menu")
+            print(f"| {key}. {value:<57}|")
+        print(f"| {'9. Back to Main Menu':<60}|")
         print("===============================================================")
 
         choice = input("Enter your choice (1-9): ")
@@ -2805,14 +2836,14 @@ def filter_products():
             main_menu()
             return
         elif choice not in categories:
-            print("Invalid choice. Please try again.")
+            print("Invalid choice. Please try again.\n")
             input("Press [ENTER] to continue.")
             continue
 
         selected_category = categories[choice]
         while True:
             clear_screen()
-            print(f"===== Products in Category: {selected_category} =====")
+            print(f"Products in Category: {selected_category}                ")
             load_products()
             # Only show active products in this category
             filtered = [p for p in products if p.category.lower() == selected_category.lower() and p.status == "Active"]
@@ -2822,15 +2853,16 @@ def filter_products():
             else:
                 for product in filtered:
                     display_product(product)
-            print("---------------------------------------------------------------")
+            print("\n-----------------------------------------------------------------")
 
-            print("_____________________________________")
-            print("|Options:                            |")
-            print("| -> Enter Product ID to add to cart |")
-            print("| -> [C] View Cart                   |")
-            print("| -> [B] Back to Category Selection  |")
-            print("| -> [M] Back to Main Menu           |")
-            print("|____________________________________|")
+            print(" _________________________________")
+            print("|                                 |")
+            print("|    Options:                     |")
+            print("| Enter Product ID to add to cart |")
+            print("| [C] View Cart                   |")
+            print("| [B] Back to Category Selection  |")
+            print("| [M] Back to Main Menu           |")
+            print("|_________________________________|")
 
             selection = input("\nEnter your choice: ").upper()
 
@@ -2849,18 +2881,18 @@ def filter_products():
             product = jump_search(products, selection, key='product_id')
 
             if not product:
-                print(f"\nProduct with ID '{product_id}' not found.")
+                print(f"Product with ID '{product_id}' not found.\n")
                 input("Press [ENTER] to continue.")
                 continue
 
             # Check if product is inactive
             if product.status == "Inactive":
-                print("\nThis product is currently unavailable.")
+                print("\nThis product is currently unavailable.\n")
                 input("Press [ENTER] to continue.")
                 continue
 
             if product.stock <= 0:
-                print("\nSorry, this product is out of stock!")
+                print("\nSorry, this product is out of stock!\n")
                 input("Press [ENTER] to continue.")
                 continue
 
@@ -3339,13 +3371,13 @@ def view_member_list(status_filter):
                         print("⫭=============================================================⫬")
                         print("|                       MEMBER DETAILS                        |")
                         print("===============================================================")
-                        print(f"Member ID         : {found_member.member_id}")
-                        print(f"Name              : {found_member.full_name}")
-                        print(f"Email             : {found_member.email}")
-                        print(f"Age               : {found_member.age}")
-                        print(f"Gender            : {found_member.gender}")
-                        print(f"Contact           : {found_member.contact}")
-                        print(f"Status            : {found_member.status}")
+                        print(f"|Member ID         : {found_member.member_id}                |")
+                        print(f"|Name              : {found_member.full_name}                |")
+                        print(f"|Email             : {found_member.email}                    |")
+                        print(f"|Age               : {found_member.age}                      |")
+                        print(f"|Gender            : {found_member.gender}                   |")
+                        print(f"|Contact           : {found_member.contact}                  |")
+                        print(f"|Status            : {found_member.status}                   |")
                         print("===============================================================")
                         input("\nPress [ENTER] to continue.")
                         break
@@ -3370,7 +3402,7 @@ def change_member_status():
         print("⫭============================================================⫬")
         print("|                         MEMBER LIST                         |")
         print("===============================================================")
-        print("| ID     | Name                | Status                      ")
+        print("| ID     | Name                | Status                       |")
         
         member_ids = []
         with open(MEMBERS_FILE, 'r') as file:
@@ -3534,10 +3566,10 @@ def view_admin_list(status_filter):
                     print("⫭============================================================⫬")
                     print("|                        ADMIN DETAILS                        |")
                     print("===============================================================")
-                    print(f"Name              : {found_admin.name}                        ")
-                    print(f"Position          : {found_admin.position}                    ")
-                    print(f"Contact           : {found_admin.contact}                     ")
-                    print(f"Status            : {found_admin.status}                      ")
+                    print(f"| Name              : {found_admin.name}                       |")
+                    print(f"| Position          : {found_admin.position}                   |")
+                    print(f"| Contact           : {found_admin.contact}                    |")
+                    print(f"| Status            : {found_admin.status}                     |")
                     print("===============================================================")
                 else:
                     print(f"Admin with name '{search_name}' not found in {status_filter.lower()} admins.")
@@ -3647,7 +3679,7 @@ def add_new_admin():
         with open(ADMINS_FILE, 'a') as file:
             file.write(f"\n\n{name}\n{password}\n{contact}\n{position}\n{status}")
             
-            print(f"\nAdmin {name} added successfully!")
+            print(f"\nAdmin {name} added successfully!\n")
             input("Press [ENTER] to continue. ")
     except Exception as e:
         print(f"Error addinf admin: {e}")
@@ -3745,14 +3777,14 @@ def main_menu():
         clear_screen()
         print(f"Welcome {logged_in_member.full_name} ! ")
         print("===============================================================")
-        print("                            Main Menu                          ")
+        print("|                          Main Menu                          |")
         print("===============================================================")
-        print(" [1] Browse Products")
-        print(" [2] View My Cart")
-        print(" [3] My Profile")
-        print(" [4] Purchase History")
-        print(" [5] Rate Our System")
-        print(" [6] Log Out")
+        print("| 1. Browse Products                                          |")
+        print("| 2. View My Cart                                             |")
+        print("| 3. My Profile                                               |")
+        print("| 4. Purchase History                                         |")
+        print("| 5. Rate Our System                                          |")
+        print("| 6. Log Out                                                  |")
         print("===============================================================")
 
         choice = input("Enter your choice: ")

@@ -4,7 +4,7 @@
 103,Baguette,Bread,4.2,78,Inactive
 104,Rye Bread,Bread,5.0,100,Inactive
 105,Supa Mega Jumbo Bread uwu,Bread,10.5,100,Active
-106,Lawrence Miguel,Bread,20.0,70,Active
+106,Lawrence Miguel,Bread,20.0,100,Inactive
 200,Croissant,Pastries,3.5,79,Inactive
 201,Danish Pastry,Pastries,4.0,46,Active
 202,Puff Pastry,Pastries,3.8,17,Active
@@ -19,7 +19,7 @@
 401,Chocolate Donut,Donuts,2.8,100,Active
 402,Custard-Filled Donut,Donuts,3.0,100,Active
 403,Jam-Filled Donut,Donuts,2.9,100,Active
-404,Sugar Donut,Donuts,2.5,70,Active
+404,Sugar Donut,Donuts,2.5,81,Active
 500,Vanilla Cupcake,Cupcakes & Muffins,3.5,100,Active
 501,Chocolate Muffin,Cupcakes & Muffins,3.8,100,Active
 502,Blueberry Muffin,Cupcakes & Muffins,4.0,20,Active
