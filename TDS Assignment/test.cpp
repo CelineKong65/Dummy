@@ -48,15 +48,16 @@ struct Order {
 // --------------------- HASHING + LINKED LIST QUEUE ---------------------
 class HashCustomer {
 	private:
+		// Node structure for linked list
 		struct Node {
 			Customer data;
 			Node* next;
 		};
 	
-		Node* front;
-		Node* rear;
-		string filename;
-		Node* table[TABLE_SIZE];
+		Node* front;// Front pointer of the linked list
+		Node* rear;// Rear pointer of the linked list
+		string filename;// File name for data persistence
+		Node* table[TABLE_SIZE];// Hash table array for customer data
 		
 		// ID validate
 		bool isValidID(const string& id){
@@ -188,7 +189,7 @@ class HashCustomer {
 			return hasDot;
 		}
 		
-		
+		// Hash function to generate an index from customer ID
 		int hashFunction(string key){
 	        unsigned int hash = 0;
 	        for (char ch : key) {
@@ -198,12 +199,14 @@ class HashCustomer {
 	    }
 	
 	public:
+		// Constructor: initialize pointers and hash table
 		HashCustomer() : filename("customer.txt"), front(NULL), rear(NULL) {
 		    for(int i = 0; i < TABLE_SIZE; i++) {
 		        table[i] = NULL;
 		    }
 		}
 	
+		// Destructor: clean up linked list memory
 		~HashCustomer() {
 			Node* current = front;
 			while (current != NULL) {
@@ -213,7 +216,9 @@ class HashCustomer {
 			}
 		}
 		
+		// Insert a customer into both linked list and hash table
 		void insert(const Customer& customer) {
+			// Insert to linked list
 		    Node* newNode = new Node;
 		    newNode->data = customer;
 		    newNode->next = NULL;
@@ -225,6 +230,7 @@ class HashCustomer {
 		        rear = newNode;
 		    }
 		
+			// Insert to hash table
 		    int index = hashFunction(customer.id);
 		    newNode = new Node;
 		    newNode->data = customer;
@@ -232,6 +238,7 @@ class HashCustomer {
 		    table[index] = newNode;
 		}
 		
+		// Search customer by ID in hash table
 	    Customer* search(const string& customerId) {
 	        int index = hashFunction(customerId);
 	        Node* current = table[index];
@@ -245,6 +252,7 @@ class HashCustomer {
 	        return NULL;
 	    }
 		
+		// Convert a line of text into a Customer object
 		Customer parseCustomer(const string& line) {
 			Customer c;
 			stringstream ss(line);
@@ -252,10 +260,12 @@ class HashCustomer {
 			return c;
 		}
 	
+		// Check if linked list is empty
 		bool isEmpty() const {
 			return front == NULL;
 		}
 	
+		// Save all customers from linked list to file
 		void saveToFile() {
 			ofstream file("customer.txt");
 			if (!file) {
@@ -275,6 +285,7 @@ class HashCustomer {
 			file.close();
 		}
 	
+		// Load customer data from file and insert into system
 		void loadFromFile() {
 			ifstream file("customer.txt");
 			if (!file) {
@@ -293,6 +304,7 @@ class HashCustomer {
 			file.close();
 		}
 	
+		// Display all customers from the linked list
 		void display() {
 			Node* current = front;
 			int i = 1;
@@ -340,6 +352,7 @@ class HashCustomer {
 						
 					case 2: 
 					{
+						// Add customer information and validate customer details
 						do{
 							cout << "Enter customer ID : ";
 							getline(cin, cus.id);
@@ -386,6 +399,7 @@ class HashCustomer {
 						
 					case 3: 
 					{
+						// Search customer information by ID
 						string searchID;
 	                    cout << "Search Customer Information" << endl;
 	                    cout << "Enter customer ID: ";
@@ -410,6 +424,7 @@ class HashCustomer {
 	                    
 					case 4: 
 					{
+						// Save customer data to file
 						saveToFile();
 						cout << "Saved the customer information to " << filename << endl;
 						cout << "\nPress [Enter] back to menu...";
@@ -588,8 +603,7 @@ void teamAMenu(){
     cout<<"                    Team A Menu                   "<<endl;
     cout<<"=================================================="<<endl;
     cout<<"1. Hashing Customer"<<endl;
-    cout<<"2. Hashing Rating"<<endl;
-    cout<<"3. Return to Main Menu"<<endl;
+    cout<<"2. Return to Main Menu"<<endl;
     cout<<"--------------------------------------------------"<<endl;
     cout<<"Enter your choice: ";
     cin>>choice;
@@ -601,12 +615,6 @@ void teamAMenu(){
     			break;
 			}
 		case 2:
-			{
-				system("cls");
-    			cout<<"Successfully enter page hashing rating";
-				break;
-			}
-		case 3:
 			{
 				system("cls");
 				mainMenu();
