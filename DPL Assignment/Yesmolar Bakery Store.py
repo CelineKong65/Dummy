@@ -2681,7 +2681,7 @@ def display_cart(cart):
         status = item.product.status if item.product and item.product.status else "N/A"
 
         print(" ----------------------------------------------------------------")
-        print(f"| Item {i:<58}|")
+        print(f"| Item {str(i) + ':':<58}|")
         print(f"| Product ID : {pid:<50}|")
         print(f"| Name       : {name:<50}|")
 
@@ -3775,7 +3775,8 @@ def main_menu():
 
     while True:
         clear_screen()
-        print(f"Welcome {logged_in_member.full_name} ! ")
+        print("===============================================================")
+        print(f"|                   Welcome {logged_in_member.full_name + ' !':<33} |")
         print("===============================================================")
         print("|                          Main Menu                          |")
         print("===============================================================")
