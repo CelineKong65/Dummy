@@ -19,7 +19,7 @@ void mainMenu();
 void teamAMenu();
 void teamBMenu();
 void productMenu();
-void sortOrder();
+void orderMenu();
 void printWrappedText(const string& text);
 
 // --------------------- STRUCTURES ---------------------
@@ -640,7 +640,7 @@ void teamBMenu(){
     cout<<"                    Team B Menu                   "<<endl;
     cout<<"=================================================="<<endl;
     cout<<"1. Display Unsorted Products"<<endl;
-    cout<<"2. Order History"<<endl;
+    cout<<"2. Display Unsorted Order History"<<endl;
     cout<<"3. Return to Main Menu"<<endl;
     cout<<"--------------------------------------------------"<<endl;
     cout<<"Enter your choice: ";
@@ -655,7 +655,7 @@ void teamBMenu(){
 		case 2:
 			{
 				system("cls");
-    			sortOrder();
+    			orderMenu();
 				break;
 			}
 		case 3:
@@ -674,24 +674,6 @@ void teamBMenu(){
 				break;
 			}
 	}
-}
-
-//---------------------------------------------------DIPLAY UNSORTED ORDER------------------------------------------
-void displayUnsortedOrders() {
-    Order orders[MAX_ORDERS];
-    int orderCount = loadOrders(orders);
-    
-    cout << "\nUnsorted Orders:\n";
-    for (int i = 0; i < orderCount; i++) {
-        cout << "\nOrder ID : " << orders[i].orderID << endl;
-        cout << "Customer ID: " << orders[i].customerID << endl;
-        cout << "Product ID: " << orders[i].productID << endl;
-        cout << "Date/Time: " << orders[i].dateTime << endl;
-        cout << "Total Amount: " << orders[i].totalAmount << endl;
-        cout << "\n";
-        
-        cout << "_________________________________________________________________________________________" << endl;
-    }
 }
 
 //----------------------------------------------------save products to raw product.txt----------------------------------------
@@ -1063,36 +1045,168 @@ void printWrappedText(const string& text) {
     cout << endl;
 }
 
-//---------------------- SORT ORDER-------------------
-void sortOrder(){
+//---------------------------------------------------- ADD ORDER ----------------------------------------------------
+void addOrders(Order orders[]) {
+    int orderCount = loadOrders(orders);
+    Order newOrder;
+    bool idExist = false;
+    int choice;
+    int addCount = 0;
+    const int MAX_ADD = 5;
+    
+    system("cls");
+    
+    do {
+        cout << "\nCurrent Orders:\n";
+        for(int i = 0; i < orderCount; i++) {
+            cout << orders[i].orderID << " - " 
+                 << orders[i].dateTime << " - " 
+                 << "Customer: " << orders[i].customerID << endl;
+        }
+        
+        cout << endl;
+        do {
+            idExist = false;
+            cout << "Enter Order ID [Press 0 to return to Order Menu] : ";
+            cin >> newOrder.orderID;
+            
+            if(newOrder.orderID == "0"){
+                return;
+            }
+        
+            for(int i = 0; i < orderCount; i++) {
+                if(orders[i].orderID == newOrder.orderID) {
+                    cout << "This Order ID already exists! Please re-enter.\n";
+                    idExist = true;
+                    break;
+                }
+            }
+        } while (idExist);
+
+        cout << "Enter Customer ID: ";
+        cin >> newOrder.customerID;
+        
+        cout << "Enter Product ID: ";
+        cin >> newOrder.productID;
+        
+        cout << "Enter Date/Time (format: YYYY-MM-DD HH:MM:SS): ";
+        cin.ignore();
+        getline(cin, newOrder.dateTime);
+        
+        cout << "Enter Total Amount: ";
+        cin >> newOrder.totalAmount;
+
+        orders[orderCount] = newOrder;
+        orderCount++;
+        addCount++;
+
+        // Save to order file
+        ofstream outFile("order.txt", ios::app);
+        if (!outFile) {
+            cout << "Error opening file for writing!" << endl;
+            return;
+        }
+        
+        outFile << newOrder.orderID << " "
+                << newOrder.customerID << " "
+                << newOrder.productID << " "
+                << "\"" << newOrder.dateTime << "\" " 
+                << newOrder.totalAmount << "\n";
+        outFile.close();
+
+        cout << "\nOrder added successfully!" << endl;
+        
+        if(addCount < MAX_ADD) {
+            cout << "Do you want to continue adding other orders? [" << (MAX_ADD-addCount) << " times left]" << endl;
+            cout << "__________" << endl;
+            cout << "| 1. YES |" << endl;
+            cout << "| 2. NO  |" << endl;
+            cout << "|________|" << endl;
+            cout << "\nEnter your choice : ";
+            cin >> choice;
+        } else {
+            cout << "Maximum of 5 orders added.\n";
+            choice = 2;
+        }
+    } while(choice == 1 && addCount < MAX_ADD);
+
+    cout << "Press [ENTER] to return to Order Menu.";
+    cin.ignore(); 
+    cin.get();     
+    system("cls");
+}
+
+// --------------------- ORDER MENU ---------------------
+void orderMenu(){
 	Order orders[MAX_ORDERS];
-	
-	int  orderCount = loadOrders(orders);
 	int choice;
-	
+
 	do {
-        cout << "\n==================================================" << endl;
-        cout << "                    Order History                  " << endl;
-        cout << "==================================================" << endl;
-        cout << "1. Display Unsorted Order List" << endl;
-        cout << "2. Add New Order (min. 5 entries)" << endl;
-        cout << "3. Sort Data by Date & Time" << endl;
-        cout << "4. Save Sorted Data" << endl;
-        cout << "5. Return to Team B Menu" << endl;
-        cout << "--------------------------------------------------" << endl;
+		int  orderCount = loadOrders(orders);
+		
+	    cout << "\nUnsorted Orders:\n";
+		for (int i = 0; i < orderCount; i++) {
+		    cout << "\nOrder ID : " << orders[i].orderID << endl;
+		    cout << "Customer ID: " << orders[i].customerID << endl;
+		    cout << "Product ID: " << orders[i].productID << endl;
+		    cout << "Date/Time: " << orders[i].dateTime << endl;
+		    cout << "Total Amount: " << orders[i].totalAmount << endl;
+		    cout << "\n";
+		        
+		    cout << "_________________________________________________________________________________________" << endl;
+		}
+	    
+        cout << "|================================================|" << endl;
+        cout << "|                 Available Actions              |" << endl;
+        cout << "|================================================|" << endl;
+        cout << "|1. Add New Order (min. 5 entries)               |" << endl;
+        cout << "|2. Search Data by ID                            |" << endl;
+        cout << "|3. Display Sorted Data                          |" << endl;
+        cout << "|4. Save Sorted Data                             |" << endl;
+        cout << "|5. Return to Team B Menu                        |" << endl;
+        cout << "|________________________________________________|" << endl;
         cout << "Enter your choice: ";
         cin >> choice;
         
         switch(choice) {
         	case 1:
                 system("cls");
-                displayUnsortedOrders();
+                addOrders(orders);
                 break;
             case 2:
-                system("cls");
-                //function
-                break;
-             case 3:
+			{
+			    system("cls");
+			    orderCount = loadOrders(orders);
+			    string searchOrderID;  
+			    
+			    cout << "\nEnter Order ID to search: ";
+			    cin >> searchOrderID;
+			    
+			    bool found = false;
+			    for (int i = 0; i < orderCount; i++) {
+			        if (orders[i].orderID == searchOrderID) {
+			            cout << "\nOrder Found:" << endl;
+			            cout << "==================================================================" << endl;
+			            cout << "Order ID    : " << orders[i].orderID << endl;
+			            cout << "Customer ID : " << orders[i].customerID << endl;
+			            cout << "Product ID  : " << orders[i].productID << endl;
+			            cout << "Date/Time   : " << orders[i].dateTime << endl;
+			            cout << "Total Amount: " << orders[i].totalAmount << endl;
+			            cout << "==================================================================" << endl;
+			            found = true;
+			            break;
+			        }
+			    }
+			    
+			    if (!found) {
+			        cout << "Order not found.\n";
+			    }
+			    cout << "Press [ENTER] to Refresh.";
+			    cin.ignore();
+			    cin.get();     
+			    break;
+			}   
+            case 3:
                 system("cls");
                 shellSortOrdersByDateTime(orders, orderCount);
                 cout << "Orders sorted by Date/Time:\n";
@@ -1102,24 +1216,24 @@ void sortOrder(){
                     cout << "Customer: " << orders[i].customerID << endl;
                     cout << "Product: " << orders[i].productID << endl;
                     cout << "Amount: RM" << orders[i].totalAmount << endl;
-                    cout << "----------------------------------------" << endl;
+                    cout << "_________________________________________________________________________________________" << endl;
                 }
+                cout << "\nPress [Enter] to continue...";
+		        cin.ignore();
+		        cin.get();
                 break;
-            case 4:
-                system("cls");
+			case 4:
+	            system("cls");
 	            saveSortedOrders(orders, orderCount);
 	            break;
-            case 5:
-				system("cls");
+	        case 5:
+                system("cls");
                 teamBMenu();
                 return;
             default:
                 cout << "Invalid choice. Please try again.\n";
                 break;   
 		}
-		cout << "\nPress [Enter] to continue...";
-        cin.ignore();
-        cin.get();
         system("cls");
 	}while (true);
 }
