@@ -2063,6 +2063,17 @@ def edit_cart(cart):
         input("Press [ENTER] to continue.")
         return False
 
+    editable_items = []
+    for i, item in enumerate(cart, 1):
+        status = item.product.status if item.product else "N/A"
+        if status == "Active":
+            editable_items.append((i, item))
+
+    if not editable_items:
+        print("No editable items in your cart (all items are inactive).")
+        input("Press [ENTER] to continue.")
+        return False
+
     while True:
         item_num_input = input("\nEnter item number to edit (or 0 to cancel): ").strip()
 
@@ -2076,76 +2087,88 @@ def edit_cart(cart):
             print("Cancel successful!\n")
             input("Press [ENTER] to continue.")
             return False
-        elif item_num < 1 or item_num > len(cart):
-            if len(cart) == 1:
+        
+        valid_numbers = [i for i, _ in editable_items]
+        
+        if item_num not in valid_numbers:
+            if len(valid_numbers) == 1:
                 print("Invalid item number. Please enter 1")
             else:
-                print(f"Invalid item number. Please enter between 1 and {len(cart)}")
+                print(f"Invalid item number. Please enter between {valid_numbers[0]} and {valid_numbers[-1]}")
             continue
-        else:
-            break
 
-    selected_item = cart[item_num - 1]
-    product_id = selected_item.product_id if selected_item.product_id else (
-        selected_item.product.product_id if selected_item.product else "")
-    
-    product = None
-    for p in products:
-        if p.product_id == product_id:
-            product = p
-            break
+        selected_item = None
+        original_index = 0
+        for i, item in editable_items:
+            if i == item_num:
+                selected_item = item
+                original_index = i - 1  
+                break
 
-    if not product:
-        print("Product not found in inventory.")
+        if not selected_item:
+            print("Item not found.")
+            continue
+
+        product_id = selected_item.product_id if selected_item.product_id else (
+            selected_item.product.product_id if selected_item.product else "")
+        
+        product = None
+        for p in products:
+            if p.product_id == product_id:
+                product = p
+                break
+
+        if not product:
+            print("Product not found in inventory.")
+            input("Press [ENTER] to continue.")
+            return False
+
+        while True:
+            print(f"\nCurrent quantity: {selected_item.quantity}")
+            print(f"Available stock: {product.stock + selected_item.quantity}\n")
+            new_qty_input = input("Enter new quantity (or 0 to remove item): ").strip()
+
+            if not is_integer(new_qty_input):
+                print("Invalid input. Please enter a number.")
+                continue
+
+            new_qty = int(new_qty_input)
+
+            if new_qty == 0:
+                product.stock += selected_item.quantity
+                cart.pop(original_index)
+                
+                if save_cart(cart) and update_product_file():
+                    print("Item removed from cart successfully!\n")
+                else:
+                    product.stock -= selected_item.quantity
+                    cart.insert(original_index, selected_item)
+                    print("Failed to update cart. Changes reverted.")
+                break
+            elif new_qty < 0:
+                print("Quantity cannot be negative.")
+                continue
+            elif new_qty > (product.stock + selected_item.quantity):
+                print(f"Not enough stock available. Maximum: {product.stock + selected_item.quantity}")
+                continue
+            else:
+                diff = new_qty - selected_item.quantity
+                
+                product.stock -= diff
+                selected_item.quantity = new_qty
+                selected_item.total = selected_item.price * new_qty
+                
+                if save_cart(cart) and update_product_file():
+                    print("Cart updated successfully!\n")
+                else:
+                    product.stock += diff
+                    selected_item.quantity -= diff
+                    selected_item.total = selected_item.price * (selected_item.quantity - diff)
+                    print("Failed to update cart. Changes reverted.")
+                break
+
         input("Press [ENTER] to continue.")
-        return False
-
-    while True:
-        print(f"\nCurrent quantity: {selected_item.quantity}")
-        print(f"Available stock: {product.stock + selected_item.quantity}\n")
-        new_qty_input = input("Enter new quantity (or 0 to remove item): ").strip()
-
-        if not is_integer(new_qty_input):
-            print("Invalid input. Please enter a number.")
-            continue
-
-        new_qty = int(new_qty_input)
-
-        if new_qty == 0:
-            product.stock += selected_item.quantity
-            cart[:] = cart[:item_num - 1] + cart[item_num:]
-            
-            if save_cart(cart) and update_product_file():
-                print("Item removed from cart successfully!\n")
-            else:
-                product.stock -= selected_item.quantity
-                cart.insert(item_num - 1, selected_item)
-                print("Failed to update cart. Changes reverted.")
-            break
-        elif new_qty < 0:
-            print("Quantity cannot be negative.")
-            continue
-        elif new_qty > (product.stock + selected_item.quantity):
-            print(f"Not enough stock available. Maximum: {product.stock + selected_item.quantity}")
-            continue
-        else:
-            diff = new_qty - selected_item.quantity
-            
-            product.stock -= diff
-            selected_item.quantity = new_qty
-            selected_item.total = selected_item.price * new_qty
-            
-            if save_cart(cart) and update_product_file():
-                print("Cart updated successfully!\n")
-            else:
-                product.stock += diff
-                selected_item.quantity -= diff
-                selected_item.total = selected_item.price * (selected_item.quantity - diff)
-                print("Failed to update cart. Changes reverted.")
-            break
-
-    input("Press [ENTER] to continue.")
-    return True
+        return True
 
 def clear_cart(member_id):
     cart_file = get_cart_filename(member_id)
@@ -2163,6 +2186,72 @@ def proceed_to_payment(products, cart):
         return
 
     clear_screen()
+
+    has_inactive = False
+    for item in cart:
+        status = item.product.status if item.product else "Active"
+        if status == "Inactive":
+            has_inactive = True
+            break
+    
+    if has_inactive:
+        print("==================================================================")
+        print("|                      PAYMENT ERROR                             |")
+        print("==================================================================")
+        print("| Your cart contains inactive/unavailable products.              |")
+        print("| Please remove these items or wait for them to become available |")
+        print("| before proceeding to payment.                                  |")
+        print("==================================================================")
+        
+        print("\nInactive products in your cart:")
+        for i, item in enumerate(cart, 1):
+            status = item.product.status if item.product else "Active"
+            if status == "Inactive":
+                print(f"{i}. {item.name} (Product ID: {item.product_id})")
+
+        print(" ____________________________________")
+        print("|                                    |")
+        print("|    Options:                        |")
+        print("|  1. Remove inactive items          |")
+        print("|  2. Back to cart                   |")
+        print("|  3. Back to main menu              |")
+        print("|____________________________________|")
+        
+        while True:
+            choice = input("\nEnter your choice: ")
+            if choice == '1':
+                items_to_delete = []
+                for item in cart:
+                    status = item.product.status if item.product else "Active"
+                    if status == "Inactive":
+                        items_to_delete.append(item)
+                
+                for item in items_to_delete:
+                    for product in products:
+                        if product.product_id == item.product_id:
+                            product.stock += item.quantity
+                            break
+                    cart.remove(item)
+                
+                if save_cart(cart) and update_product_file():
+                    print("\nInactive items removed successfully!")
+                    input("Press [ENTER] to refresh cart.")
+                    display_cart(cart)
+                else:
+                    print("\nError removing items. Please try again.")
+                    input("Press [ENTER] to continue.")
+                return
+            elif choice == '2':
+                display_cart(cart)
+                return
+            elif choice == '3':
+                clear_screen()
+                main_menu()
+                return
+            else:
+                print("Invalid choice. Please try again.")
+        return
+    
     total_payment = 0.00
     
     print("==================================================================")
@@ -2244,7 +2333,7 @@ def proceed_to_payment(products, cart):
     elif payment_method == '1':
         cash_payment(products, payable_items, actual_total)  
     elif payment_method == '2':
-        debit_card_payment(payable_items, actual_total)  
+        debit_card_payment(payable_items, actual_total)
 
 def debit_card_payment(cart, total_payment):
     card_number = input("Credit card number (13-16 digits): ").strip()
