@@ -30,3 +30,12 @@ U0002,Kong lee ching,ORD0008,2025-05-03 23:06:37,Cash
 U0002,Kong lee ching,ORD0008,102,Sourdough,Bread,5.50,22,121.00
 U0002,Kong lee ching,ORD0008,TOTAL,114.95
 
+U0008,Lee Ching,ORD0014,2025-05-17 00:07:17,Cash
+U0008,Lee Ching,ORD0014,105,Supa Mega Jumbo Bread uwu,Bread,10.50,9,94.50
+U0008,Lee Ching,ORD0014,TOTAL,94.50
+
+U0008,Lee Ching,ORD0016,2025-05-17 00:13:58,Debit Card
+U0008,Lee Ching,ORD0016,303,Fruit Cake,Cakes,14.50,2,29.00
+U0008,Lee Ching,ORD0016,404,Sugar Donut,Donuts,2.50,10,25.00
+U0008,Lee Ching,ORD0016,TOTAL,54.00
+
