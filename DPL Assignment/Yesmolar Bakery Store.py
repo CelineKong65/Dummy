@@ -246,7 +246,7 @@ def signup():
     status = "Active"
     
     while True:
-        full_name = input("Enter your full name, [R] to return: ").strip()
+        full_name = input("\nEnter your full name, [R] to return: ").strip()
 
         if full_name == 'R' or full_name == 'r':
             clear_screen()
@@ -290,7 +290,7 @@ def signup():
         break 
 
     while True:
-        email = input("Enter your email (example: xuanting@example.com): ")
+        email = input("\nEnter your email (example: xuanting@example.com): ")
 
         clean_email = ""
         
@@ -305,7 +305,7 @@ def signup():
                 dot = True
 
         if not at or not dot:
-            print("Invalid email format. Please include @ and . in your email!\n")
+            print("Invalid email format. Please include @ and . in your email!")
             continue
 
         same = False
@@ -330,10 +330,10 @@ def signup():
 
     while True:
         password = ""
-        password = input("Enter your new password (example: Xuanting123): ")
+        password = input("\nEnter your new password (example: Xuanting123): ")
 
         if len(password) < 8:
-            print("Password must be at least 8 characters!\n")
+            print("Password must be at least 8 characters!")
             continue
 
         upper = False
@@ -349,27 +349,27 @@ def signup():
                 digit = True
 
         if not upper:
-            print("Password must contain at least one uppercase letter!\n")
+            print("Password must contain at least one uppercase letter!")
             continue
         if not lower:
-            print("Password must contain at least one lowercase letter!\n")
+            print("Password must contain at least one lowercase letter!")
             continue
         if not digit:
-            print("Password must contain at least one digit!\n")
+            print("Password must contain at least one digit!")
             continue
         
-        confirm_password = input("Confrim your password: ")
+        confirm_password = input("\nConfrim your password: ")
         if confirm_password != password:
-            print("Passwords do not match!\n")
+            print("Passwords do not match!")
             continue
     
         break
 
     while True:
-        age = input("Enter your age: ")
+        age = input("\nEnter your age: ")
 
         if len(age) != 2:
-            print("Age must be exactly 2 digits!\n")
+            print("Age must be exactly 2 digits!")
             continue
 
         is_digit = True
@@ -378,17 +378,17 @@ def signup():
                 is_digit = False
 
         if not is_digit:
-            print("Age must contain only digits!\n")
+            print("Age must contain only digits!")
             continue
 
         if age[0] == '0':
-            print("Age cannot start with 0!\n")
+            print("Age cannot start with 0!")
             continue
 
         break
 
     while True:
-        gender = input("Enter your gender (male or female): ")
+        gender = input("\nEnter your gender (male or female): ")
 
         is_valid= False
 
@@ -409,15 +409,15 @@ def signup():
                 is_valid = True
 
         if not is_valid:
-            print("Please enter 'Male', 'Female', 'male' or 'female'!\n")
+            print("Please enter 'Male', 'Female', 'male' or 'female'!")
             continue
         break
 
     while True:
-        contact = input("Enter your contact number (example: 012-34567890): ")
+        contact = input("\nEnter your contact number (example: 012-34567890): ")
 
         if len(contact) < 4 or contact[3] != '-':
-            print("Format must be like 012-34567890 with a dash at the 4th position!\n")
+            print("Format must be like 012-34567890 with a dash at the 4th position!")
             continue
 
         part1 = ""
@@ -430,7 +430,7 @@ def signup():
 
 
         if not (part1[0] == '0' and part1[1] == '1'):
-            print("Phone number must start with '01'!\n")
+            print("Phone number must start with '01'!")
             continue
 
         combined = part1 + part2
@@ -440,11 +440,11 @@ def signup():
                 only_digits = False
                 break
         if not only_digits:
-            print("Phone number cannot contain symbols or space!\n")
+            print("Phone number cannot contain symbols or space!")
             continue
 
         if len(combined) != 10 and len(combined) != 11:
-            print("Phone number must be 10 or 11 digits!\n")
+            print("Phone number must be 10 or 11 digits!")
             continue
     
         break
@@ -489,7 +489,7 @@ def login():
         login_menu()
         return
     
-    password = input("Enter your password :").strip()
+    password = input("\nEnter your password: ").strip()
 
     try:
         with open(MEMBERS_FILE, "r", encoding='utf-8') as f:
@@ -533,7 +533,7 @@ def login():
                 clear_screen()
                 return False
                     
-        print("Email not found.\n")
+        print("Email not found.")
         input("\nPress [ENTER] to continue.")
         clear_screen()
         return False
@@ -635,7 +635,7 @@ def edit_member_profile():
 
         elif choice == "2":
             while True:
-                new_name = input("Enter new Full Name: ")
+                new_name = input("\nEnter new Full Name: ")
 
                 letter_count = 0
                 is_valid = True
@@ -651,7 +651,7 @@ def edit_member_profile():
                         letter_count += 1
 
                 if not is_valid or letter_count < 2:
-                    print("Invalid name. Must contain only letters and spaces, with at least 2 letters.\n")
+                    print("\nInvalid name. Must contain only letters and spaces, with at least 2 letters.")
                     continue
 
                 cleaned_new_name = ""
@@ -680,18 +680,18 @@ def edit_member_profile():
                         break
 
                 if name_exists:
-                    print("This name is already registered. Please use a different name!\n")
+                    print("\nThis name is already registered. Please use a different name!")
                     continue
 
                 logged_in_member.full_name = new_name
                 update_member(logged_in_member)
-                print("Full Name updated successfully!\n")
-                input("Press [ENTER] to continue.")
+                print("\nFull Name updated successfully!")
+                input("\nPress [ENTER] to continue.")
                 break
 
         elif choice == "3":
             while True:
-                new_email = input("Enter new email: ")
+                new_email = input("\nEnter new email: ")
 
                 has_at = False
                 has_dot = False
@@ -702,7 +702,7 @@ def edit_member_profile():
                         has_dot = True
 
                 if not has_at or not has_dot:
-                    print("Invalid email format. Must contain @ and .\n")
+                    print("\nInvalid email format. Must contain @ and .")
                     continue
 
                 cleaned_new_email = ""
@@ -731,22 +731,22 @@ def edit_member_profile():
                         break
 
                 if email_exists:
-                    print("This email is already registered. Please use a different email!\n")
+                    print("\nThis email is already registered. Please use a different email!")
                     continue
 
                 logged_in_member.email = new_email
                 update_member(logged_in_member)
-                print("Email updated successfully!\n")
-                input("Press [ENTER] to continue.")
+                print("\nEmail updated successfully!")
+                input("\nPress [ENTER] to continue.")
                 break
 
         elif choice == "4":
             while True:
                 logged_in_member.password = ""
-                logged_in_member.password = input("Enter your new password (example: Xuanting123): ")
+                logged_in_member.password = input("\nEnter your new password (example: Xuanting123): ")
 
                 if len(logged_in_member.password) < 8:
-                    print("Password must be at least 8 characters!\n")
+                    print("\nPassword must be at least 8 characters!")
                     continue
 
                 upper = False
@@ -762,32 +762,32 @@ def edit_member_profile():
                         digit = True
 
                 if not upper:
-                    print("Password must contain at least one uppercase letter!\n")
+                    print("\nPassword must contain at least one uppercase letter!")
                     continue
                 if not lower:
-                    print("Password must contain at least one lowercase letter!\n")
+                    print("\nPassword must contain at least one lowercase letter!")
                     continue
                 if not digit:
-                    print("Password must contain at least one digit!\n")
+                    print("\nPassword must contain at least one digit!")
                     continue
                 
-                confirm_password = input("Confrim your password: ")
+                confirm_password = input("\nConfrim your password: ")
                 if confirm_password != logged_in_member.password:
-                    print("Passwords do not match!\n")
+                    print("\nPasswords do not match!")
                     continue
             
                 update_member(logged_in_member)
-                print("Password updated successfully!\n")
-                input("Press [ENTER] to continue.")
+                print("\nPassword updated successfully!")
+                input("\nPress [ENTER] to continue.")
                 break
 
         elif choice == "5":
             try:
                 while True:
-                    logged_in_member.age = input("Enter new age: ")
+                    logged_in_member.age = input("\nEnter new age: ")
 
                     if len(logged_in_member.age) != 2:
-                        print("Age must be exactly 2 digits!\n")
+                        print("\nAge must be exactly 2 digits!")
                         continue
 
                     is_digit = True
@@ -796,23 +796,23 @@ def edit_member_profile():
                             is_digit = False
 
                     if not is_digit:
-                        print("Age must contain only digits!\n")
+                        print("\nAge must contain only digits!")
                         continue
 
                     if logged_in_member.age[0] == '0':
-                        print("Age cannot start with 0!\n")
+                        print("\nAge cannot start with 0!")
                         continue
 
                     update_member(logged_in_member)
-                    print("Age updated successfully!\n")
+                    print("\nAge updated successfully!")
                     break
             except ValueError:
-                print("Invalid input! Age must be a number.\n")
-            input("Press [ENTER] to continue.")
+                print("\nInvalid input! Age must be a number.")
+            input("\nPress [ENTER] to continue.")
 
         elif choice == "6":
             while True:
-                logged_in_member.gender = input("Enter new gender (male or female): ")
+                logged_in_member.gender = input("\nEnter new gender (male or female): ")
 
                 is_valid= False
 
@@ -833,20 +833,20 @@ def edit_member_profile():
                         is_valid = True
 
                 if not is_valid:
-                    print("Please enter 'Male', 'Female', 'male' or 'female'!\n")
+                    print("\nPlease enter 'Male', 'Female', 'male' or 'female'!")
                     continue
 
                 update_member(logged_in_member)
-                print("Gender updated successfully!\n")
-                input("Press [ENTER] to continue.")
+                print("\nGender updated successfully!")
+                input("\nPress [ENTER] to continue.")
                 break
 
         elif choice == "7":
             while True:
-                logged_in_member.contact  = input("Enter your contact number (example: 012-34567890): ")
+                logged_in_member.contact  = input("\nEnter your contact number (example: 012-34567890): ")
 
                 if len(logged_in_member.contact) < 4 or logged_in_member.contact[3] != '-':
-                    print("Format must be like 012-34567890 with a dash at the 4th position!\n")
+                    print("\nFormat must be like 012-34567890 with a dash at the 4th position!")
                     continue
 
                 part1 = ""
@@ -859,7 +859,7 @@ def edit_member_profile():
 
 
                 if not (part1[0] == '0' and part1[1] == '1'):
-                    print("Phone number must start with '01'!\n")
+                    print("\nPhone number must start with '01'!")
                     continue
 
                 combined = part1 + part2
@@ -869,16 +869,16 @@ def edit_member_profile():
                         only_digits = False
                         break
                 if not only_digits:
-                    print("Phone number cannot contain symbols or space!\n")
+                    print("\nPhone number cannot contain symbols or space!")
                     continue
 
                 if len(combined) != 10 and len(combined) != 11:
-                    print("Phone number must be 10 or 11 digits!\n")
+                    print("\nPhone number must be 10 or 11 digits!")
                     continue
     
                 update_member(logged_in_member)
-                print("Contact Number updated successfully!\n")
-                input("Press [ENTER] to continue.")
+                print("\nContact Number updated successfully!")
+                input("\nPress [ENTER] to continue.")
                 break
         
         elif choice == "8":
@@ -892,14 +892,14 @@ def edit_member_profile():
 def admin_login():
     global logged_in_admin
 
-    name = input("\nEnter your name, [R] to return:").strip()
+    name = input("\nEnter your name, [R] to return: ").strip()
 
     if name == 'R' or name == 'r':
         clear_screen()
         login_menu()
         return
     
-    password = input("Enter your password :").strip()
+    password = input("\nEnter your password: ").strip()
 
     try:
         with open(ADMINS_FILE, "r", encoding='utf-8') as f:
@@ -922,7 +922,7 @@ def admin_login():
                 while attempts < 3:
                     if password == stored_password:
                         print("Logged in Successfully!")
-                        print(f"Welcome {stored_position}!\n")
+                        print(f"Welcome {stored_position}!")
                         logged_in_admin = Admin(
                             name=lines[i],
                             password=lines[i + 1],
@@ -944,7 +944,7 @@ def admin_login():
                 clear_screen()
                 return False
 
-        print("Name not found.\n")
+        print("Name not found.")
         input("\nPress [ENTER] to continue.")
         clear_screen()
         return False
@@ -3003,7 +3003,7 @@ def filter_products():
                         print("Not enough stock available.")
                     else:
                         add_to_cart(cart, product_id, qty)
-                        input("Press [ENTER] to continue.")
+                        input("\nPress [ENTER] to continue.")
                         break
                 except ValueError:
                     print("Invalid input. Please enter a number.")
