@@ -119,12 +119,66 @@ void filterProducts();
 void displayCart(Member loggedInMember);
 void printWrappedText(const string& text);
 
-// Helper functions
+//-------------------------------------------------------------------------Helper functions------------------------------------------------------------------------------------------
 void clearScreen() {
     system("cls");
 }
 
-//---------------------- function to wrapped the description----------
+bool isEmpty(const string& str) {
+    for (size_t i = 0; i < str.length(); i++) {
+        if (str[i] != ' ' && str[i] != '\t') {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Manual string to int conversion; returns -1 if invalid
+int StringToInt(const string& str) {
+    int result = 0;
+    if (str.length() == 0) 
+		return -1;
+
+    for (size_t i = 0; i < str.length(); i++) {
+        char c = str[i];
+        if (c < '0' || c > '9') return -1;
+        result = result * 10 + (c - '0');
+    }
+    return result;
+}
+
+// Manual string to float conversion; returns -1.0f if invalid
+float StringToFloat(const string& str) {
+    float result = 0.0f;
+    bool decimalFound = false;
+    float decimalDivisor = 10.0f;
+    int digitCount = 0;
+    if (str.length() == 0) return -1.0f;
+
+    for (size_t i = 0; i < str.length(); i++) {
+        char c = str[i];
+        if (c == '.') {
+            if (decimalFound) return -1.0f; // multiple dots
+            decimalFound = true;
+        }
+        else if (c >= '0' && c <= '9') {
+            int digit = c - '0';
+            if (!decimalFound) {
+                result = result * 10 + digit;
+            } else {
+                result = result + digit / decimalDivisor;
+                decimalDivisor *= 10;
+            }
+            digitCount++;
+        }
+        else {
+            return -1.0f; // invalid character
+        }
+    }
+    if (digitCount == 0) return -1.0f; // no digits found
+    return result;
+}
+
 void printWrappedText(const string& text) {
 	int lineLength = 60;
     int count = 0;
@@ -518,10 +572,16 @@ void signup() {
     string status = "Active";
     string full_name, email, password, confirm_password, contact;
 	
-	cin.ignore();
     // Full name validation
     while (true) {
-        cout << "Enter your full name, [R] to return to the main menu: ";
+    	cout << "_______________________________________________" << endl;
+        cout << "| NAME REQUIREMENTS                           |" << endl;
+        cout << "|_____________________________________________|" << endl;
+        cout << "|1. Name must have at least 2 characters      |" << endl;
+        cout << "|2. No special character(s) allowed           |" << endl;
+        cout << "|3. No number(s) allowed                      |" << endl;
+        cout << "|_____________________________________________|" << endl;
+        cout << "\nEnter your full name, [R] to return to the main menu: ";
         getline(cin, full_name);
         
         if (full_name == "R" || full_name == "r") {
@@ -541,7 +601,9 @@ void signup() {
         }
 
         if (!valid || letterCount < 2) {
-            cout << "Invalid name. Name must have at least 2 letters and contain only letters and spaces." << endl;
+        	cout << "_______________________________________________" << endl;
+        	cout << "| ERROR! INVALID NAME                         |" << endl;
+        	cout << "|_____________________________________________|" << endl;
             continue;
         }
 
@@ -550,7 +612,7 @@ void signup() {
 
     // Email validation
     while (true) {
-        cout << "Enter your email (example: user@example.com): ";
+        cout << "\nEnter your email (example: user@example.com)        : ";
         getline(cin, email);
 
         bool hasAt = false, hasDot = false;
@@ -560,7 +622,9 @@ void signup() {
         }
 
         if (!hasAt || !hasDot) {
-            cout << "Invalid email format. Please include @ and . in your email!" << endl;
+        	cout << "____________________________________________________" << endl;
+        	cout << "| Invalid email format! Must include @ and . symbol |" << endl;
+        	cout << "|___________________________________________________|" << endl;
             continue;
         }
 
@@ -574,7 +638,9 @@ void signup() {
         }
 
         if (exists) {
-            cout << "This email is already registered. Please use a different email!" << endl;
+        	cout << "____________________________________________________" << endl;
+        	cout << "| This email is already registered!                 |" << endl;
+        	cout << "|___________________________________________________|" << endl;
             continue;
         }
 
@@ -583,11 +649,21 @@ void signup() {
 
     // Password validation
     while (true) {
-        cout << "Enter your new password (example: Xuanting123): ";
+    	cout << "_______________________________________________" << endl;
+        cout << "| PASSWORD REQUIREMENTS                       |" << endl;
+        cout << "|_____________________________________________|" << endl;
+        cout << "|1. Password must be at least 8 characters    |" << endl;
+        cout << "|2. Password must have at least 1 uppercase   |" << endl;
+        cout << "|3. Password must have at least 1 lowercase   |" << endl;
+        cout << "|4. Password must have at least 1 number      |" << endl;
+        cout << "|_____________________________________________|" << endl;
+        cout << "\nEnter your new password (example: Xuanting123)      : ";
         getline(cin, password);
 
         if (password.length() < 8) {
-            cout << "Password must be at least 8 characters!" << endl;
+        	cout << "____________________________________________________" << endl;
+        	cout << "| Password must be at least 8 characters!           |" << endl;
+        	cout << "|___________________________________________________|" << endl;
             continue;
         }
 
@@ -599,22 +675,30 @@ void signup() {
         }
 
         if (!hasUpper) {
-            cout << "Password must contain at least one uppercase letter!" << endl;
+        	cout << "____________________________________________________" << endl;
+        	cout << "| Password must have at least 1 uppercase!          |" << endl;
+        	cout << "|___________________________________________________|" << endl;
             continue;
         }
         if (!hasLower) {
-            cout << "Password must contain at least one lowercase letter!" << endl;
+            cout << "____________________________________________________" << endl;
+        	cout << "| Password must have at least 1 lowercase!          |" << endl;
+        	cout << "|___________________________________________________|" << endl;
             continue;
         }
         if (!hasDigit) {
-            cout << "Password must contain at least one digit!" << endl;
+            cout << "____________________________________________________" << endl;
+        	cout << "| Password must have at least 1 number!             |" << endl;
+        	cout << "|___________________________________________________|" << endl;
             continue;
         }
-
-        cout << "Confirm your password: ";
+		
+        cout << "\nConfirm your password                               : ";
         getline(cin, confirm_password);
         if (confirm_password != password) {
-            cout << "Passwords do not match!" << endl;
+        	cout << "____________________________________________________" << endl;
+        	cout << "| Passwords do not match!                           |" << endl;
+        	cout << "|___________________________________________________|" << endl;
             continue;
         }
 
@@ -623,11 +707,13 @@ void signup() {
 
     // Contact validation
     while (true) {
-        cout << "Enter your contact number (example: 012-34567890): ";
+        cout << "\nEnter your contact number (example: 012-34567890)   : ";
         getline(cin, contact);
 
         if (contact.length() < 4 || contact[3] != '-') {
-            cout << "Format must be like 012-34567890 with a dash at the 4th position!" << endl;
+        	cout << "____________________________________________________" << endl;
+        	cout << "| Invalid format! Example: 012-34567890             |" << endl;
+        	cout << "|___________________________________________________|" << endl;
             continue;
         }
 
@@ -635,7 +721,9 @@ void signup() {
         string part2 = contact.substr(4);
 
         if (!(part1[0] == '0' && part1[1] == '1')) {
-            cout << "Phone number must start with '01'!" << endl;
+        	cout << "____________________________________________________" << endl;
+        	cout << "| Phone number must start with '01'!                |" << endl;
+        	cout << "|___________________________________________________|" << endl;
             continue;
         }
 
@@ -649,12 +737,17 @@ void signup() {
         }
 
         if (!onlyDigits) {
-            cout << "Phone number cannot contain symbols or space!" << endl;
+        	cout << "____________________________________________________" << endl;
+        	cout << "| Phone number cannot contain symbols (except '-')  |" << endl;
+        	cout << "| or space!                                         |" << endl;
+        	cout << "|___________________________________________________|" << endl;
             continue;
         }
 
         if (combined.length() != 10 && combined.length() != 11) {
-            cout << "Phone number must be 10 or 11 digits!" << endl;
+        	cout << "____________________________________________________" << endl;
+        	cout << "| Phone number must be 10 or 11 digits!             |" << endl;
+        	cout << "|___________________________________________________|" << endl;
             continue;
         }
 
@@ -691,18 +784,31 @@ void signup() {
 
 void login() {
     string email, password;
+    bool hasAt = false, hasDot = false;
     
-    cin.ignore();
-    cout << "\nEnter your email, [R] to return to the main menu: ";
-    getline(cin, email);
-
-    if (email == "R" || email == "r") {
-        clearScreen();
-        mainMenu();
-        return;
-    }
-
-    cout << "Enter your password: ";
+    do {
+	    cout << "\nEnter your email, [R] to return to the main menu: ";
+	    getline(cin, email);
+	
+	    if (email == "R" || email == "r") {
+	        clearScreen();
+	        mainMenu();
+	        return;
+	    }
+	
+	    for (char c : email) {
+	        if (c == '@') hasAt = true;
+	        if (c == '.') hasDot = true;
+	    }
+	
+	    if (!hasAt || !hasDot) {
+	        cout << "____________________________________________________" << endl;
+	        cout << "| Invalid email format! Must include @ and . symbol |" << endl;
+	        cout << "|___________________________________________________|" << endl;
+	    }
+	} while (!hasAt || !hasDot);
+    
+    cout << "\nEnter your password: ";
     getline(cin, password);
 
     ifstream file(MEMBERS_FILE);
@@ -722,7 +828,7 @@ void login() {
                 if (lines[2] == email) {
                     found = true;
                     if (lines[5] != "Active") {
-                        cout << "Your account is inactive. Please contact admin." << endl;
+                        cout << "\nYour account is inactive. Please contact admin." << endl;
                         cout << "\nPress [ENTER] to return to login menu.";
                         cin.ignore();
                         clearScreen();
@@ -734,7 +840,7 @@ void login() {
                     string currentPassword = password;
                     while (attempts < 3) {
                         if (currentPassword == lines[3]) {
-                            cout << "Logged in Successfully!" << endl;
+                            cout << "\nLogged in Successfully!" << endl;
                             loggedInMember = Member(lines[0], lines[1], lines[2], lines[3], 
                                                    lines[4], lines[5]);
                             cout << "\nPress [ENTER] to continue.";
@@ -744,13 +850,13 @@ void login() {
                             return;
                         } else {
                             attempts++;
-                            cout << "Incorrect password! Attempts left: " << 3 - attempts << endl;
+                            cout << "\nIncorrect password! Attempts left: " << 3 - attempts << endl;
                             cout << "Please enter your password again: ";
                             getline(cin, currentPassword);
                         }
                     }
 
-                    cout << "Too many failed attempts. Login terminating." << endl;
+                    cout << "\nToo many failed attempts. Login terminated." << endl;
                     cout << "\nPress [ENTER] to return to login menu.";
                     cin.ignore();
                     clearScreen();
@@ -773,16 +879,29 @@ void login() {
 
 void adminLogin() {
     string email, password;
+    bool hasAt = false, hasDot = false;
     
-    cin.ignore();
-    cout << "\nEnter your email, [R] to return to the main menu: ";
-    getline(cin, email);
-
-    if (email == "R" || email == "r") {
-        clearScreen();
-        mainMenu();
-        return;
-    }
+    do {
+	    cout << "\nEnter your email, [R] to return to the main menu: ";
+	    getline(cin, email);
+	
+	    if (email == "R" || email == "r") {
+	        clearScreen();
+	        mainMenu();
+	        return;
+	    }
+	
+	    for (char c : email) {
+	        if (c == '@') hasAt = true;
+	        if (c == '.') hasDot = true;
+	    }
+	
+	    if (!hasAt || !hasDot) {
+	        cout << "____________________________________________________" << endl;
+	        cout << "| Invalid email format! Must include @ and . symbol |" << endl;
+	        cout << "|___________________________________________________|" << endl;
+	    }
+	} while (!hasAt || !hasDot);
 
     cout << "Enter your password: ";
     getline(cin, password);
@@ -804,7 +923,7 @@ void adminLogin() {
                 if (lines[2] == email) {
                     found = true;
                     if (lines[6] != "Active") {
-                        cout << "Your account is inactive. Please contact Superadmin." << endl;
+                        cout << "\nYour account is inactive. Please contact Superadmin." << endl;
                         cout << "\nPress [ENTER] to return to login menu.";
                         cin.ignore();
                         clearScreen();
@@ -816,7 +935,7 @@ void adminLogin() {
                     string currentPassword = password;
                     while (attempts < 3) {
                         if (currentPassword == lines[3]) {
-                            cout << "Logged in Successfully!" << endl;
+                            cout << "\nLogged in Successfully!" << endl;
                             loggedInAdmin = Admin(lines[0], lines[1], lines[2], lines[3], 
                                                    lines[4], lines[5], lines[6]);
                             cout << "\nPress [ENTER] to continue.";
@@ -826,13 +945,13 @@ void adminLogin() {
                             return;
                         } else {
                             attempts++;
-                            cout << "Incorrect password! Attempts left: " << 3 - attempts << endl;
+                            cout << "\nIncorrect password! Attempts left: " << 3 - attempts << endl;
                             cout << "Please enter your password again: ";
                             getline(cin, currentPassword);
                         }
                     }
 
-                    cout << "Too many failed attempts. Login terminating." << endl;
+                    cout << "\nToo many failed attempts. Login terminated." << endl;
                     cout << "\nPress [ENTER] to return to login menu.";
                     cin.ignore();
                     clearScreen();
@@ -865,91 +984,84 @@ void mainMenu() {
         cout << "4.    Exit  " << endl;
         cout << "===============================================================" << endl;
 
-        int choice;
+        string choiceString;
         cout << "Enter your choice: ";
-        cin >> choice;
-
-        switch(choice){
-        	case 1:{
-        		loadMembers();
-	            clearScreen();
-	            cout << "\n===============================================================" << endl;
-	            cout << "                    Signing Up As Member...                    " << endl;
-	            cout << "===============================================================" << endl;
-	            signup();
-				break;
-			}
-			case 2:{
-        		clearScreen();
-	            cout << "\n===============================================================" << endl;
-	            cout << "                    Logging In As Member...                    " << endl;
-	            cout << "===============================================================" << endl;
-	            login();
-			}
-			case 3:{
-        		clearScreen();
-	            cout << "\n===============================================================" << endl;
-	            cout << "                    Logging In As Admin...                    " << endl;
-	            cout << "===============================================================" << endl;
-	            adminLogin();
-			}
-			case 4:{
-        		cout << "\nThank you for visiting Yesmolar Pizza Store!\n" << endl;
-            	exit(0);
-			}
-			default :{
-	            cout << "\nInvalid choice. Press [ENTER] to try again." << endl;
-	            cin.ignore();
-	            cin.get();
-	            clearScreen();
-			}
-    	}
+        getline(cin,choiceString);
+        
+        int choice = StringToInt(choiceString);
+        
+        if(choice==1){
+        	loadMembers();
+	        clearScreen();
+	        cout << "\n===============================================================" << endl;
+	        cout << "                    Signing Up As Member...                    " << endl;
+	        cout << "===============================================================" << endl;
+	        signup();
+		}
+		else if(choice==2){
+			clearScreen();
+	        cout << "\n===============================================================" << endl;
+	        cout << "                    Logging In As Member...                    " << endl;
+	        cout << "===============================================================" << endl;
+	        login();
+		}
+		else if(choice==3){
+			clearScreen();
+	        cout << "\n===============================================================" << endl;
+	        cout << "                    Logging In As Admin...                    " << endl;
+	        cout << "===============================================================" << endl;
+	        adminLogin();
+		}
+		else if(choice==4){
+			cout << "\nThank you for visiting Yesmolar Pizza Store!\n" << endl;
+            exit(0);
+		}
+		else{
+			cout << "\nInvalid choice. Press [ENTER] to try again.";
+	        cin.get();
+	        clearScreen();
+	        mainMenu();
+		}
 	}
 }
 
 //===============================================================================Member Menu===================================================================================
 void memberMenu(Member loggedInMember){
 	clearScreen();
-        cout << "\n===============================================================" << endl;
-        cout << "               WELOCOME " << loggedInMember.full_name << endl;
-        cout << "===============================================================" << endl;
-        cout << "1.    Browse Product  " << endl;
-        cout << "2.    View My Cart  " << endl;
-        cout << "3.    View Order History  " << endl;
-        cout << "4.    View My Profile  " << endl;
-        cout << "5.    Rate Our System  " << endl;
-        cout << "6.    Log Out  " << endl;
-        cout << "===============================================================" << endl;
+    cout << "\n===============================================================" << endl;
+    cout << "               WELOCOME " << loggedInMember.full_name << endl;
+    cout << "===============================================================" << endl;
+    cout << "1.    Browse Product  " << endl;
+    cout << "2.    View My Cart  " << endl;
+    cout << "3.    View Order History  " << endl;
+    cout << "4.    View My Profile  " << endl;
+    cout << "5.    Rate Our System  " << endl;
+    cout << "6.    Log Out  " << endl;
+    cout << "===============================================================" << endl;
         
-        int choice;
+    string choiceString;
+    cout << "Enter your choice: ";
+    getline(cin,choiceString);
         
-        cout << "Enter your choice: ";
-        cin >> choice;
+    int choice = StringToInt(choiceString);
         
-        switch(choice){
-        	case 1:{
-        		clearScreen();
-        		filterProducts();
-				break;
-			}
-			case 2:{
-				clearScreen();
-				displayCart(loggedInMember);
-				break;
-			}
-        	case 6:{
-        		clearScreen();
-        		mainMenu();
-				break;
-			}
-			default:{
-				cout << "Invalid choice! Press [ENTER] to retry." ;
-				cin.ignore();
-				cin.get();
-				memberMenu(loggedInMember);
-				break;
-			}
-		}
+    if(choice==1){
+        clearScreen();
+        filterProducts();
+	}
+	else if(choice==2){
+		clearScreen();
+		displayCart(loggedInMember);
+	}
+	else if(choice==6){
+		clearScreen();
+        mainMenu();
+	}
+    else{
+        cout << "Invalid choice! Press [ENTER] to retry." ;
+		cin.get();
+		memberMenu(loggedInMember);
+	}
 }
 
 // Function to display a product
@@ -1247,7 +1359,6 @@ bool isInteger(const string& s) {
 
 // Function to display cart
 void displayCart(Member loggedInMember) {
-	cin.ignore();
 	loadProducts();
     if (loggedInMember.member_id.empty()) {
         cout << "Error: No user logged in." << endl;
@@ -1280,6 +1391,7 @@ void displayCart(Member loggedInMember) {
         cout << "2. Return to main menu" << endl;
 
         while (true) {
+        	cin.ignore();
             string choice;
             cout << "\nEnter your choice: ";
             getline(cin, choice);
@@ -1345,35 +1457,35 @@ void displayCart(Member loggedInMember) {
     cout << "|  5. Back to member menu            |" << endl;
     cout << "|____________________________________|" << endl;
 
-    while (true) {
-        string choice;
-        cout << "\nEnter your choice: ";
-        getline(cin, choice);
-
-        if (choice == "1") {
-            //delete cart function(cart, cartSize);
-            break;
-        } else if (choice == "2") {
-            //edit cart function (cart, cartSize);
-            break;
-        } else if (choice == "3") {
-            // proceed to payment function(cart, cartSize);
-            break;
-        } else if (choice == "4") {
-            clearScreen();
-            filterProducts();
-            return;
-        } else if (choice == "5") {
-            clearScreen();
-            memberMenu(loggedInMember);
-            return;
-        } else {
-            cout << "Invalid choice. Press [ENTER] to retry." << endl;
-            cin.ignore();
-            cin.get();
-            displayCart(loggedInMember);
-        }
-    }
+	while (true) {
+	    string choice;
+	    cout << "\nEnter your choice: ";
+	    getline(cin, choice);
+	
+	    if (choice == "1") {
+	        // deleteCart(cart, cartSize);
+	        break;
+	    } else if (choice == "2") {
+	        // editCart(cart, cartSize);
+	        break;
+	    } else if (choice == "3") {
+	        // proceedToPayment(cart, cartSize);
+	        break;
+	    } else if (choice == "4") {
+	        clearScreen();
+	        filterProducts();
+	        return;
+	    } else if (choice == "5") {
+	        clearScreen();
+	        memberMenu(loggedInMember);
+	        return;
+	    } else {
+	        cout << "Invalid choice. Press [ENTER] to retry.";
+	        cin.get();
+	        clearScreen();
+	        displayCart(loggedInMember);
+	    }
+	}
 
     displayCart(loggedInMember);
 }
@@ -1495,23 +1607,23 @@ void filterProducts() {
         cout << "| 4. Back to Main Menu                                        |" << endl;
         cout << "===============================================================" << endl;
 
-        int choice;
+        string choiceString;
         cout << "Enter your choice : ";
-        cin >> choice;
+        getline(cin,choiceString);
         
-        if (choice == 4) {
-            clearScreen();
-            memberMenu(loggedInMember);
-            return;
-        }
+        int choice = StringToInt(choiceString);
 
         string categories[] = {"Pizza", "Side", "Beverage"};
 
         if (choice < 1 || choice > 4) {
-            cout << "Invalid choice. Press [ENTER] to retry." << endl;
-            cin.ignore();
+            cout << "Invalid choice. Press [ENTER] to retry.";
             cin.get();
             filterProducts();
+        }
+        else if (choice == 4) {
+            clearScreen();
+            memberMenu(loggedInMember);
+            return;
         }
 
         string selected_category = categories[choice - 1];
@@ -1549,12 +1661,15 @@ void filterProducts() {
             cin >> selection;
 
             if (selection == "C" || selection == "c") {
+            	cin.ignore();
                 displayCart(loggedInMember);
                 continue;
             } else if (selection == "B" || selection == "b") {
+            	cin.ignore();
                 break;
             } else if (selection == "M" || selection == "m") {
                 clearScreen();
+                cin.ignore();
                 memberMenu(loggedInMember);
                 return;
             }
