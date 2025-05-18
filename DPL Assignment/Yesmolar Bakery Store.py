@@ -1386,7 +1386,7 @@ def view_feedback_rating():
 
     while True:
         print("1. Filter feedback by rate level")
-        print("2. Sort feedback by date")
+        print("2. Sort feedback and rating")
         choice = input("\nEnter your choice (R for return): ")
 
         if choice == '1':
