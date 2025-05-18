@@ -552,7 +552,8 @@ int loadOrders(Order orders[]) {
 }
 //-------------------------------------------------------- MAIN MENU ------------------------------------------------------
 void mainMenu(){
-	int choice;
+	system("cls");
+	string choice;
 	
 	cout<<"=================================================="<<endl;
     cout<<"                  TDS Assignment                  "<<endl;
@@ -562,37 +563,27 @@ void mainMenu(){
     cout<<"3. Exit System"<<endl;
     cout<<"--------------------------------------------------"<<endl;
     cout<<"Enter your choice: ";
-    cin>>choice;
-    
-    switch(choice){
-    	case 1:
-    		{
-    			system("cls");
-    			teamAMenu();
-    			break;
-			}
-		case 2:
-			{
-				system("cls");
-				teamBMenu();
-				break;
-			}
-		case 3:
-			{
-				cout<<"\nThank you for using the system. Goodbye!"<<endl;
-				exit(1);
-				break;
-			}
-		default:
-			{
-				cout<<"Invalid choice. Press Enter to try again"<<endl;
-				cin.ignore();
-				cin.get();
-				mainMenu();
-				break;
-			}
+    getline(cin, choice);
+
+    if(choice=="1"){
+    	system("cls");
+    	teamAMenu();
+	}
+	else if(choice=="2"){
+		system("cls");
+		teamBMenu();
+	}
+    else if(choice=="3"){
+    	cout<<"\nThank you for using the system. Goodbye!"<<endl;
+		exit(1);
+	}
+	else{
+		cout<<"Invalid choice. Press Enter to try again";
+		cin.get();		
+		mainMenu();
 	}
 }
+
 
 //--------------------------------------------------- TEAM A MENU -----------------------------------------------------
 void teamAMenu(){
@@ -634,8 +625,8 @@ void teamAMenu(){
 
 //-------------------------------------------------- TEAM B MENU ----------------------------------------------
 void teamBMenu(){
-	int choice;
-	
+	string choice;
+
 	cout<<"=================================================="<<endl;
     cout<<"                    Team B Menu                   "<<endl;
     cout<<"=================================================="<<endl;
@@ -644,35 +635,25 @@ void teamBMenu(){
     cout<<"3. Return to Main Menu"<<endl;
     cout<<"--------------------------------------------------"<<endl;
     cout<<"Enter your choice: ";
-    cin>>choice;
-    switch(choice){
-    	case 1:
-    		{
-    			system("cls");
-    			productMenu();
-    			break;
-			}
-		case 2:
-			{
-				system("cls");
-    			orderMenu();
-				break;
-			}
-		case 3:
-			{
-				system("cls");
-				mainMenu();
-				break;
-			}
-		default:
-			{
-				cout<<"Invalid choice. Press Enter to try again"<<endl;
-				cin.ignore();
-				cin.get();
-				system("cls");
-				teamBMenu();
-				break;
-			}
+    getline(cin,choice);
+
+    if (choice == "1") {
+	    system("cls");
+	    productMenu();
+	}
+	else if (choice == "2") {
+	    system("cls");
+	    orderMenu();
+	}
+	else if (choice == "3") {
+	    system("cls");
+	    mainMenu();
+	}
+	else {
+	    cout << "Invalid choice. Press Enter to try again";
+	    cin.get();
+	    system("cls");
+	    teamBMenu();
 	}
 }
 
@@ -713,7 +694,6 @@ void saveSortedProducts(Product products[], int productCount) {
     outFile.close();
     cout << "Sorted products saved to sorted_product.txt" << endl;
     cout << "Press [ENTER] to return to Product Menu.";
-	cin.ignore();
 	cin.get();    
 }
 
@@ -738,174 +718,295 @@ void saveSortedOrders(Order orders[], int orderCount) {
 }
 
 //----------------------------------------------------------- ADD PRODUCT-------------------------------------------------------
+bool isEmpty(const string& str) {
+    for (size_t i = 0; i < str.length(); i++) {
+        if (str[i] != ' ' && str[i] != '\t') {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Manual string to int conversion; returns -1 if invalid
+int StringToInt(const string& str) {
+    int result = 0;
+    if (str.length() == 0) return -1;
+
+    for (size_t i = 0; i < str.length(); i++) {
+        char c = str[i];
+        if (c < '0' || c > '9') return -1;
+        result = result * 10 + (c - '0');
+    }
+    return result;
+}
+
+// Manual string to float conversion; returns -1.0f if invalid
+float StringToFloat(const string& str) {
+    float result = 0.0f;
+    bool decimalFound = false;
+    float decimalDivisor = 10.0f;
+    int digitCount = 0;
+    if (str.length() == 0) return -1.0f;
+
+    for (size_t i = 0; i < str.length(); i++) {
+        char c = str[i];
+        if (c == '.') {
+            if (decimalFound) return -1.0f; // multiple dots
+            decimalFound = true;
+        }
+        else if (c >= '0' && c <= '9') {
+            int digit = c - '0';
+            if (!decimalFound) {
+                result = result * 10 + digit;
+            } else {
+                result = result + digit / decimalDivisor;
+                decimalDivisor *= 10;
+            }
+            digitCount++;
+        }
+        else {
+            return -1.0f; // invalid character
+        }
+    }
+    if (digitCount == 0) return -1.0f; // no digits found
+    return result;
+}
+
 void addProducts(Product products[]) {
     productCount = loadProducts(products);
     Product newProduct;
     bool idExist = false;
-    int choice;
+    string choice;
     int addCount = 0;
     const int MAX_ADD = 5;
-    
+
     system("cls");
-    
+
     do {
-    	
-    	// Sort and display current products
-	    shellSort(products, productCount);
-	    cout << "\nCurrent Products:\n";
-	    for(int i = 0; i < productCount; i++) {
-	        cout << setw(3) << setfill('0') << products[i].id << " - " << products[i].name << endl;
-	    }
-	    
-        cout << endl;
+        // Sort and display current products (Assuming shellSort exists)
+        // shellSort(products, productCount);
+
+        cout << "\nCurrent Products:\n";
+        for (int i = 0; i < productCount; i++) {
+            // Print ID with leading zeros manually (3 digits)
+            int id = products[i].id;
+            if (id < 10) cout << "00" << id;
+            else if (id < 100) cout << "0" << id;
+            else cout << id;
+            cout << " - " << products[i].name << endl;
+        }
+
+        // Enter ID
+        string idStr;
+        int idToAdd = -1;
         do {
-            idExist = false;
-            int idToAdd;
-            // Check if the Product id is 3 digits        
-            do {
-                cout << "Enter ID in 3 digits [Press 0 to return to Product Menu] : ";
-                cin >> idToAdd;
-                if(idToAdd == 0){
-                	return;
-				}
-                else if(idToAdd<000 || idToAdd>999) {
-                    cout << "ID must be exactly 3 digits!\n";
-                }
-            } while(idToAdd<000 || idToAdd>999);
+            cout << "Enter ID in 3 digits [Press 0 to return to Product Menu] : ";
+            getline(cin, idStr);
 
-            // Convert string ID to integer
-            newProduct.id = idToAdd;
-
-            // Check if the ID already exists
-            shellSort(products, productCount);
-            int prodIndex = jumpSearch(products, productCount, newProduct.id);
-            
-            if (prodIndex != -1) {
-                cout << "This Product ID already exists! Please re-enter.\n";
-                idExist = true;
+            // Check all digits
+            idToAdd = StringToInt(idStr);
+            if (idToAdd == -1) {
+                cout << "Invalid input! ID must be digits only.\n";
+                continue;
             }
-        } while (idExist);
+            if (idToAdd == 0) {
+                return;
+            }
+            if (idStr.length() != 3) {
+                cout << "ID must be exactly 3 digits!\n";
+                idToAdd = -1; // force re-entry
+                continue;
+            }
 
-        // If ID is valid, move forward with other product details
-        cout << "Enter Product Name      : ";
-        cin.ignore(); // Clear the buffer
-        getline(cin, newProduct.name);
-        cout << "Enter Price             : ";
-        cin >> newProduct.price;
-        cout << "Enter Description       : ";
-        cin.ignore();
-        getline(cin, newProduct.description);
+            // Check ID already exists
+            idExist = false;
+            for (int i = 0; i < productCount; i++) {
+                if (products[i].id == idToAdd) {
+                    cout << "This Product ID already exists! Please re-enter.\n";
+                    idExist = true;
+                    break;
+                }
+            }
+        } while (idToAdd == -1 || idExist);
 
-        // Add the new product to the array
+        newProduct.id = idToAdd;
+
+        // Enter Product Name
+        do {
+            cout << "Enter Product Name      : ";
+            getline(cin, newProduct.name);
+            if (isEmpty(newProduct.name)) {
+                cout << "Name cannot be empty or only spaces!\n";
+            }
+        } while (isEmpty(newProduct.name));
+
+        // Enter Price
+        string priceStr;
+        float price = -1.0f;
+        do {
+            cout << "Enter Price             : ";
+            getline(cin, priceStr);
+            price = StringToFloat(priceStr);
+            if (price < 0) {
+                cout << "Invalid price input. Only digits and at most one dot allowed.\n";
+            }
+        } while (price < 0);
+        newProduct.price = price;
+
+        // Enter Description
+        do {
+            cout << "Enter Description       : ";
+            getline(cin, newProduct.description);
+            if (isEmpty(newProduct.description)) {
+                cout << "Description cannot be empty or only spaces!\n";
+            }
+        } while (isEmpty(newProduct.description));
+
+        // Add new product
         products[productCount] = newProduct;
         productCount++;
         addCount++;
 
         // Save to raw file immediately
-        ofstream outFile("raw_product.txt", ios::app); // Append mode
+        ofstream outFile("raw_product.txt", ios::app);
         if (!outFile) {
             cout << "Error opening file for writing!" << endl;
             return;
         }
-        
-        outFile << setw(3) << setfill('0') << newProduct.id << " \"" 
-                << newProduct.name << "\" " 
-                << fixed << setprecision(2) << newProduct.price << " \"" 
-                << newProduct.description << "\"\n";
+
+        // Manually write ID with leading zeros
+        if (newProduct.id < 10) outFile << "00" << newProduct.id;
+        else if (newProduct.id < 100) outFile << "0" << newProduct.id;
+        else outFile << newProduct.id;
+
+        outFile << " \"" << newProduct.name << "\" ";
+        outFile.setf(ios::fixed);
+        outFile.precision(2);
+        outFile << newProduct.price << " \"" << newProduct.description << "\"\n";
         outFile.close();
 
         cout << "\nProduct added successfully!" << endl;
-        
-        if(addCount < MAX_ADD) {
-            cout << "Do you want to continue adding other products? [" << (MAX_ADD-addCount) << " times left]" << endl;
-            cout << "__________" << endl;
-            cout << "| 1. YES |" << endl;
-            cout << "| 2. NO  |" << endl;
-            cout << "|________|" << endl;
-            cout << "\nEnter your choice : ";
-            cin >> choice;
-        } else {
-            cout << "Maximum of 5 products added.\n";
-            choice = 2;
-        }
-    } while(choice == 1 && addCount < MAX_ADD);
 
-    // Wait for the user to press Enter before returning
+        if (addCount < MAX_ADD) {
+            cout << "Do you want to continue adding other products? [" << (MAX_ADD - addCount) << " times left]" << endl;
+            cout << "___________________________________________" << endl;
+            cout << "| Press 1 for YES / any other keys for NO |" << endl;
+            cout << "|_________________________________________|" << endl;
+            cout << "\nEnter your choice : ";
+            getline(cin, choice);
+        }
+        else {
+            cout << "Maximum of 5 products added.\n";
+            choice = "2";
+        }
+
+    } while (choice == "1" && addCount < MAX_ADD);
+
     cout << "Press [ENTER] to return to Product Menu.";
-    cin.ignore(); 
-    cin.get();     
+    cin.get();
     system("cls");
 }
 
 //----------------------------------------------------------------------------Delete PRODUCTS----------------------------------------------------------------------------
+void printIdWithLeadingZeros(int id) {
+    if (id < 10) cout << "00" << id;
+    else if (id < 100) cout << "0" << id;
+    else cout << id;
+}
+
 void deleteProducts(Product products[]) {
     productCount = loadProducts(products);
-    int idToDelete;
+    string inputStr;
+    int idToDelete = -1;
     bool productFound = false;
 
-    // Sort and display current products
-    // this is a temporary sorted products, i add this to avoid the data in raw_product.txt will be sorted and return to the product menu
+    // Temporary sorted copy
     Product sortedProducts[MAX_PRODUCTS];
-    // this for loop will assign the data in products into the temporary copy
-    for(int i = 0; i < productCount; i++) {
-    	sortedProducts[i] = products[i];
-	}
-	//sort and display the copy, NOT the actual raw_product.txt
-	shellSort(sortedProducts, productCount);
+    for (int i = 0; i < productCount; i++) {
+        sortedProducts[i] = products[i];
+    }
+    shellSort(sortedProducts, productCount);
+
     cout << "\nCurrent Products:\n";
-    for(int i = 0; i < productCount; i++) {
-        cout << setw(3) << setfill('0') << sortedProducts[i].id << " - " << sortedProducts[i].name << endl;
+    for (int i = 0; i < productCount; i++) {
+        printIdWithLeadingZeros(sortedProducts[i].id);
+        cout << " - " << sortedProducts[i].name << endl;
     }
 
     while (!productFound) {
-    	cout << "\nEnter ID in 3 digits [Press 0 to return to Product Menu] : ";
-        cin >> idToDelete;
-            if(idToDelete == 0){
-                return;
-			}
-        
-        //jump search in the temporary copy
+        cout << "\nEnter ID in 3 digits [Press 0 to return to Product Menu] : ";
+        getline(cin, inputStr);
+
+        // Convert string to int manually
+        idToDelete = StringToInt(inputStr);
+
+        if (idToDelete == -1) {
+            cout << "Invalid input! Please enter digits only.\n";
+            continue; // ask again
+        }
+
+        if (idToDelete == 0) {
+            return; // exit to menu
+        }
+
+        if (inputStr.length() != 3) {
+            cout << "ID must be exactly 3 digits!\n";
+            continue; // ask again
+        }
+
+        // Search in sortedProducts with jumpSearch
         int prodIndex = jumpSearch(sortedProducts, productCount, idToDelete);
-            
+
         if (prodIndex != -1) {
-        	//find the actual data in the unsorted array with linear search
-        	int actualID = -1;
-        	for(int i = 0; i < productCount; i++) {
-        		if(products[i].id == sortedProducts[prodIndex].id) {
-        			actualID = i;
-        			break;
-				}
-			}
-			
-        cout << "\nProduct Selected: " << setw(3) << setfill('0') << products[actualID].id << " - " << products[actualID].name << endl;
-            
-        cout << "\nAre you sure you want to delete this product? (1=Yes, 2=No): ";
-        int confirm;
-        cin >> confirm;
-            
-            if(confirm == 1) {
-                // Shift all elements after the index left by one
-                for(int i = actualID; i < productCount - 1; i++) {
-                    products[i] = products[i+1];
+            // Find actual index in unsorted products
+            int actualID = -1;
+            for (int i = 0; i < productCount; i++) {
+                if (products[i].id == sortedProducts[prodIndex].id) {
+                    actualID = i;
+                    break;
+                }
+            }
+
+            cout << "\nProduct Selected: ";
+            printIdWithLeadingZeros(products[actualID].id);
+            cout << " - " << products[actualID].name << endl;
+
+            cout << "\nAre you sure you want to delete this product? "<< endl;
+            cout << "___________________________________________" << endl;
+            cout << "| Press 1 for YES / any other keys for NO |" << endl;
+            cout << "|_________________________________________|" << endl;
+            cout << "Enter you choice: ";
+            string confirmString;
+            getline(cin, confirmString);
+
+            int confirm = StringToInt(confirmString);
+            if (confirm == 1) {
+                // Shift left to delete
+                for (int i = actualID; i < productCount - 1; i++) {
+                    products[i] = products[i + 1];
                 }
                 productCount--;
-                
-                // Save the new and unsorted data back to raw_product.txt
+
+                // Save to file
                 ofstream outFile("raw_product.txt");
                 if (!outFile) {
                     cout << "Error opening file for writing!" << endl;
                     return;
                 }
-                
-                for(int i = 0; i < productCount; i++) {
-                    outFile << setw(3) << setfill('0') << products[i].id << " \"" 
-                            << products[i].name << "\" " 
-                            << fixed << setprecision(2) << products[i].price << " \"" 
+
+                for (int i = 0; i < productCount; i++) {
+                    // Print ID with leading zeros manually
+                    if (products[i].id < 10) outFile << "00" << products[i].id;
+                    else if (products[i].id < 100) outFile << "0" << products[i].id;
+                    else outFile << products[i].id;
+
+                    outFile << " \"" << products[i].name << "\" "
+                            << fixed << setprecision(2) << products[i].price << " \""
                             << products[i].description << "\"\n";
                 }
                 outFile.close();
-                
-                cout << "\nProduct deleted successfully!";
+
+                cout << "\nProduct deleted successfully!\n";
                 productFound = true;
             } else {
                 cout << "\nDeletion cancelled.\n";
@@ -916,17 +1017,52 @@ void deleteProducts(Product products[]) {
         }
     }
 
-    // Wait for the user to press Enter before returning
     cout << "Press [ENTER] to return to Product Menu.";
-    cin.ignore();
-    cin.get();     
-    return;
+    cin.get();
+}
+
+//-------------------------------------------------------- SEARCH PRODUCT ----------------------------------------------------
+void searchProducts(Product products[]){
+	productCount = loadProducts(products);
+	string IDToSearchString;
+			
+	cout << "\nEnter Product ID to search / 0 to return to Product Menu: ";
+	getline(cin,IDToSearchString);
+	
+	if(IDToSearchString=="0"){
+		productMenu();
+	}
+			
+	int IDToSearch = StringToInt(IDToSearchString);
+			    
+	shellSort(products, productCount);
+	int prodIndex = jumpSearch(products, productCount, IDToSearch);
+			
+	if (prodIndex != -1)
+	{
+		cout << "\nProduct Found:" << endl;
+		cout << "==================================================================" << endl;
+		cout << "ID: " << products[prodIndex].id << endl;
+		cout << "Name: " << products[prodIndex].name << endl;
+		cout << "Price: " << products[prodIndex].price << endl;
+		cout << "Description:" << endl;
+	    printWrappedText(products[prodIndex].description);
+	    cout << "==================================================================" << endl;
+	}
+	else
+	{
+		cout << "Product not found.\n";
+	}
+	cout << "Press [ENTER] to Retry.";
+	cin.get();  
+	system("cls");
+	searchProducts(products);  
 }
 
 //-------------------------------------------------------- PRODUCT MENU ----------------------------------------------------
 void productMenu(){
 	Product products[MAX_PRODUCTS];
-	int choice;
+	string choice;
 
 	do {
 		//display unsorted products first
@@ -953,81 +1089,55 @@ void productMenu(){
         cout << "|6. Return to Team B Menu                        |" << endl;
         cout << "|________________________________________________|" << endl;
         cout << "Enter your choice: ";
-        cin >> choice;
+        getline(cin,choice);
         
-        switch(choice) {
-        	case 1:
-                system("cls");
-                addProducts(products);
-                break;
-            case 2:
-                system("cls");
-                deleteProducts(products);
-                break;
-             case 3:
-            {
-            	system("cls");
-            	productCount = loadProducts(products);
-			    int searchProdID;
-			
-			    cout << "\nEnter Product ID to search: ";
-			    cin >> searchProdID;
-			    
-			    shellSort(products, productCount);
-			    int prodIndex = jumpSearch(products, productCount, searchProdID);
-			
-			    if (prodIndex != -1)
-			    {
-			    	cout << "\nProduct Found:" << endl;
-			    	cout << "==================================================================" << endl;
-					cout << "ID: " << products[prodIndex].id << endl;
-					cout << "Name: " << products[prodIndex].name << endl;
-					cout << "Price: " << products[prodIndex].price << endl;
-					cout << "Description:" << endl;
-			        printWrappedText(products[prodIndex].description);
-			        cout << "==================================================================" << endl;
-			    }
-			    else
-			    {
-					cout << "Product not found.\n";
-				}
-				cout << "Press [ENTER] to Refresh.";
-			    cin.ignore();
-			    cin.get();     
-			    break;
-			}
-            case 4:
-                system("cls");
-                shellSort(products, productCount);
-                cout << "Products sorted by ID:\n";
-                for (int i = 0; i < productCount; i++) {
-                    cout << "\nID   : " << setw(3) << setfill('0') << products[i].id << endl;
-                    cout << "Name : " << products[i].name << endl;
-                    cout << "Price: " << products[i].price << endl;
-                    cout << "\n";
-                    printWrappedText(products[i].description);
-                    cout << "_________________________________________________________________________________________" << endl;
-                }
-                cout << "\nPress [Enter] to continue...";
-		        cin.ignore();
-		        cin.get();
-                break;
-			case 5:
-	            system("cls");
-	            saveSortedProducts(products, productCount);
-	            break;
-	        case 6:
-                system("cls");
-                teamBMenu();
-                return;
-            default:
-                cout << "Invalid choice. Please try again.\n";
-                break;   
+        if(choice=="1"){
+        	system("cls");
+            addProducts(products);
 		}
+        else if(choice=="2"){
+        	system("cls");
+            deleteProducts(products);
+		}
+        else if(choice=="3"){
+        	system("cls");
+        	searchProducts(products);
+		}
+		else if(choice=="4"){
+			system("cls");
+            shellSort(products, productCount);
+            cout << "Products sorted by ID:\n";
+            for (int i = 0; i < productCount; i++) {
+                cout << "\nID   : " << setw(3) << setfill('0') << products[i].id << endl;
+                cout << "Name : " << products[i].name << endl;
+                cout << "Price: " << products[i].price << endl;
+                cout << "\n";
+                printWrappedText(products[i].description);
+                cout << "_________________________________________________________________________________________" << endl;
+            }
+            cout << "\nPress [Enter] to return to Product Menu ";
+		    cin.get();
+		}
+    	else if(choice=="5"){
+    		system("cls");
+	        saveSortedProducts(products, productCount);
+		}
+		else if(choice=="6"){
+			system("cls");
+            teamBMenu();
+            return;
+		}
+	    else{
+	    	cout << "Invalid input. Please enter a number between 1 and 5.\n";
+		    cout << "Press [Enter] to continue...";
+		    cin.get();
+		    system("cls");
+		    productMenu();
+		}
+            
         system("cls");
 	}while (true);
 }
-
 //---------------------- function to wrapped the description----------
 void printWrappedText(const string& text) {
 	int lineLength = 60;
