@@ -31,10 +31,10 @@ struct Product {
 };
 
 struct Customer {
-    string id;
-    string name;
-    string email;
-    string phone;
+    string cus_id;
+    string cus_name;
+    string cus_email;
+    string cus_phone;
 };
 
 struct Admin {
@@ -68,15 +68,28 @@ class HashCustomer {
 		Node* table[TABLE_SIZE];// Hash table array for customer data
 		
 		// ID validate
-		bool isValidID(const string& id){
-			if (id.length() == 0) return false;
-
-		    for (int i = 0; i < id.length(); i++){
-		        if (id[i] < '0' || id[i] > '9'){
-		            return false; 
+		bool isValidID(const string& id) {
+		    int length = 0;
+		
+		    while (id[length] != '\0') {
+		        length++;
+		    }
+		
+		    if (length != 4) {
+		        return false;
+		    }
+		
+		    if (id[0] != '1') {
+		        return false;
+		    }
+		
+		    for (int i = 0; i < length; i++) {
+		        if (id[i] < '0' || id[i] > '9') {
+		            return false;
 		        }
 		    }
-		    return true; 
+		
+		    return true;
 		}
 		
 		// Id existing validate
@@ -120,7 +133,7 @@ class HashCustomer {
 		    for (int i = 0; i < TABLE_SIZE; i++){
 		        Node* current = table[i];
 		        while (current != NULL) {
-		            if (current->data.name == name){
+		            if (current->data.cus_name == name){
 		                return true;
 		            }
 		            current = current->next;
@@ -239,7 +252,7 @@ class HashCustomer {
 		    }
 		
 			// Insert to hash table
-		    int index = hashFunction(customer.id);
+		    int index = hashFunction(customer.cus_id);
 		    newNode = new Node;
 		    newNode->data = customer;
 		    newNode->next = table[index];
@@ -252,7 +265,7 @@ class HashCustomer {
 	        Node* current = table[index];
 	        
 	        while(current != NULL) {
-	            if(current->data.id == customerId) {
+	            if(current->data.cus_id == customerId) {
 	                return &(current->data);
 	            }
 	            current = current->next;
@@ -264,7 +277,7 @@ class HashCustomer {
 		Customer parseCustomer(const string& line) {
 			Customer c;
 			stringstream ss(line);
-			ss >> c.id >> c.name >> c.email >> c.phone;
+			ss >> c.cus_id >> c.cus_name >> c.cus_email >> c.cus_phone;
 			return c;
 		}
 	
@@ -283,10 +296,10 @@ class HashCustomer {
 	
 			Node* current = front;
 			while (current != NULL) {
-				file << current->data.id << " "
-					 << current->data.name << " "
-					 << current->data.email << " "
-					 << current->data.phone << endl;
+				file << current->data.cus_id << " "
+					 << current->data.cus_name << " "
+					 << current->data.cus_email << " "
+					 << current->data.cus_phone << endl;
 				current = current->next;
 			}
 	
@@ -317,10 +330,10 @@ class HashCustomer {
 			Node* current = front;
 			int i = 1;
 			while (current != NULL) {
-				cout << i << "." << current->data.id << " " 
-								 << current->data.name << " " 
-								 << current->data.email << " "
-								 << current->data.phone << endl;
+				cout << i << "." << current->data.cus_id << " " 
+								 << current->data.cus_name << " " 
+								 << current->data.cus_email << " "
+								 << current->data.cus_phone << endl;
 				current = current->next;
 				i++;
 			}
@@ -363,40 +376,40 @@ class HashCustomer {
 						// Add customer information and validate customer details
 						do{
 							cout << "Enter customer ID : ";
-							getline(cin, cus.id);
-							if (!isValidID(cus.id)){
+							getline(cin, cus.cus_id);
+							if (!isValidID(cus.cus_id)){
 						        cout << "ID must contain digits only! Please try again.\n";
-						    }else if (isIDExists(cus.id)){
+						    }else if (isIDExists(cus.cus_id)){
 						        cout << "This ID already exists! Please enter a different ID.\n";
 						    }
-						}while (!isValidID(cus.id) || isIDExists(cus.id));
+						}while (!isValidID(cus.cus_id) || isIDExists(cus.cus_id));
 						
 						do{
 							cout << "Enter customer name : ";
-							getline(cin, cus.name);
-							if (!isValidName(cus.name)){
+							getline(cin, cus.cus_name);
+							if (!isValidName(cus.cus_name)){
 						        cout << "Invalid name! Only letters and spaces are allowed, name must be 3 to 30 characters.\n";
-						    }else if (isNameExists(cus.name)){
+						    }else if (isNameExists(cus.cus_name)){
 						        cout << "This name already exists! Please enter a different name.\n";
 						    }
-						}while (!isValidName(cus.name) || isNameExists(cus.name));
+						}while (!isValidName(cus.cus_name) || isNameExists(cus.cus_name));
 						
 						
 						do{
 							cout << "Enter customer phone number (e.g. 010-1234567) : ";
-							getline(cin, cus.phone);
-							if (!isValidPhone(cus.phone)){
+							getline(cin, cus.cus_phone);
+							if (!isValidPhone(cus.cus_phone)){
 								cout << "Invalid phone number! Make sure it follows the format 010-1234567 and contains only digits with 10 or 11 numbers.\n";
 							}
-						}while(!isValidPhone(cus.phone));
+						}while(!isValidPhone(cus.cus_phone));
 						
 						do{
 							cout << "Enter customer email (e.g. john@example.com) : ";
-							getline(cin, cus.email);
-							if (!isValidEmail(cus.email)){
+							getline(cin, cus.cus_email);
+							if (!isValidEmail(cus.cus_email)){
 								cout << "Invalid email address! Make sure it contains '@' and a '.' and they are not at the beginning or end.\n";
 							}
-						}while(!isValidEmail(cus.email));
+						}while(!isValidEmail(cus.cus_email));
 						
 						insert(cus);
 						cout << "\nPress [Enter] back to menu...";
@@ -416,10 +429,10 @@ class HashCustomer {
 	                    Customer* foundCustomer = search(searchID);
 	                    if (foundCustomer != NULL) {
 	                        cout << "\nCustomer Found:" << endl;
-	                        cout << "ID: " << foundCustomer->id << endl;
-	                        cout << "Name: " << foundCustomer->name << endl;
-	                        cout << "Email: " << foundCustomer->email << endl;
-	                        cout << "Phone: " << foundCustomer->phone << endl;
+	                        cout << "ID: " << foundCustomer->cus_id << endl;
+	                        cout << "Name: " << foundCustomer->cus_name << endl;
+	                        cout << "Email: " << foundCustomer->cus_email << endl;
+	                        cout << "Phone: " << foundCustomer->cus_phone << endl;
 	                    } else {
 	                        cout << "\nCustomer not found!" << endl;
 	                    }
@@ -471,15 +484,28 @@ class HashAdmin {
 		Node* table[TABLE_SIZE];// Hash table array for customer data
 		
 		// ID validate
-		bool isValidID(const string& id){
-			if (id.length() == 0) return false;
-
-		    for (int i = 0; i < id.length(); i++){
-		        if (id[i] < '0' || id[i] > '9'){
-		            return false; 
+		bool isValidID(const string& id) {
+		    int length = 0;
+		    
+		    while (id[length] != '\0') {
+		        length++;
+		    }
+		
+		    if (length != 3) {
+		        return false;
+		    }
+		    
+		    if (id[0] != '1') {
+		        return false;
+		    }
+		
+		    for (int i = 0; i < length; i++) {
+		        if (id[i] < '0' || id[i] > '9') {
+		            return false;
 		        }
 		    }
-		    return true; 
+		
+		    return true;
 		}
 		
 		// Id existing validate
