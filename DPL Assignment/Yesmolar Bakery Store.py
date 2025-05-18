@@ -61,6 +61,14 @@ class CartItem:
         self.total = total if total else (self.price * quantity)
         self.status = status if status else (product.status if product else "")
 
+class Feedback:
+    def __init__(self, name, rating, comment, timestamp):
+        self.name = name
+        self.rating = int(rating)
+        self.comment = comment
+        self.timestamp = timestamp
+        self.datetime = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
+
 # Global variables
 products = []
 members = []
@@ -358,7 +366,7 @@ def signup():
             print("Password must contain at least one digit!")
             continue
         
-        confirm_password = input("\nConfrim your password: ")
+        confirm_password = input("\nConfirm your password: ")
         if confirm_password != password:
             print("Passwords do not match!")
             continue
@@ -510,7 +518,7 @@ def login():
                 attempts = 0
                 while attempts < 3:
                     if password == stored_password:
-                        print("Logged in Successfully!")
+                        print("\nLogged in Successfully!")
                         logged_in_member = Member(
                             full_name=lines[i + 1],
                             member_id=lines[i],
@@ -533,7 +541,7 @@ def login():
                 clear_screen()
                 return False
                     
-        print("Email not found.")
+        print("\nEmail not found.")
         input("\nPress [ENTER] to continue.")
         clear_screen()
         return False
@@ -651,7 +659,7 @@ def edit_member_profile():
                         letter_count += 1
 
                 if not is_valid or letter_count < 2:
-                    print("\nInvalid name. Must contain only letters and spaces, with at least 2 letters.")
+                    print("Invalid name. Must contain only letters and spaces, with at least 2 letters.")
                     continue
 
                 cleaned_new_name = ""
@@ -680,7 +688,7 @@ def edit_member_profile():
                         break
 
                 if name_exists:
-                    print("\nThis name is already registered. Please use a different name!")
+                    print("This name is already registered. Please use a different name!")
                     continue
 
                 logged_in_member.full_name = new_name
@@ -702,7 +710,7 @@ def edit_member_profile():
                         has_dot = True
 
                 if not has_at or not has_dot:
-                    print("\nInvalid email format. Must contain @ and .")
+                    print("Invalid email format. Must contain @ and .")
                     continue
 
                 cleaned_new_email = ""
@@ -731,7 +739,7 @@ def edit_member_profile():
                         break
 
                 if email_exists:
-                    print("\nThis email is already registered. Please use a different email!")
+                    print("This email is already registered. Please use a different email!")
                     continue
 
                 logged_in_member.email = new_email
@@ -746,7 +754,7 @@ def edit_member_profile():
                 logged_in_member.password = input("\nEnter your new password (example: Xuanting123): ")
 
                 if len(logged_in_member.password) < 8:
-                    print("\nPassword must be at least 8 characters!")
+                    print("Password must be at least 8 characters!")
                     continue
 
                 upper = False
@@ -762,18 +770,18 @@ def edit_member_profile():
                         digit = True
 
                 if not upper:
-                    print("\nPassword must contain at least one uppercase letter!")
+                    print("Password must contain at least one uppercase letter!")
                     continue
                 if not lower:
-                    print("\nPassword must contain at least one lowercase letter!")
+                    print("Password must contain at least one lowercase letter!")
                     continue
                 if not digit:
-                    print("\nPassword must contain at least one digit!")
+                    print("Password must contain at least one digit!")
                     continue
                 
-                confirm_password = input("\nConfrim your password: ")
+                confirm_password = input("\nConfirm your password: ")
                 if confirm_password != logged_in_member.password:
-                    print("\nPasswords do not match!")
+                    print("Passwords do not match!")
                     continue
             
                 update_member(logged_in_member)
@@ -787,7 +795,7 @@ def edit_member_profile():
                     logged_in_member.age = input("\nEnter new age: ")
 
                     if len(logged_in_member.age) != 2:
-                        print("\nAge must be exactly 2 digits!")
+                        print("Age must be exactly 2 digits!")
                         continue
 
                     is_digit = True
@@ -796,18 +804,18 @@ def edit_member_profile():
                             is_digit = False
 
                     if not is_digit:
-                        print("\nAge must contain only digits!")
+                        print("Age must contain only digits!")
                         continue
 
                     if logged_in_member.age[0] == '0':
-                        print("\nAge cannot start with 0!")
+                        print("Age cannot start with 0!")
                         continue
 
                     update_member(logged_in_member)
                     print("\nAge updated successfully!")
                     break
             except ValueError:
-                print("\nInvalid input! Age must be a number.")
+                print("Invalid input! Age must be a number.")
             input("\nPress [ENTER] to continue.")
 
         elif choice == "6":
@@ -833,7 +841,7 @@ def edit_member_profile():
                         is_valid = True
 
                 if not is_valid:
-                    print("\nPlease enter 'Male', 'Female', 'male' or 'female'!")
+                    print("Please enter 'Male', 'Female', 'male' or 'female'!")
                     continue
 
                 update_member(logged_in_member)
@@ -846,7 +854,7 @@ def edit_member_profile():
                 logged_in_member.contact  = input("\nEnter your contact number (example: 012-34567890): ")
 
                 if len(logged_in_member.contact) < 4 or logged_in_member.contact[3] != '-':
-                    print("\nFormat must be like 012-34567890 with a dash at the 4th position!")
+                    print("Format must be like 012-34567890 with a dash at the 4th position!")
                     continue
 
                 part1 = ""
@@ -859,7 +867,7 @@ def edit_member_profile():
 
 
                 if not (part1[0] == '0' and part1[1] == '1'):
-                    print("\nPhone number must start with '01'!")
+                    print("Phone number must start with '01'!")
                     continue
 
                 combined = part1 + part2
@@ -869,11 +877,11 @@ def edit_member_profile():
                         only_digits = False
                         break
                 if not only_digits:
-                    print("\nPhone number cannot contain symbols or space!")
+                    print("Phone number cannot contain symbols or space!")
                     continue
 
                 if len(combined) != 10 and len(combined) != 11:
-                    print("\nPhone number must be 10 or 11 digits!")
+                    print("Phone number must be 10 or 11 digits!")
                     continue
     
                 update_member(logged_in_member)
@@ -921,7 +929,7 @@ def admin_login():
                 attempts = 0
                 while attempts < 3:
                     if password == stored_password:
-                        print("Logged in Successfully!")
+                        print("\nLogged in Successfully!")
                         print(f"Welcome {stored_position}!")
                         logged_in_admin = Admin(
                             name=lines[i],
@@ -1048,7 +1056,7 @@ def admin_profile():
         if choice == "Y" or choice == "y" or choice == "yes":
             edit_admin_profile()
         elif choice == "N" or choice == "n" or choice == "no":
-            input("Press [Enter] to return to the admin menu.")
+            input("\nPress [Enter] to return to the admin menu.")
             clear_screen()
             return admin_menu()
         else:
@@ -1074,7 +1082,7 @@ def edit_admin_profile():
 
         if choice == "1":
             while True:
-                new_name = input("Enter new Full Name: ")
+                new_name = input("\nEnter new Full Name: ")
 
                 letter_count = 0
                 is_valid = True
@@ -1132,17 +1140,17 @@ def edit_admin_profile():
                 original_name = logged_in_admin.name
                 logged_in_admin.name = new_name
                 update_admin(logged_in_admin, original_name)
-                print("Name updated successfully!\n")
-                input("Press [ENTER] to continue.")
+                print("\nName updated successfully!")
+                input("\nPress [ENTER] to continue.")
                 break
 
         elif choice == "2":
             while True:
                 logged_in_admin.password = ""
-                logged_in_admin.password = input("Enter your new password (example: Xuanting123): ")
+                logged_in_admin.password = input("\nEnter your new password (example: Xuanting123): ")
 
                 if len(logged_in_admin.password) < 8:
-                    print("Password must be at least 8 characters!\n")
+                    print("Password must be at least 8 characters!")
                     continue
 
                 upper = False
@@ -1158,28 +1166,28 @@ def edit_admin_profile():
                         digit = True
 
                 if not upper:
-                    print("Password must contain at least one uppercase letter!\n")
+                    print("Password must contain at least one uppercase letter!")
                     continue
                 if not lower:
-                    print("Password must contain at least one lowercase letter!\n")
+                    print("Password must contain at least one lowercase letter!")
                     continue
                 if not digit:
                     print("Password must contain at least one digit!")
                     continue
                 
-                confirm_password = input("Confirm your password: ")
+                confirm_password = input("\nConfirm your password: ")
                 if confirm_password != logged_in_admin.password:
-                    print("Passwords do not match!")
+                    print("\nPasswords do not match!")
                     continue
             
                 update_admin(logged_in_admin)
-                print("Password updated successfully!\n")
-                input("Press [ENTER] to continue.")
+                print("\nPassword updated successfully!")
+                input("\nPress [ENTER] to continue.")
                 break
 
         elif choice == "3":
             while True:
-                logged_in_admin.contact  = input("Enter your contact number (example: 012-34567890): ")
+                logged_in_admin.contact  = input("\nEnter your contact number (example: 012-34567890): ")
 
                 if len(logged_in_admin.contact) < 4 or logged_in_admin.contact[3] != '-':
                     print("Format must be like 012-34567890 with a dash at the 4th position!")
@@ -1195,7 +1203,7 @@ def edit_admin_profile():
 
 
                 if not (part1[0] == '0' and part1[1] == '1'):
-                    print("Phone number must start with '01'!\n")
+                    print("Phone number must start with '01'!")
                     continue
 
                 combined = part1 + part2
@@ -1205,16 +1213,16 @@ def edit_admin_profile():
                         only_digits = False
                         break
                 if not only_digits:
-                    print("Phone number cannot contain symbols or space!\n")
+                    print("Phone number cannot contain symbols or space!")
                     continue
 
                 if len(combined) != 10 and len(combined) != 11:
-                    print("Phone number must be 10 or 11 digits!\n")
+                    print("Phone number must be 10 or 11 digits!")
                     continue
     
                 update_admin(logged_in_admin)
-                print("Contact Number updated successfully!\n")
-                input("Press [ENTER] to continue.")
+                print("\nContact Number updated successfully!")
+                input("\nPress [ENTER] to continue.")
                 break
         elif choice == "4":
             input("\nYour position cannot be edited. Press [ENTER] to continue.")
@@ -1231,7 +1239,6 @@ def filter_feedback_rating():
     try:
         rate_filter = int(input("Enter the rating level to filter by (1 to 5): "))
         if 1 <= rate_filter <= 5:       
-            clear_screen()
             print("===========================================================================")
             print(f"|                    Filtered Feedback (Rating = {rate_filter})                       |")
             print("===========================================================================")
@@ -1280,13 +1287,7 @@ def sort_feedback_rating():
                     parts = line.split(', ', 3)
                     if len(parts) == 4:
                         name, rating, comment, timestamp = parts
-                        feedback_rating.append({
-                            'name': name,
-                            'rating': int(rating),
-                            'comment': comment,
-                            'timestamp': timestamp,
-                            'datetime': datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
-                        })
+                        feedback_rating.append(Feedback(name, rating, comment, timestamp))
 
         if not feedback_rating:
             print("No feedback records found to sort.")
@@ -1304,29 +1305,25 @@ def sort_feedback_rating():
         choice = input("\nEnter your choice (1-5): ")
 
         if choice == '1':
-            clear_screen()
             print("============================================================================")
             print("|            SORTED FEEDBACK & RATING (Rating - Highest First)             |")
             print("============================================================================")
-            feedback_rating.sort(key=lambda x: x['rating'], reverse=True)
+            bubble_sort(feedback_rating, key='rating', reverse=True)
         elif choice == '2':
-            clear_screen()
             print("============================================================================")
             print("|            SORTED FEEDBACK & RATING (Rating - Lowest First)              |")
             print("============================================================================")
-            feedback_rating.sort(key=lambda x: x['rating'])
+            bubble_sort(feedback_rating, key='rating', reverse=False)
         elif choice == '3':
-            clear_screen()
             print("============================================================================")
             print("|             SORTED FEEDBACK & RATING (Date – Newest First)               |")
             print("============================================================================")
-            feedback_rating.sort(key=lambda x: x['datetime'], reverse=True)
+            bubble_sort(feedback_rating, key='datetime', reverse=True)
         elif choice == '4':
-            clear_screen()
             print("============================================================================")
             print("|             SORTED FEEDBACK & RATING (Date – Oldest First)               |")
             print("============================================================================")
-            feedback_rating.sort(key=lambda x: x['datetime'])
+            bubble_sort(feedback_rating, key='datetime', reverse=False)
         elif choice == '5':
             input("\nPress [ENTER] to return rating menu.")
             clear_screen()
@@ -1336,10 +1333,10 @@ def sort_feedback_rating():
             return sort_feedback_rating()
 
         for record in feedback_rating:
-            print(f"| Name         : {record['name']:<58}|")
-            print(f"| Rating       : {record['rating']:<58}|")
-            print(f"| Comment      : {record['comment']:<58}|")
-            print(f"| Date & Time  : {record['timestamp']:<58}|")
+            print(f"| Name         : {record.name:<58}|")
+            print(f"| Rating       : {record.rating:<58}|")
+            print(f"| Comment      : {record.comment:<58}|")
+            print(f"| Date & Time  : {record.timestamp:<58}|")
             print("----------------------------------------------------------------------------")
 
         input("\nPress [ENTER] to return to feedback menu.")
@@ -1606,7 +1603,7 @@ def add_product(products, category):
     
     # Get product ID
     while True:
-        new_product.product_id = input("Enter ID in 3 digits: ")
+        new_product.product_id = input("\nEnter ID in 3 digits: ")
         if get_length(new_product.product_id) != 3:
             print("ID must be exactly 3 digits!")
             continue
@@ -1622,7 +1619,7 @@ def add_product(products, category):
     
     # Get product name
     while True:
-        new_product.name = input("Enter product name: ").strip()
+        new_product.name = input("\nEnter product name: ").strip()
         if get_length(new_product.name) == 0:
             print("Name cannot be empty!")
             continue
@@ -1630,7 +1627,7 @@ def add_product(products, category):
     
     # Get product price
     while True:
-        price_input = input("Enter price: ")
+        price_input = input("\nEnter price: ")
         try:
             new_product.price = float(price_input)
             if new_product.price <= 0:
@@ -1642,7 +1639,7 @@ def add_product(products, category):
     
     # Get product stock
     while True:
-        stock_input = input("Enter stock quantity: ")
+        stock_input = input("\nEnter stock quantity: ")
         try:
             new_product.stock = int(stock_input)
             if new_product.stock < 0:
@@ -1654,7 +1651,7 @@ def add_product(products, category):
     
     # Get product status
     while True:
-        new_product.status = input("Enter status [Active/Inactive]: ").capitalize()
+        new_product.status = input("\nEnter status [Active/Inactive]: ").capitalize()
         if new_product.status not in ["Active", "Inactive"]:
             print("Status must be either 'Active' or 'Inactive'!")
             continue
@@ -1683,15 +1680,15 @@ def edit_product(products, category):
     product_to_edit = jump_search(products, product_id, key='product_id')
     
     if not product_to_edit:
-        print("\nNo product found with that ID in this category!")
-        input("Press [ENTER] to continue.")
+        print("No product found with that ID in this category!")
+        input("\nPress [ENTER] to continue.")
         return
     
     print(f"\nEditing product: {product_to_edit.name}")
     
     # Edit name
     while True:
-        new_name = input(f"Enter new name [{product_to_edit.name}]: ").strip()
+        new_name = input(f"\nEnter new name [{product_to_edit.name}]: ").strip()
         if get_length(new_name) == 0:
             new_name = product_to_edit.name
             break
@@ -1702,7 +1699,7 @@ def edit_product(products, category):
     
     # Edit price
     while True:
-        price_input = input(f"Enter new price [{product_to_edit.price}]: ").strip()
+        price_input = input(f"\nsEnter new price [{product_to_edit.price}]: ").strip()
         if get_length(price_input) == 0:
             new_price = product_to_edit.price
             break
@@ -1717,7 +1714,7 @@ def edit_product(products, category):
     
     # Edit stock
     while True:
-        stock_input = input(f"Enter new stock [{product_to_edit.stock}]: ").strip()
+        stock_input = input(f"\nEnter new stock [{product_to_edit.stock}]: ").strip()
         if get_length(stock_input) == 0:
             new_stock = product_to_edit.stock
             break
@@ -1732,7 +1729,7 @@ def edit_product(products, category):
     
     # Edit status
     while True:
-        status_input = input(f"Enter new status [{product_to_edit.status}] (Active/Inactive): ").capitalize().strip()
+        status_input = input(f"\nEnter new status [{product_to_edit.status}] (Active/Inactive): ").capitalize().strip()
         if get_length(status_input) == 0:
             new_status = product_to_edit.status
             break
@@ -1769,8 +1766,8 @@ def restock_product(products, category):
     product_to_restock = jump_search(products, product_id, key='product_id')
     
     if not product_to_restock:
-        print("\nNo product found with that ID in this category!")
-        input("Press [ENTER] to continue.")
+        print("No product found with that ID in this category!")
+        input("\nPress [ENTER] to continue.")
         return
     
     print(f"\nRestocking product: {product_to_restock.name}")
@@ -1778,7 +1775,7 @@ def restock_product(products, category):
     
     # Get additional stock
     while True:
-        add_stock_input = input("Enter quantity to add: ").strip()
+        add_stock_input = input("\nEnter quantity to add: ").strip()
         try:
             add_stock = int(add_stock_input)
             if add_stock <= 0:
@@ -1812,7 +1809,7 @@ def feedback_rating():
     print("===========================================================================")
 
     while True:
-        rate_input = input("Enter your rating for our system (1 to 5), [R] to return: ").strip()
+        rate_input = input("\nEnter your rating for our system (1 to 5), [R] to return: ").strip()
 
         if rate_input in ["R", "r"]:
             clear_screen()
@@ -1827,7 +1824,7 @@ def feedback_rating():
         else:
             print("Invalid input. Please enter a number between 1 and 5, or 'R' to return.\n")
 
-    comment = input("Enter your comment (optional): ")
+    comment = input("\nEnter your comment (optional): ")
     print("\nThank you for your feedback!")
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -2045,7 +2042,7 @@ def delete_cart(cart):
     cart[:] = new_cart  
 
     if save_cart(cart) and update_product_file():
-        print(f"'{deleted_item.name}' removed from cart successfully!\n")
+        print(f"\n'{deleted_item.name}' removed from cart successfully!\n")
     else:
         cart[:] = original_cart  
         for product in products:
@@ -2170,7 +2167,7 @@ def edit_cart(cart):
                 selected_item.total = selected_item.price * new_qty
                 
                 if save_cart(cart) and update_product_file():
-                    print("Cart updated successfully!\n")
+                    print("\nCart updated successfully!\n")
                 else:
                     product.stock += diff
                     selected_item.quantity -= diff
@@ -2347,7 +2344,7 @@ def proceed_to_payment(products, cart):
         debit_card_payment(payable_items, actual_total)
 
 def debit_card_payment(cart, total_payment):
-    card_number = input("Credit card number (13-16 digits): ").strip()
+    card_number = input("\nCredit card number (13-16 digits): ").strip()
     
     while not is_valid_card_number(card_number):
         card_number = input("\nInvalid number. Please re-enter credit card number (13-16 digits): ").strip()
@@ -3339,10 +3336,8 @@ def view_sales_report():
                             category_count[category] += quantity
                             
         clear_screen()
-        print
-        
         print("===========================================================================")
-        print("|                             ORDER HISTORY                               |")
+        print("|                             SALES REPORT                                |")
         print("===========================================================================")
         
         if not category_sales:
@@ -3456,9 +3451,9 @@ def view_member_list(status_filter):
             print("---------------------------------------------------------------------------")
         
         while True:
-            search_choice = input("\nDo you want to search member by ID? (Y/N/C to cancel): ").upper().strip()
+            search_choice = input("\nDo you want to search member by ID? (Y/N to return): ").upper().strip()
             
-            if search_choice == 'C' or search_choice == 'N':
+            if search_choice == 'N':
                 return
             
             if search_choice == 'Y':
@@ -3488,13 +3483,13 @@ def view_member_list(status_filter):
                         input("\nPress [ENTER] to continue.")
                         break
                     else:
-                        print(f"\nMember with ID {search_id} not found in {status_filter.lower()} members.")
+                        print(f"Member with ID {search_id} not found in {status_filter.lower()} members.")
                         continue
                 
                 clear_screen()
                 break
             
-            print("Invalid choice. Please enter Y (Yes), N (No), or C (Cancel).")
+            print("Invalid choice. Please enter Y (Yes), or N (No).")
             continue
             
     except FileNotFoundError:
@@ -3566,7 +3561,7 @@ def change_member_status():
                 for member_data in members:
                     file.write("\n".join(member_data) + "\n\n")
                  
-            print(f"Member {chosen_id} status changed to {new_status} successfully.")
+            print(f"\nMember {chosen_id} status changed to {new_status} successfully.")
         else:
             print("Member not found.")
         
@@ -3668,7 +3663,7 @@ def view_admin_list(status_filter):
             if search_choice == 'Y':
                 bubble_sort(filtered_admins, key='name')
                 
-                search_name = input("Enter Admin Name to search: ").strip()
+                search_name = input("\nEnter Admin Name to search: ").strip()
                 found_admin = jump_search(filtered_admins, search_name, key='name')
                 
                 if found_admin:
@@ -3725,7 +3720,7 @@ def add_new_admin():
         break
     
     while True:
-        password = input("Enter password (min 8 chars with uppercase, lowercase, number): ").strip()
+        password = input("\nEnter password: ").strip()
         if len(password) < 8:
             print("Password must be at least 8 characters.")
             continue
@@ -3746,7 +3741,7 @@ def add_new_admin():
               print("Password must contain at least one uppercase letter, one lowercase letter, and one number.")
               continue
           
-        confirm = input("Confirm password: ").strip()
+        confirm = input("\nConfirm password: ").strip()
         if password != confirm:
             print("Password doesn't match.")
             continue
@@ -3754,7 +3749,7 @@ def add_new_admin():
         break
     
     while True:
-        contact = input("Enter contact number (e.g., 012-3456789 or 012-34567890): ").strip()
+        contact = input("\nEnter contact number: ").strip()
         if len(contact) < 4 or contact[3] != '-':
             print("Format must be like 012-3456789 with a '-' .")
             continue
