@@ -3021,8 +3021,7 @@ def view_dashboard():
                     product_count += 1
                     parts = line.split(',')
                     if len(parts) >= 6:
-                        stock = int(parts[4]) if parts[4].isdigit() else 0
-                        
+                        stock = int(parts[4]) if parts[4].isdigit() else 0       
                         status = parts[5]
                         if status == "Active":
                             active_product += 1
@@ -3057,22 +3056,41 @@ def view_dashboard():
     
     order_count = 0
     total_sales = 0.0
+    monthly_sale = {"01": 0.0, "02": 0.0, "03": 0.0, "04": 0.0, "05": 0.0, "06": 0.0, "07": 0.0, "08": 0.0, "09": 0.0, "10": 0.0, "11": 0.0, "12": 0.0, }
+    month_name = {"01":"January", "02":"February", "03":"March", "04":"April", "05":"May", "06":"June", "07":"July", "08":"August", "09":"September" ,"10":"October" ,"11":"November", "12":"December"}
     
     try:
         with open(PURCHASE_HISTORY_FILE, 'r') as file:
             content = file.read()
             records = content.split("\n\n")
-            order_count = len([r for r in records if r.strip()])
-            
             for record in records:
                 if not record.strip():
                     continue
-                lines = record.split("\n")
+                lines = record.strip().split("\n")
                 if len(lines) < 2:
                     continue
-                total_line = lines[-1].split(',')
-                if len(total_line) >= 5 and total_line[3] == "TOTAL":
-                    total_sales += float(total_line[4])
+
+                date_line = lines[0].split(",")
+                if len(date_line) >= 4:
+                    date_part = date_line[3].strip()
+                    if len(date_part) >= 7 and date_part[5:7] in monthly_sale:
+                        order_month = date_part[5:7]
+                    else:
+                        order_month = None
+                else:
+                    order_month = None
+
+                for line in lines:
+                    parts = line.split(",")
+                    if len(parts) >= 5 and parts[3] == "TOTAL":
+                        try:
+                            total = float(parts[4])
+                            total_sales += total
+                            if order_month:
+                                monthly_sale[order_month] += total
+                            order_count += 1
+                        except:
+                            pass        
     except FileNotFoundError:
         pass
     
@@ -3095,6 +3113,15 @@ def view_dashboard():
     print(f"| Total Orders                 : {order_count:<41}|")
     print(f"| Total Sales                  : RM {total_sales:<38.2f}|")
     print("|_________________________________________________________________________|")
+    print("|                                                                         |")
+    print("| Monthly Sales Report                                                    |")
+    print("|                                                                         |")
+    for key in sorted(month_name.keys()):
+        name = month_name[key]
+        sale = monthly_sale[key]
+        print(f"| {name:<71} |")
+        print(f"| Sales for this month         : RM {sale:<38.2f}|")
+        print("|                                                                         |")
     
     print("===========================================================================")
     input("\nPress [ENTER] to return to admin menu.")
@@ -3137,7 +3164,7 @@ def view_order_history():
         while True:
             search_input = input("| Enter Member ID to filter (or press ENTER for all): ").strip().upper()
             
-            if not search_input:  # Show all if empty input
+            if not search_input:
                 break
                 
             found_member = jump_search(member_ids, search_input)
@@ -3180,7 +3207,7 @@ def view_order_history():
                 while True:
                     order_input = input("| Enter Order ID to view order (or press ENTER for all): ").strip().upper()
                     
-                    if not order_input:  # Show all if empty input
+                    if not order_input:
                         break
                         
                     if order_input in member_order_ids:
@@ -3396,7 +3423,6 @@ def manage_member():
 
 def view_member_list(status_filter):
     try:
-        # Load all members
         members = []
         with open(MEMBERS_FILE, 'r') as file:
             lines = []
@@ -3545,8 +3571,7 @@ def change_member_status():
                     lines = block.splitlines()
                     if len(lines) >= 8:
                         members.append(lines)
-                        
-        # Find and update the member
+                    
         updated = False
         for member_data in members:
             if member_data[0] == chosen_id:
