@@ -3164,7 +3164,7 @@ def view_order_history():
         while True:
             search_input = input("| Enter Member ID to filter (or press ENTER for all): ").strip().upper()
             
-            if not search_input:  # Show all if empty input
+            if not search_input:
                 break
                 
             found_member = jump_search(member_ids, search_input)
@@ -3207,7 +3207,7 @@ def view_order_history():
                 while True:
                     order_input = input("| Enter Order ID to view order (or press ENTER for all): ").strip().upper()
                     
-                    if not order_input:  # Show all if empty input
+                    if not order_input:
                         break
                         
                     if order_input in member_order_ids:
@@ -3423,7 +3423,6 @@ def manage_member():
 
 def view_member_list(status_filter):
     try:
-        # Load all members
         members = []
         with open(MEMBERS_FILE, 'r') as file:
             lines = []
@@ -3572,8 +3571,7 @@ def change_member_status():
                     lines = block.splitlines()
                     if len(lines) >= 8:
                         members.append(lines)
-                        
-        # Find and update the member
+                    
         updated = False
         for member_data in members:
             if member_data[0] == chosen_id:
