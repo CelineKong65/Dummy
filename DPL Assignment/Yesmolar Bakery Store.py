@@ -1273,7 +1273,7 @@ def filter_feedback_rating():
             return filter_feedback_rating()
     except ValueError:
         print("Invalid input. Please enter a valid number.\n")
-    input("\nPress [Enter] to return rating menu.")
+    input("\nPress [ENTER] to return to feedback menu.")
     clear_screen()
     return view_feedback_rating()
 
@@ -1291,7 +1291,7 @@ def sort_feedback_rating():
 
         if not feedback_rating:
             print("No feedback records found to sort.")
-            input("\nPress [ENTER] to return rating menu.")
+            input("\nPress [ENTER] to return to feedback menu.")
             clear_screen()
             return view_feedback_rating()
         
