@@ -730,7 +730,8 @@ bool isEmpty(const string& str) {
 // Manual string to int conversion; returns -1 if invalid
 int StringToInt(const string& str) {
     int result = 0;
-    if (str.length() == 0) return -1;
+    if (str.length() == 0) 
+		return -1;
 
     for (size_t i = 0; i < str.length(); i++) {
         char c = str[i];
@@ -916,7 +917,7 @@ void printIdWithLeadingZeros(int id) {
 
 void deleteProducts(Product products[]) {
     productCount = loadProducts(products);
-    string inputStr;
+    string idToDeleteString;
     int idToDelete = -1;
     bool productFound = false;
 
@@ -935,10 +936,10 @@ void deleteProducts(Product products[]) {
 
     while (!productFound) {
         cout << "\nEnter ID in 3 digits [Press 0 to return to Product Menu] : ";
-        getline(cin, inputStr);
+        getline(cin, idToDeleteString);
 
         // Convert string to int manually
-        idToDelete = StringToInt(inputStr);
+        idToDelete = StringToInt(idToDeleteString);
 
         if (idToDelete == -1) {
             cout << "Invalid input! Please enter digits only.\n";
@@ -949,7 +950,7 @@ void deleteProducts(Product products[]) {
             return; // exit to menu
         }
 
-        if (inputStr.length() != 3) {
+        if (idToDeleteString.length() != 3) {
             cout << "ID must be exactly 3 digits!\n";
             continue; // ask again
         }
