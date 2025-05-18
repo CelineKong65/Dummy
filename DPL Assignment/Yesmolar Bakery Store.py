@@ -107,76 +107,78 @@ def custom_chr(code):
 #bubble sort 在这里
 def bubble_sort(arr, key=None, reverse=False):
     n = len(arr)
-    for i in range(n-1):
+    for i in range(n - 1):
         swapped = False
-        for j in range(0, n-i-1):
-            # Get values to compare
+        for j in range(0, n - i - 1):
             if key:
-                a = getattr(arr[j], key) if hasattr(arr[j], key) else arr[j]
-                b = getattr(arr[j+1], key) if hasattr(arr[j+1], key) else arr[j+1]
+                # Access attribute manually without getattr()
+                a = arr[j].__dict__[key] if isinstance(arr[j], object) and key in arr[j].__dict__ else arr[j]
+                b = arr[j + 1].__dict__[key] if isinstance(arr[j + 1], object) and key in arr[j + 1].__dict__ else arr[j + 1]
             else:
                 a = arr[j]
-                b = arr[j+1]
-            
-            # Compare based on reverse flag
-            if (a > b) if not reverse else (a < b):
-                arr[j], arr[j+1] = arr[j+1], arr[j]
+                b = arr[j + 1]
+
+            if (a > b and not reverse) or (a < b and reverse):
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
                 swapped = True
         if not swapped:
             break
 
+
 #Jump Search here
+def min_val(a, b):
+    return a if a < b else b
+
 def jump_search(arr, target, key=None):
     n = len(arr)
     if n == 0:
         return None
-    
-    # Calculate jump size
-    step = int(n ** 0.5)
-    
-    # Find the block where target be present
+
+    # Calculate jump step
+    step = 1
+    while step * step < n:
+        step += 1
+
     prev = 0
     while True:
+        index = step - 1
+        if index >= n:
+            index = n - 1
+
         if key:
-            current_val = getattr(arr[min(step, n)-1], key) if hasattr(arr[min(step, n)-1], key) else None
+            current_val = arr[index].__dict__[key] if isinstance(arr[index], object) and key in arr[index].__dict__ else None
         else:
-            current_val = arr[min(step, n)-1]
-            
+            current_val = arr[index]
+
         if current_val is None:
             return None
-        
+
         if current_val < target:
             prev = step
-            step += int(n ** 0.5)
+            step += 1
             if prev >= n:
                 return None
-        
         else:
             break
-        
-    # Perform Linear search in the indentified block
-    if key:
-        while getattr(arr[prev], key) < target:
-            prev += 1
-            if prev == min(step, n):
-                return None
-            
-    else:
-        while arr[prev] < target:
-            prev += 1
-            if prev == min(step, n):
-                return None
-            
-    # Check if found the target
-    if key:
-        if getattr(arr[prev], key) == target:
+
+    end = step
+    if end > n:
+        end = n
+
+    while prev < end:
+        if key:
+            val = arr[prev].__dict__[key] if isinstance(arr[prev], object) and key in arr[prev].__dict__ else None
+        else:
+            val = arr[prev]
+
+        if val == target:
             return arr[prev]
-        
-    else:
-        if arr[prev] == target:
-            return arr[prev]
-        
-    return None 
+        elif val > target:
+            return None
+
+        prev += 1
+
+    return None
 
 def load_members():
     global members
