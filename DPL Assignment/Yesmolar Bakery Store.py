@@ -79,6 +79,31 @@ logged_in_admin = ""
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
+ascii_table = [
+    '\x00', '\x01', '\x02', '\x03', '\x04', '\x05', '\x06', '\x07', 
+    '\x08', '\t', '\n', '\x0b', '\x0c', '\r', '\x0e', '\x0f', 
+    '\x10', '\x11', '\x12', '\x13', '\x14', '\x15', '\x16', '\x17', 
+    '\x18', '\x19', '\x1a', '\x1b', '\x1c', '\x1d', '\x1e', '\x1f', 
+    ' ', '!', '"', '#', '$', '%', '&', "'", 
+    '(', ')', '*', '+', ',', '-', '.', '/', 
+    '0', '1', '2', '3', '4', '5', '6', '7', 
+    '8', '9', ':', ';', '<', '=', '>', '?', 
+    '@', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 
+    'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 
+    'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 
+    'X', 'Y', 'Z', '[', '\\', ']', '^', '_', 
+    '`', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 
+    'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 
+    'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 
+    'x', 'y', 'z', '{', '|', '}', '~', '\x7f'
+]
+
+def custom_chr(code):
+    if 0 <= code <= 127:
+        return ascii_table[code]
+    else:
+        return ascii_table[code % 128]
+
 #bubble sort 在这里
 def bubble_sort(arr, key=None, reverse=False):
     n = len(arr)
@@ -659,7 +684,7 @@ def edit_member_profile():
                 for char in new_name:
                     if char != ' ':
                         if 'A' <= char <= 'Z':
-                            cleaned_new_name += chr(ord(char) + 32)
+                            cleaned_new_name += custom_chr(ord(char) + 32)
                         else:
                             cleaned_new_name += char
 
@@ -672,7 +697,7 @@ def edit_member_profile():
                     for char in member.full_name:
                         if char != ' ':
                             if 'A' <= char <= 'Z':
-                                cleaned_existing += chr(ord(char) + 32)
+                                cleaned_existing += custom_chr(ord(char) + 32)
                             else:
                                 cleaned_existing += char
 
@@ -710,7 +735,7 @@ def edit_member_profile():
                 for char in new_email:
                     if char != ' ':
                         if 'A' <= char <= 'Z':
-                            cleaned_new_email += chr(ord(char) + 32)
+                            cleaned_new_email += custom_chr(ord(char) + 32)
                         else:
                             cleaned_new_email += char
 
@@ -723,7 +748,7 @@ def edit_member_profile():
                     for char in member.email:
                         if char != ' ':
                             if 'A' <= char <= 'Z':
-                                cleaned_existing += chr(ord(char) + 32)
+                                cleaned_existing += custom_chr(ord(char) + 32)
                             else:
                                 cleaned_existing += char
 
@@ -988,9 +1013,9 @@ def update_admin(updated_admin, original_name):
                     a = name[j]
                     b = original_name[j]
                     if 'A' <= a <= 'Z':
-                        a = chr(ord(a) + 32)
+                        a = custom_chr(ord(a) + 32)
                     if 'A' <= b <= 'Z':
-                        b = chr(ord(b) + 32)
+                        b = custom_chr(ord(b) + 32)
                     if a != b:
                         same = False
                         break
@@ -1100,7 +1125,7 @@ def edit_admin_profile():
                 for char in new_name:
                     if char != ' ':
                         if 'A' <= char <= 'Z':
-                            cleaned_new += chr(ord(char) + 32)
+                            cleaned_new += custom_chr(ord(char) + 32)
                         else:
                             cleaned_new += char
 
@@ -1108,7 +1133,7 @@ def edit_admin_profile():
                 for char in logged_in_admin.name:
                     if char != ' ':
                         if 'A' <= char <= 'Z':
-                            cleaned_current_admin += chr(ord(char) + 32)
+                            cleaned_current_admin += custom_chr(ord(char) + 32)
                         else:
                             cleaned_current_admin += char
 
@@ -1118,7 +1143,7 @@ def edit_admin_profile():
                     for char in admin.name:
                         if char != ' ':
                             if 'A' <= char <= 'Z':
-                                cleaned_admin_name += chr(ord(char) + 32)
+                                cleaned_admin_name += custom_chr(ord(char) + 32)
                             else:
                                 cleaned_admin_name += char
 
