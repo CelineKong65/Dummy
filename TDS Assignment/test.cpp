@@ -37,6 +37,14 @@ struct Customer {
     string phone;
 };
 
+struct Admin {
+    string admin_id;
+    string admin_name;
+    string admin_email;
+    string admin_phone;
+    string admin_position;
+};
+
 struct Order {
     string orderID;
     int customerID;
@@ -449,6 +457,425 @@ class HashCustomer {
 		}
 };
 
+class HashAdmin {
+	private:
+		// Node structure for linked list
+		struct Node {
+			Admin data;
+			Node* next;
+		};
+	
+		Node* front;// Front pointer of the linked list
+		Node* rear;// Rear pointer of the linked list
+		string filename;// File name for data persistence
+		Node* table[TABLE_SIZE];// Hash table array for customer data
+		
+		// ID validate
+		bool isValidID(const string& id){
+			if (id.length() == 0) return false;
+
+		    for (int i = 0; i < id.length(); i++){
+		        if (id[i] < '0' || id[i] > '9'){
+		            return false; 
+		        }
+		    }
+		    return true; 
+		}
+		
+		// Id existing validate
+		bool isIDExists(const string& id){
+			return search(id) != NULL;
+		}
+		
+		// Name validate
+		bool isValidName(const string& name){
+		    const int MAX_LENGTH = 30;
+		    const int MIN_LENGTH = 3;
+		    int length = 0;
+		    bool hasLetter = false;
+		
+		    for (int i = 0; name[i] != '\0'; ++i){
+		        char c = name[i];
+		        length++;
+		
+		        if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == ' ')){
+		            return false;
+		        }
+		
+		        if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')){
+		            hasLetter = true;
+		        }
+		
+		        if (length > MAX_LENGTH){
+		            return false;
+		        }
+		    }
+		
+		    if (length < MIN_LENGTH || !hasLetter){
+		        return false;
+		    }
+		
+		    return true;
+		}
+		
+		// Name existing validate
+		bool isNameExists(const string& admin_name){
+		    for (int i = 0; i < TABLE_SIZE; i++){
+		        Node* current = table[i];
+		        while (current != NULL) {
+		            if (current->data.admin_name == admin_name){
+		                return true;
+		            }
+		            current = current->next;
+		        }
+		    }
+		    return false;
+		}
+		
+		// Phone number validate
+		bool isValidPhone(const string& admin_phone){
+			const char* p = admin_phone.c_str();
+			int i = 0;
+			int digitCount = 0;
+		
+			while (p[i] != '\0') {
+				if (i == 3 && p[i] != '-'){
+					return false;
+				}
+		
+				char c = p[i];
+		
+				if (!((c >= '0' && c <= '9') || c == '-' )){
+					return false;
+				}
+		
+				if (c >= '0' && c <= '9'){
+					digitCount++;
+				}
+		
+				i++;
+			}
+		
+			if (digitCount < 10 || digitCount > 11){
+				return false;
+			}
+		
+			if (i < 4){
+				return false;
+			}
+		
+			return true;
+		}
+		
+		// Email validate
+		bool isValidEmail(const string& email){
+			if(email[0] == '\0') return false;
+			
+			bool hasAt = false;
+			int atPos = -1;
+			int i = 0;
+			while(email[i] != '0'){
+				if(email[i] == '@'){
+					hasAt = true;
+					atPos = i;
+					break;
+				}
+				i++;
+			}
+			
+			if(!hasAt) return false;
+			
+			if (atPos == 0 || email[atPos + 1] == '\0') return false;
+		
+			bool hasDot = false;
+			i = atPos + 1;
+			while (email[i] != '\0') {
+				if (email[i] == '.') {
+					hasDot = true;
+					if (email[i + 1] == '\0') return false;
+					break;
+				}
+				i++;
+			}
+			return hasDot;
+		}
+		
+		// Position validate
+		bool isValidPosition(const std::string& position) {
+			return position == "admin" || position == "superadmin";
+		}
+		
+		// Hash function to generate an index from admin ID
+		int hashFunction(string key){
+	        unsigned int hash = 0;
+	        for (char ch : key) {
+	            hash = (hash << 5) + ch;
+	        }
+	        return hash % TABLE_SIZE;
+	    }
+	
+	public:
+		// Constructor: initialize pointers and hash table
+		HashAdmin() : filename("admin.txt"), front(NULL), rear(NULL) {
+		    for(int i = 0; i < TABLE_SIZE; i++) {
+		        table[i] = NULL;
+		    }
+		}
+	
+		// Destructor: clean up linked list memory
+		~HashAdmin() {
+			Node* current = front;
+			while (current != NULL) {
+				Node* next = current->next;
+				delete current;
+				current = next;
+			}
+		}
+		
+		// Insert a customer into both linked list and hash table
+		void insert(const Admin& admin) {
+			// Insert to linked list
+		    Node* newNode = new Node;
+		    newNode->data = admin;
+		    newNode->next = NULL;
+		
+		    if (isEmpty()) {
+		        front = rear = newNode;
+		    } else {
+		        rear->next = newNode;
+		        rear = newNode;
+		    }
+		
+			// Insert to hash table
+		    int index = hashFunction(admin.admin_id);
+		    newNode = new Node;
+		    newNode->data = admin;
+		    newNode->next = table[index];
+		    table[index] = newNode;
+		}
+		
+		// Search admin by ID in hash table
+	    Admin* search(const string& admin_id) {
+	        int index = hashFunction(admin_id);
+	        Node* current = table[index];
+	        
+	        while(current != NULL) {
+	            if(current->data.admin_id == admin_id) {
+	                return &(current->data);
+	            }
+	            current = current->next;
+	        }
+	        return NULL;
+	    }
+		
+		// Convert a line of text into a admin object
+		Admin parseCustomer(const string& line) {
+			Admin a;
+			stringstream ss(line);
+			ss >> a.admin_id >> a.admin_name >> a.admin_email >> a.admin_phone >> a.admin_position;
+			return a;
+		}
+	
+		// Check if linked list is empty
+		bool isEmpty() const {
+			return front == NULL;
+		}
+	
+		// Save all admin from linked list to file
+		void saveToFile() {
+			ofstream file("admin.txt");
+			if (!file) {
+				cout << "File fail to connect" << endl;
+				return;
+			}
+	
+			Node* current = front;
+			while (current != NULL) {
+				file << current->data.admin_id << " "
+					 << current->data.admin_name << " "
+					 << current->data.admin_email << " "
+					 << current->data.admin_phone << " "
+					 << current->data.admin_position << endl;
+				current = current->next;
+			}
+	
+			file.close();
+		}
+	
+		// Load admin data from file and insert into system
+		void loadFromFile() {
+			ifstream file("admin.txt");
+			if (!file) {
+				cout << "File fail to connect" << endl;
+				return;
+			}
+	
+			string line;
+			while (getline(file, line)) {
+				if(!line.empty()) {
+					Admin a = parseCustomer(line);
+					insert(a);
+				}
+			}
+	
+			file.close();
+		}
+	
+		// Display all admin from the linked list
+		void displayAdmin() {
+			Node* current = front;
+			int i = 1;
+			while (current != NULL) {
+				cout << i << "." << current->data.admin_id << " "
+								 << current->data.admin_name << " "
+								 << current->data.admin_email << " "
+								 << current->data.admin_phone << " "
+								 << current->data.admin_position << endl;
+				current = current->next;
+				i++;
+			}
+		}
+	
+		// Hashing admin main menu
+		void hashingAdmin() {
+			loadFromFile();
+			
+			int choice;
+			Admin ad;
+			
+			do {
+				cout << "==================================================" << endl;
+				cout << "                  Hashing Admin                " << endl;
+				cout << "==================================================" << endl;
+				cout << "1. Display Admin Information";
+				cout << "\n2. Add Admin Information";
+				cout << "\n3. Search Admin Information";
+				cout << "\n4. Save Admin Information";
+				cout << "\n5. Return to Team A Menu";
+				cout << "\n--------------------------------------------------" << endl;
+				cout << "\nEnter your choice: ";
+				cin >> choice;
+				cin.ignore();
+				cout << endl;
+				
+				switch(choice) {
+					case 1:
+					{
+						displayAdmin();
+						cout << "\nPress [Enter] back to menu...";
+						cin.get(); 
+						system("cls");
+						break;
+					}
+						
+					case 2: 
+					{
+						// Add customer information and validate customer details
+						do{
+							cout << "Enter admin ID : ";
+							getline(cin, ad.admin_id);
+							if (!isValidID(ad.admin_id)){
+						        cout << "Admin ID must contain digits only! Please try again.\n";
+						    }else if (isIDExists(ad.admin_id)){
+						        cout << "This admin ID already exists! Please enter a different ID.\n";
+						    }
+						}while (!isValidID(ad.admin_id) || isIDExists(ad.admin_id));
+						
+						do{
+							cout << "Enter admin name : ";
+							getline(cin, ad.admin_name);
+							if (!isValidName(ad.admin_name)){
+						        cout << "Invalid name! Only letters and spaces are allowed, name must be 3 to 30 characters.\n";
+						    }else if (isNameExists(ad.admin_name)){
+						        cout << "This name already exists! Please enter a different name.\n";
+						    }
+						}while (!isValidName(ad.admin_name) || isNameExists(ad.admin_name));
+						
+						
+						do{
+							cout << "Enter admin phone number (e.g. 010-1234567) : ";
+							getline(cin, ad.admin_phone);
+							if (!isValidPhone(ad.admin_phone)){
+								cout << "Invalid phone number! Make sure it follows the format 010-1234567 and contains only digits with 10 or 11 numbers.\n";
+							}
+						}while(!isValidPhone(ad.admin_phone));
+						
+						do{
+							cout << "Enter customer email (e.g. john@example.com) : ";
+							getline(cin, ad.admin_email);
+							if (!isValidEmail(ad.admin_email)){
+								cout << "Invalid email address! Make sure it contains '@' and a '.' and they are not at the beginning or end.\n";
+							}
+						}while(!isValidEmail(ad.admin_email));
+						
+						do{
+							cout << "Enter admin position (superadmin/admin) : ";
+							getline(cin, ad.admin_position);
+							if (!isValidPosition(ad.admin_position)){
+								cout << "Invalid position entered. Please select either 'admin' or 'superadmin'.\n";
+							}
+						}while(!isValidPosition(ad.admin_position));
+						
+						insert(ad);
+						cout << "\nPress [Enter] back to menu...";
+						cin.get(); 
+						system("cls");
+						break;
+					}
+						
+					case 3: 
+					{
+						// Search admin information by ID
+						string searchID;
+	                    cout << "Search Customer Information" << endl;
+	                    cout << "Enter customer ID: ";
+	                    getline(cin, searchID);
+	                    
+	                    Admin* foundAdmin = search(searchID);
+	                    if (foundAdmin != NULL) {
+	                        cout << "\nAdmin Found:" << endl;
+	                        cout << "ID: " << foundAdmin->admin_id << endl;
+	                        cout << "Name: " << foundAdmin->admin_name << endl;
+	                        cout << "Email: " << foundAdmin->admin_email << endl;
+	                        cout << "Phone: " << foundAdmin->admin_phone << endl;
+	                        cout << "Position: " << foundAdmin->admin_position << endl;
+	                    } else {
+	                        cout << "\nCustomer not found!" << endl;
+	                    }
+	                    
+	                    cout << "\nPress [Enter] back to menu...";
+	                    cin.get(); 
+	                    system("cls");
+	                    break;
+					}
+	                    
+					case 4: 
+					{
+						// Save admin data to file
+						saveToFile();
+						cout << "Saved the admin information to " << filename << endl;
+						cout << "\nPress [Enter] back to menu...";
+						cin.get(); 
+						system("cls");
+						break;
+					}
+						
+					case 5: 
+					{
+						system("cls");
+						teamAMenu();
+						break;
+					}
+						
+					default:
+						cout << "Invalid choice." << endl;
+						break;
+				}
+				
+			} while (true);
+		}
+};
+
 // --------------------- SHELL SORT ---------------------
 void shellSort(Product arr[], int n)
 {
@@ -588,13 +1015,15 @@ void mainMenu(){
 //--------------------------------------------------- TEAM A MENU -----------------------------------------------------
 void teamAMenu(){
 	HashCustomer HC;
+	HashAdmin HA;
 	int choice;
 	
 	cout<<"=================================================="<<endl;
     cout<<"                    Team A Menu                   "<<endl;
     cout<<"=================================================="<<endl;
     cout<<"1. Hashing Customer"<<endl;
-    cout<<"2. Return to Main Menu"<<endl;
+    cout<<"2. Hashing Admin"<<endl;
+    cout<<"3. Return to Main Menu"<<endl;
     cout<<"--------------------------------------------------"<<endl;
     cout<<"Enter your choice: ";
     cin>>choice;
@@ -606,6 +1035,12 @@ void teamAMenu(){
     			break;
 			}
 		case 2:
+    		{
+    			system("cls");
+    			HA.hashingAdmin();
+    			break;
+			}
+		case 3:
 			{
 				system("cls");
 				mainMenu();
