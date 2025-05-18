@@ -79,16 +79,9 @@ logged_in_admin = ""
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
-# 这个是 len() 的 raw code, 我要减少 built-in function 虽然老师说可以用
-def get_length(arr):
-    count = 0
-    for _ in arr:
-        count += 1
-    return count
-
 #bubble sort 在这里
 def bubble_sort(arr, key=None, reverse=False):
-    n = get_length(arr)
+    n = len(arr)
     for i in range(n-1):
         swapped = False
         for j in range(0, n-i-1):
@@ -1180,7 +1173,7 @@ def edit_admin_profile():
                     print("\nPasswords do not match!")
                     continue
             
-                update_admin(logged_in_admin)
+                update_admin(logged_in_admin, logged_in_admin.name)
                 print("\nPassword updated successfully!")
                 input("\nPress [ENTER] to continue.")
                 break
@@ -1220,7 +1213,7 @@ def edit_admin_profile():
                     print("Phone number must be 10 or 11 digits!")
                     continue
     
-                update_admin(logged_in_admin)
+                update_admin(logged_in_admin, logged_in_admin.name)
                 print("\nContact Number updated successfully!")
                 input("\nPress [ENTER] to continue.")
                 break
@@ -1418,7 +1411,7 @@ def login_menu():
         print("============================================================================")
         print("|                                                                          |")
         print("|                                                          .--.            |")
-        print("|                                                  ✧     / _  \            |")
+        print("|                                                  ✧     / _   /           |")
         print("|  1.    Sign Up                                        / __  /            |")
         print("|  2.    Login                                         / __  /  ✧          |")
         print("|  3.    Admin Login                                  '  _  /              |")
@@ -1604,7 +1597,7 @@ def add_product(products, category):
     # Get product ID
     while True:
         new_product.product_id = input("\nEnter ID in 3 digits: ")
-        if get_length(new_product.product_id) != 3:
+        if len(new_product.product_id) != 3:
             print("ID must be exactly 3 digits!")
             continue
             
@@ -1620,7 +1613,7 @@ def add_product(products, category):
     # Get product name
     while True:
         new_product.name = input("\nEnter product name: ").strip()
-        if get_length(new_product.name) == 0:
+        if len(new_product.name) == 0:
             print("Name cannot be empty!")
             continue
         break
@@ -1689,10 +1682,10 @@ def edit_product(products, category):
     # Edit name
     while True:
         new_name = input(f"\nEnter new name [{product_to_edit.name}]: ").strip()
-        if get_length(new_name) == 0:
+        if len(new_name) == 0:
             new_name = product_to_edit.name
             break
-        if get_length(new_name) < 2:
+        if len(new_name) < 2:
             print("Name must be at least 2 characters!")
             continue
         break
@@ -1700,7 +1693,7 @@ def edit_product(products, category):
     # Edit price
     while True:
         price_input = input(f"\nsEnter new price [{product_to_edit.price}]: ").strip()
-        if get_length(price_input) == 0:
+        if len(price_input) == 0:
             new_price = product_to_edit.price
             break
         try:
@@ -1715,7 +1708,7 @@ def edit_product(products, category):
     # Edit stock
     while True:
         stock_input = input(f"\nEnter new stock [{product_to_edit.stock}]: ").strip()
-        if get_length(stock_input) == 0:
+        if len(stock_input) == 0:
             new_stock = product_to_edit.stock
             break
         try:
@@ -1730,7 +1723,7 @@ def edit_product(products, category):
     # Edit status
     while True:
         status_input = input(f"\nEnter new status [{product_to_edit.status}] (Active/Inactive): ").capitalize().strip()
-        if get_length(status_input) == 0:
+        if len(status_input) == 0:
             new_status = product_to_edit.status
             break
         if status_input not in ["Active", "Inactive"]:
