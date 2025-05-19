@@ -165,13 +165,13 @@ def jump_search(arr, target, key=None):
     if key:
         while getattr(arr[prev], key) < target:
             prev += 1
-            if prev == min(step, n):
+            if prev == min_val(step, n):
                 return None
             
     else:
         while arr[prev] < target:
             prev += 1
-            if prev == min(step, n):
+            if prev == min_val(step, n):
                 return None
             
     # Check if found the target
