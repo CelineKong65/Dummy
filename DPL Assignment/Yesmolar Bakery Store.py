@@ -172,6 +172,30 @@ def split_lines(text):
     
     return lines
 
+def raw_keys(dictionary):
+    keys = []
+    for key in dictionary:
+        keys.append(key)
+    return keys
+
+def raw_items(dictionary):
+    items = []
+    for key in dictionary:
+        items.append((key, dictionary[key]))
+    return items
+
+def raw_replace(s, old, new):
+    result = ""
+    i = 0
+    while i < len(s):
+        if s[I:I+len(old)] == old:
+            result += new
+            i += len(old)
+        else:
+            result += s[i]
+            i += 1
+    return result
+
 #bubble sort 在这里
 def bubble_sort(arr, key=None, reverse=False):
     n = len(arr)
@@ -3129,14 +3153,20 @@ def view_dashboard():
     
     try:
         with open(PRODUCT_FILE, 'r') as file:
-            for line in file:
+            content = file.read()
+            lines = split_lines(content)
+            for line in lines:
                 line = line.strip()
                 if line:
                     product_count += 1
-                    parts = line.split(',')
+                    parts = my_split(line, ',')
                     if len(parts) >= 6:
-                        stock = int(parts[4]) if parts[4].isdigit() else 0       
-                        status = parts[5]
+                        stock_str = parts[4].strip()    
+                        stock = 0
+                        if stock_str and all('0' <= ch <= '9' for ch in stock_str):
+                            stock = int(stock_str)       
+                        
+                        status = parts[5].strip()
                         if status == "Active":
                             active_product += 1
                             if stock <= 0:
@@ -3152,18 +3182,15 @@ def view_dashboard():
     inactive_member = 0
     
     try:
-        with open (MEMBERS_FILE, 'r') as file:
-            lines = []
-            for line in file:
-                line = line.strip()
-                if line:
-                    lines.append(line)
-                    
+        with open(MEMBERS_FILE, 'r') as file:
+            content = file.read()
+            lines = split_lines(content)
+            
             member_count = len(lines) // 8
             for i in range(0, len(lines), 8):
                 if i + 7 < len(lines) and lines[i+7] == "Active":
                     active_member += 1
-                else :
+                else:
                     inactive_member += 1
     except FileNotFoundError:
         pass
@@ -3176,15 +3203,15 @@ def view_dashboard():
     try:
         with open(PURCHASE_HISTORY_FILE, 'r') as file:
             content = file.read()
-            records = content.split("\n\n")
+            records = my_split(content.strip(), delimiter="\n\n")
             for record in records:
                 if not record.strip():
                     continue
-                lines = record.strip().split("\n")
+                lines = my_split(record.strip(), delimiter="\n")
                 if len(lines) < 2:
                     continue
 
-                date_line = lines[0].split(",")
+                date_line = my_split(lines[0], ',')
                 if len(date_line) >= 4:
                     date_part = date_line[3].strip()
                     if len(date_part) >= 7 and date_part[5:7] in monthly_sale:
@@ -3195,16 +3222,27 @@ def view_dashboard():
                     order_month = None
 
                 for line in lines:
-                    parts = line.split(",")
+                    parts = my_split(line, ',')
                     if len(parts) >= 5 and parts[3] == "TOTAL":
-                        try:
-                            total = float(parts[4])
+                        total_str = parts[4]
+                        total = 0.0
+                        has_dot = False
+                        is_float = True
+                        for ch in total_str:
+                            if ch == '.':
+                                if has_dot:
+                                    is_float = False
+                                    break
+                                has_dot = True
+                            elif ch < '0' or ch > '9':
+                                is_float = False
+                                break
+                        if is_float:
+                            total = float(total_str)
                             total_sales += total
                             if order_month:
                                 monthly_sale[order_month] += total
                             order_count += 1
-                        except:
-                            pass        
     except FileNotFoundError:
         pass
     
@@ -3230,7 +3268,9 @@ def view_dashboard():
     print("|                                                                         |")
     print("| Monthly Sales Report                                                    |")
     print("|                                                                         |")
-    for key in sorted(month_name.keys()):
+    month_keys = raw_keys(month_name)
+    bubble_sort(month_keys)
+    for key in month_keys:
         name = month_name[key]
         sale = monthly_sale[key]
         print(f"| {name:<71} |")
@@ -3248,15 +3288,15 @@ def view_order_history():
         order_ids = []
         with open(PURCHASE_HISTORY_FILE, "r") as file:
             content = file.read()
-            records = content.split("\n\n")
+            records = my_split(content.strip(), delimiter = "\n\n")
             
             for record in records:
                 if not record.strip():
                     continue
                 
-                lines = record.split("\n")
+                lines = my_split(record, '\n')
                 if len(lines) >= 1:
-                    header = lines[0].split(',')
+                    header = my_split(lines[0], ',')
                     if len(header) >= 3:
                         if header[0] not in member_ids:
                             member_ids.append(header[0])
@@ -3298,15 +3338,15 @@ def view_order_history():
             member_order_ids = []
             with open(PURCHASE_HISTORY_FILE, "r") as file:
                 content = file.read()
-                records = content.split("\n\n")
+                records = my_split(content.strip(), delimiter="\n\n")
                 
                 for record in records:
                     if not record.strip():
                         continue
                     
-                    lines = record.split("\n")
+                    lines = my_split(record, '\n')
                     if len(lines) >= 1:
-                        header = lines[0].split(',')
+                        header = my_split(lines[0], ',')
                         if len(header) >= 3 and header[0] == search_id:
                             member_order_ids.append(header[2])
             
@@ -3342,18 +3382,18 @@ def view_order_history():
             input("\nPress [ENTER] to continue")
             return
         
-        records = content.split("\n\n")
+        records = my_split(content.strip(), delimiter="\n\n")
         found_orders = False
         
         for record in records:
             if not record.strip():
                 continue
             
-            lines = record.split("\n")
+            lines = my_split(record, '\n')
             if len(lines) < 2:
                 continue
             
-            header = lines[0].split(',')
+            header = my_split(lines[0], ',')
             if len(header) < 5:
                 continue
             
@@ -3385,7 +3425,7 @@ def view_order_history():
             has_discount = False
             
             for line in lines[1:-1]:
-                parts = line.split(',')
+                parts = my_split(line, ',')
                 if len(parts) < 9:
                     continue
                 
@@ -3404,14 +3444,43 @@ def view_order_history():
                 print(f"| Total           : RM {total:<51}|")
                 print(" -------------------------------------------------------------------------")
                 
-                total_payment += float(total) if total.replace('.','',1).isdigit() else 0.0
+                total_float = 0.0
+                is_float = True
+                has_decimal = False
+                for ch in total:
+                    if ch == '.':
+                        if has_decimal:
+                            is_float = False
+                            break
+                        has_decimal = True
+                    elif ch < '0' or ch > '9':
+                        is_float = False
+                        break
+                if is_float:
+                    total_float = float(total)
                 
-                if float(total) > 120.00:
+                total_payment += total_float
+                
+                if total_float > 120.00:
                     has_discount = True
             
-            total_line = lines[-1].split(',')
+            total_line = my_split(lines[-1], ',')
             if len(total_line) >= 5 and total_line[3] == "TOTAL":
-                total_payment = float(total_line[4])
+                total_str = total_line[4]
+                total_payment = 0.0
+                is_float = True
+                has_decimal = False
+                for ch in total_str:
+                    if ch == '.':
+                        if has_decimal:
+                            is_float = False
+                            break
+                        has_decimal = True
+                    elif ch < '0' or ch > '9':
+                        is_float = False
+                        break
+                if is_float:
+                    total_payment = float(total_str)
             
             if has_discount:
                 print(f"| {'Total Purchase: RM ' + f'{total_payment:.2f}' + ' [after 5% discount]':<72}|")
@@ -3439,10 +3508,12 @@ def view_sales_report():
     try:
         products = {}
         with open(PRODUCT_FILE, 'r') as file:
-            for line in file:
+            content = file.read()
+            lines = split_lines(content)
+            for line in lines:
                 line = line.strip()
                 if line:
-                    parts = line.split(',')
+                    parts = my_split(line, ',')
                     if len(parts) >= 3:
                         product_id = parts[0]
                         name = parts[1]
@@ -3451,22 +3522,46 @@ def view_sales_report():
         
         with open(PURCHASE_HISTORY_FILE, 'r') as file:
             content = file.read()
-            records = content.split('\n\n')
+            records = my_split(content.strip(), delimiter="\n\n")
 
             for record in records:
                 if not record.strip():
                     continue
                 
-                lines = record.split("\n")
+                lines = my_split(record, '\n')
                 if len(lines) < 2:
                     continue
                 
                 for line in lines[1:-1]:
-                    parts = line.split(',')
+                    parts = my_split(line, ',')
                     if len(parts) >= 9:
                         product_id = parts[3]
-                        quantity = int(parts[7]) if parts[7].isdigit else 0
-                        total = float(parts[8]) if parts[8].isdigit else 0
+                        quantity_str = parts[7]
+                        total_str = parts[8]
+                        
+                        quantity = 0
+                        is_digit = True
+                        for ch in quantity_str:
+                            if ch < '0' or ch > '9':
+                                is_digit = False
+                                break
+                        if is_digit:
+                            quantity = int(quantity_str)
+                        
+                        total = 0.0
+                        is_float = True
+                        has_decimal = False
+                        for ch in total_str:
+                            if ch == '.':
+                                if has_decimal:
+                                    is_float = False
+                                    break
+                                has_decimal = True
+                            elif ch < '0' or ch > '9':
+                                is_float = False
+                                break
+                        if is_float:
+                            total = float(total_str)
                         
                         if product_id in products:
                             category = products[product_id][1]
@@ -3641,73 +3736,90 @@ def change_member_status():
     try:
         clear_screen()
         print("===========================================================================")
-        print("|                                MEMBER LIST                              |")
+        print("|                                 MEMBER LIST                             |")
         print("===========================================================================")
-        print("| ID              | Name                   | Status                       |")
+        print("| ID                 | Name                          | Status             |")
         print("===========================================================================")
-        
-        member_ids = []
-        with open(MEMBERS_FILE, 'r') as file:
-            lines = [line.strip() for line in file if line.strip()]
+
+        # Read member data manually
+        with open(MEMBERS_FILE, 'r', encoding='utf-8') as file:
+            content = file.read()
             
-            for i in range(0, len(lines), 8):
-                if i + 7 < len(lines):
-                    member_id = lines[i]
-                    full_name = lines[i+1]
-                    status = lines[i + 7]
-                    member_ids.append(member_id)
-                    
-                    print(f"| {member_id:<16}| {full_name:<23}| {status:<28} |")
-        print("===========================================================================")
+        members_data = []
+        current_member = []
+        blank_line_count = 0
         
+        for char in content:
+            if char == '\n':
+                blank_line_count += 1
+                if blank_line_count == 2:
+                    if current_member:
+                        members_data.append(join_strings("", current_member))
+                        current_member = []
+                    blank_line_count = 0
+            else:
+                if blank_line_count == 1:
+                    current_member.append('\n')
+                    blank_line_count = 0
+                current_member.append(char)
+        
+        if current_member:
+            members_data.append(join_strings("", current_member))
+
+        # Display all members
+        for member_data in members_data:
+            fields = split_lines(member_data)
+            if len(fields) >= 8:
+                member_id = fields[0]
+                full_name = fields[1]
+                status = fields[7]
+                print(f"| {member_id:<18} | {full_name:<29} | {status:<18} |")
+
+        print("===========================================================================")
+
         while True:
             chosen_id = input("\nEnter Member ID to change status (or 'C' to cancel): ").strip().upper()
             if chosen_id == 'C':
                 print("\nOperation cancelled.")
-                input("Press [ENTER] to continue. ")
+                input("Press [ENTER] to continue.")
                 return
-            
-            if chosen_id not in member_ids:
+
+            # Check if ID exists
+            found = False
+            for member_data in members_data:
+                fields = split_lines(member_data)
+                if fields and fields[0] == chosen_id:
+                    found = True
+                    break
+
+            if not found:
                 print(f"\nError: Member ID '{chosen_id}' not found. Please try again.")
-                print("Available Member ID:", ", ".join(member_ids))
                 continue
-            
+
             break
+        
         print("___________________________________________________________________________")
 
-        members = []
-        with open(MEMBERS_FILE, 'r') as file:
-            content = file.read()
-            member_blocks = content.split("\n\n")
-            
-            for block in member_blocks:
-                if block.strip():
-                    lines = block.splitlines()
-                    if len(lines) >= 8:
-                        members.append(lines)
-                    
-        updated = False
-        for member_data in members:
-            if member_data[0] == chosen_id:
-                current_status = member_data[7] if len(member_data) > 7 else "Active"
+        # Update status
+        updated_members_data = []
+        for member_data in members_data:
+            fields = split_lines(member_data)
+            if fields and fields[0] == chosen_id:
+                current_status = fields[7]
                 new_status = "Inactive" if current_status == "Active" else "Active"
-                member_data[7] = new_status
-                updated = True
-                break
-            
-        if updated:
-            with open(MEMBERS_FILE, 'w') as file:
-                for member_data in members:
-                    file.write("\n".join(member_data) + "\n\n")
-                 
-            print(f"\nMember {chosen_id} status changed to {new_status} successfully.")
-        else:
-            print("Member not found.")
-        
+                fields[7] = new_status
+                updated_members_data.append(join_strings("\n", fields))
+                print(f"\nMember {chosen_id} status changed from {current_status} to {new_status}.")
+            else:
+                updated_members_data.append(member_data)
+
+        # Save changes
+        with open(MEMBERS_FILE, 'w', encoding='utf-8') as file:
+            file.write(join_strings("\n\n", updated_members_data))
+
         print("\n===========================================================================")
-            
         input("Press [ENTER] to continue.")
-        
+
     except FileNotFoundError:
         print("Member file not found.")
         input("Press [ENTER] to continue.")
@@ -3762,21 +3874,24 @@ def view_admin_list(status_filter):
                     
             for i in range(0, len(lines), 5):
                 if i + 4 < len(lines):
-                    admin = Admin(
-                        name=lines[i],
-                        password=lines[i+1],
-                        contact=lines[i+2],
-                        position=lines[i+3],
-                        status=lines[i+4]                        
-                    )
-                    admins.append(admin)
+                    try:
+                        admin = Admin(
+                            name=lines[i],
+                            password=lines[i+1],
+                            contact=lines[i+2],
+                            position=lines[i+3],
+                            status=lines[i+4]                        
+                        )
+                        admins.append(admin)
+                    except ValueError as e:
+                        print(f"Error creating admin from line {i}: {e}")
+                        continue
                     
         filtered_admins = []
         for a in admins:
             if a.status == status_filter:
                 filtered_admins.append(a)    
                 
-                    
         clear_screen()
         if status_filter == "Active":
             print("===========================================================================")
@@ -3822,7 +3937,7 @@ def view_admin_list(status_filter):
         input("\nPress [ENTER] to continue")
     except FileNotFoundError:
         print("Admin file not found.")
-        input("Press [ENTER] to continue.") 
+        input("Press [ENTER] to continue.")
 
 def add_new_admin():       
     clear_screen()
@@ -3850,7 +3965,7 @@ def add_new_admin():
         try:
             with open(ADMINS_FILE, 'r') as file:
                 content = file.read()
-                if f"\n{name}\n" in content or content.startswith(name + "\n"):
+                if f"\n{name}\n" in content or content and content[0:len(name)+1] == name + "\n":
                     print("Name already exists.")
                     continue
         except FileNotFoundError:
@@ -3941,20 +4056,40 @@ def change_admin_status():
         print("| Name                  | Position              | Status                  |")
         print("===========================================================================")
         
-        admin_names = []
-        admin_details = []
-        with open(ADMINS_FILE, 'r') as file:
-            lines = [line.strip() for line in file if line.strip()]
+        # Read admin data manually
+        with open(ADMINS_FILE, 'r', encoding='utf-8') as file:
+            content = file.read()
             
-            for i in range(0, len(lines), 5):
-                if i + 4 < len(lines):
-                    name = lines[i]
-                    position = lines[i+3]
-                    status = lines[i+4]
-                    admin_names.append((name))
-                    admin_details.append((name, position, status))
-                    print(f"| {name:<22}| {position:<22}| {status:<24}|")
+        admins_data = []
+        current_admin = []
+        blank_line_count = 0
         
+        for char in content:
+            if char == '\n':
+                blank_line_count += 1
+                if blank_line_count == 2:
+                    if current_admin:
+                        admins_data.append(join_strings("", current_admin))
+                        current_admin = []
+                    blank_line_count = 0
+            else:
+                if blank_line_count == 1:
+                    current_admin.append('\n')
+                    blank_line_count = 0
+                current_admin.append(char)
+        
+        if current_admin:
+            admins_data.append(join_strings("", current_admin))
+
+        # Display all admins
+        for admin_data in admins_data:
+            fields = split_lines(admin_data)
+            if len(fields) >= 5:
+                name = fields[0]
+                position = fields[3]
+                status = fields[4]
+                print(f"| {name:<22}| {position:<22}| {status:<24}|")
+
         print("===========================================================================")
         
         while True:
@@ -3970,48 +4105,46 @@ def change_admin_status():
                 input("Press [ENTER] to continue. ")
                 return
             
-            if name not in admin_names:
+            # Check if name exists
+            found = False
+            for admin_data in admins_data:
+                fields = split_lines(admin_data)
+                if fields and fields[0] == name:
+                    found = True
+                    break
+            
+            if not found:
                 print(f"\nError: Admin '{name}' not found. Please try again.")
-                print("Available Admin Names: ",",".join(admin_names))
                 continue
             
             break
         
         print("===========================================================================")
         
-        current_status = ""
-        new_status = ""
-        for admin in admin_details:
-            if admin[0] == name:
-                current_status = admin[2]
+        # Update status
+        updated_admins_data = []
+        for admin_data in admins_data:
+            fields = split_lines(admin_data)
+            if fields and fields[0] == name:
+                current_status = fields[4]
                 new_status = "Inactive" if current_status == "Active" else "Active"
-                break
+                fields[4] = new_status
+                updated_admins_data.append(join_strings("\n", fields))
+                print(f"Admin '{name}' status changed from {current_status} to {new_status}.")
+            else:
+                updated_admins_data.append(admin_data)
         
-        with open(ADMINS_FILE, 'r') as file:
-            content = file.read()
-            
-        admins = content.split("\n\n")
-        updated_content = []
+        # Save changes
+        with open(ADMINS_FILE, 'w', encoding='utf-8') as file:
+            file.write(join_strings("\n\n", updated_admins_data))
         
-        for admin_block in admins:
-            if admin_block.strip():
-                admin_data = admin_block.splitlines()
-                if len(admin_data) >= 5 and admin_data[0] == name:
-                    admin_data[4] = new_status
-                    updated_content.append("\n".join(admin_data))
-                else:
-                    updated_content.append(admin_block)    
-                
-        with open(ADMINS_FILE, 'w') as file:
-            file.write("\n\n".join(updated_content))
-        
-        print(f"Admin '{name}' status changed from {current_status} to {new_status} successfully. ")
         input("Press [ENTER] to continue. ")
         
     except FileNotFoundError:
         print("Admin file not found.")
-        input("Press [ENTER] to continue.")                
+        input("Press [ENTER] to continue.")   
 # ====================================END OF VIEW ADMIN LIST=====================================
+
 def main_menu():
     global logged_in_member
     if not logged_in_member:
