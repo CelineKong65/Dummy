@@ -352,9 +352,21 @@ def save_member(member):
     with open(MEMBERS_FILE, "a+", encoding='utf-8') as file:
         file.seek(0)
         
-        content = file.read()
-        if content and not content.endswith('\n'):
-            file.write("\n") 
+        content = ""
+        while True:
+            char = file.read(1)
+            if not char:
+                break
+            content += char
+        
+        last_char_is_newline = False
+        if len(content) > 0:
+            last_char = content[-1]
+            if last_char == '\n':
+                last_char_is_newline = True
+        
+        if len(content) > 0 and not last_char_is_newline:
+            file.write("\n")
         
         file.write("\n")
         file.write(member.member_id + "\n")
@@ -577,35 +589,39 @@ def signup():
     
         break
    
-    if not all([full_name, password, confirm_password, email, age, gender, contact]):
-        print("Error : All fields are required!")
-    elif password != confirm_password:
-        print("Error : Passwords do not match!")
-    else:
-        new_member = Member(full_name=full_name, member_id=member_id, email=email, password=password, age=age, gender=gender, contact=contact,status=status)
-        members.append(new_member)
+    new_member = Member(
+        full_name=full_name,
+        member_id=member_id,
+        email=email,
+        password=password,
+        age=age,
+        gender=gender,
+        contact=contact,
+        status=status
+    )
+    members.append(new_member)
 
-        with open(MEMBERS_ID_FILE, "a+", encoding='utf-8') as file:
-            file.seek(0)
+    with open(MEMBERS_ID_FILE, "a+", encoding='utf-8') as file:
+        file.seek(0)
+        content = file.read()
 
-            content = ""
-            while True:
-                c = file.read(1)
-                if not c:
-                    break
-                content += c
+        needs_newline = True
+        if len(content) > 0:
+            last_char = content[-1]
+            if last_char == '\n':
+                needs_newline = False
+        
+        if needs_newline:
+            file.write('\n')
 
-            if len(content) == 0 or content[-1] != '\n':
-                file.write("\n")
+        for char in member_id:
+            file.write(char)
+        file.write('\n')
 
-            for ch in member_id:
-                file.write(ch)
-            file.write("\n")
-            
-        save_member(new_member)
-        print(f"\nRegistration successful! Your Member ID: {member_id}")
-        input("\nPress [ENTER] to return to login menu.")
-        clear_screen()
+    save_member(new_member)
+    print(f"\nRegistration successful! Your Member ID: {member_id}")
+    input("\nPress [ENTER] to return to login menu.")
+    clear_screen()
 
 def login():
     global logged_in_member 
