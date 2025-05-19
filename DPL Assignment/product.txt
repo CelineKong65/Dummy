@@ -3,11 +3,11 @@
 102,Sourdough,Bread,5.5,9,Active
 103,Baguette,Bread,4.2,78,Inactive
 104,Rye Bread,Bread,5.0,100,Inactive
-105,Supa Mega Jumbo Bread uwu,Bread,10.5,72,Active
+105,Supa Mega Jumbo Bread uwu,Bread,10.5,87,Active
 106,Lawrence Miguel,Bread,20.0,110,Inactive
 200,Croissant,Pastries,3.5,79,Inactive
 201,Danish Pastry,Pastries,4.0,46,Active
-202,Puff Pastry,Pastries,3.8,17,Active
+202,Puff Pastry,Pastries,3.8,7,Active
 203,Pain au Chocolat,Pastries,4.2,0,Active
 204,Apple Turnover,Pastries,4.0,77,Active
 300,Chocolate Cake,Cakes,15.0,100,Active

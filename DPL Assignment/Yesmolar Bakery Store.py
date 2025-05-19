@@ -118,6 +118,30 @@ def get_attribute(obj, attr):
     except (AttributeError, KeyError):
         return None
 
+def my_split(s, delimiter=' '):
+    result = []
+    temp = ''
+    
+    for char in s:
+        if char == delimiter:
+            result.append(temp)
+            temp = ''
+        else:
+            temp += char
+
+    result.append(temp)
+    
+    return result
+
+def my_enumerate(iterable, start=0):
+    result = []
+    index = start
+    for item in iterable:
+        result.append((index, item))
+        index += 1
+    return result
+
+
 #bubble sort 在这里
 def bubble_sort(arr, key=None, reverse=False):
     n = len(arr)
@@ -2110,7 +2134,7 @@ def edit_cart(cart):
         return False
 
     editable_items = []
-    for i, item in enumerate(cart, 1):
+    for i, item in my_enumerate(cart, 1):
         status = item.product.status if item.product else "N/A"
         if status == "Active":
             editable_items.append((i, item))
@@ -2250,7 +2274,7 @@ def proceed_to_payment(products, cart):
         print("===========================================================================")
         
         print("\nInactive products in your cart:")
-        for i, item in enumerate(cart, 1):
+        for i, item in my_enumerate(cart, 1):
             status = item.product.status if item.product else "Active"
             if status == "Inactive":
                 print(f"{i}. {item.name} (Product ID: {item.product_id})")
@@ -2313,7 +2337,7 @@ def proceed_to_payment(products, cart):
             payable_items.append(item)
             actual_total += item.total
     
-    for i, item in enumerate(cart, 1):
+    for i, item in my_enumerate(cart, 1):
         status = item.product.status if item.product else "Active"
         
         print(" -------------------------------------------------------------------------")
@@ -2629,18 +2653,18 @@ def view_purchase_history():
             return
 
         from datetime import datetime
-        records = content.strip().split("\n\n")
+        records = my_split(content.strip(), delimiter="\n\n")
         user_records = []
 
         for record in records:
             if not record.strip():
                 continue
 
-            lines = record.strip().split("\n")
+            lines = my_split(record.strip(), delimiter="\n")
             if len(lines) < 2:
                 continue
 
-            header = lines[0].split(',')
+            header = my_split(lines[0], delimiter=',')
             if len(header) < 5:
                 continue
 
@@ -2653,7 +2677,7 @@ def view_purchase_history():
                 purchase_time = header[3]
                 payment_method = header[4]
 
-                total_line = lines[-1].split(',')
+                total_line = my_split(lines[-1], delimiter=',')
                 total_payment = float(total_line[4]) if len(total_line) >= 5 and total_line[3] == "TOTAL" else 0.0
 
                 user_records.append({
@@ -2806,7 +2830,7 @@ def display_cart(cart):
     print("===========================================================================")
     grand_total = 0.0
 
-    for i, item in enumerate(cart, 1):
+    for i, item in my_enumerate(cart, 1):
         pid = item.product_id if item.product_id else (item.product.product_id if item.product else "N/A")
         name = item.name if item.name else (item.product.name if item.product else "N/A")
         category = item.product.category if item.product and item.product.category else "N/A"

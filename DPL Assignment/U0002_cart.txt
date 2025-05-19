@@ -1,5 +1,6 @@
-U0002,105,Supa Mega Bread,10.50,30,315.00
+U0002,102,Sourdough,5.50,10,55.00
+U0002,105,Supa Mega Bread,10.50,15,157.50
 U0002,203,Pain au Chocolat,4.20,3,12.60
 U0002,503,Red Velvet Cupcake,4.20,22,92.40
 U0002,803,Sausage Roll,4.20,10,42.00
-U0002,102,Sourdough,5.50,10,55.00
+U0002,202,Puff Pastry,3.80,10,38.00
