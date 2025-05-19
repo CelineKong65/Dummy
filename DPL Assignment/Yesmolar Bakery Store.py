@@ -203,7 +203,6 @@ def bubble_sort(arr, key=None, reverse=False):
         swapped = False
         for j in range(0, n - i - 1):
             if key:
-                # Access attribute manually without getattr()
                 a = get_attribute(arr[j], key) if has_attribute(arr[j], key) else arr[j]
                 b = get_attribute(arr[j+1], key) if has_attribute(arr[j+1], key) else arr[j+1]
             else:
@@ -1665,24 +1664,37 @@ def admin_menu():
 def get_quoted_field(ss):
     field = ""
     ss = ss.strip()
+    
     if not ss:
         return "", ""
 
-    if ss.startswith('"'):
+    if len(ss) > 0 and ss[0] == '"':
         ss = ss[1:]
         try:
-            quote_end_index = ss.index('"')
-            field = ss[:quote_end_index]
-            ss = ss[quote_end_index + 1:]
-            if ss.startswith(','):
-                ss = ss[1:]
-        except ValueError:
+            quote_end_index = -1
+            for i in range(len(ss)):
+                if ss[i] == '"':
+                    quote_end_index = i
+                    break
+
+            if quote_end_index == -1:
+                # No closing quote found
+                field = ss
+                ss = ""
+            else:
+                field = ss[:quote_end_index]
+                ss = ss[quote_end_index + 1:]
+
+                if len(ss) > 0 and ss[0] == ',':
+                    ss = ss[1:]
+
+        except IndexError:
             field = ss
             ss = ""
     else:
-        split = ss.split(',', 1)
-        field = split[0]
-        ss = split[1] if len(split) > 1 else ""
+        line = my_split(ss, ',')
+        field = line[0]
+        ss = line[1] if len(line) > 1 else ""
 
     return field.strip(), ss.strip()
 
@@ -1708,7 +1720,7 @@ def filter_product_admin():
             '5': 'Cupcakes & Muffins', '6': 'Cookies', '7': 'Pies & Tarts',
             '8': 'Savories & Sandwiches'
         }
-        for key, value in categories.items():
+        for key, value in raw_items(categories):
             print(f"| [{key}] {value:<68}|")
         print(f"| {'[9] Back to Main Menu':<72}|")
         print("===========================================================================")
@@ -1812,7 +1824,11 @@ def add_product(products, category):
     
     # Get product status
     while True:
-        new_product.status = input("\nEnter status [Active/Inactive]: ").capitalize()
+        status_input = input("\nEnter status [Active/Inactive]: ").strip()
+        if len(status_input) > 0:
+            status_input = status_input[0].upper() + status_input[1:].lower()
+        new_product.status = status_input
+
         if new_product.status not in ["Active", "Inactive"]:
             print("Status must be either 'Active' or 'Inactive'!")
             continue
@@ -1890,15 +1906,18 @@ def edit_product(products, category):
     
     # Edit status
     while True:
-        status_input = input(f"\nEnter new status [{product_to_edit.status}] (Active/Inactive): ").capitalize().strip()
-        if len(status_input) == 0:
-            new_status = product_to_edit.status
-            break
+        status_input = input("\nEnter status [Active/Inactive]: ").strip()
+
+        if len(status_input) > 0:
+            status_input = status_input[0].upper() + status_input[1:].lower()
+
         if status_input not in ["Active", "Inactive"]:
             print("Status must be either 'Active' or 'Inactive'!")
             continue
+
         new_status = status_input
         break
+
     
     # Update product
     product_to_edit.name = new_name
@@ -2091,8 +2110,7 @@ def update_product_file():
         return False
 
 def get_cart_filename(member_id):
-    """Returns the full path to the cart file for a given member ID"""
-    return os.path.join(SCRIPT_DIR, f"{member_id}_cart.txt")
+    return SCRIPT_DIR + "/" + str(member_id) + "_cart.txt"
 
 def load_cart(cart):
     if not logged_in_member:
@@ -2116,7 +2134,7 @@ def load_cart(cart):
                 if not line:
                     continue
 
-                parts = line.split(',')
+                parts = my_split(line, ',')  #
                 if len(parts) != 6:
                     continue
 
@@ -2856,7 +2874,7 @@ def view_purchase_history():
             print("===========================================================================")
 
             for line in record["lines"][1:-1]:
-                parts = line.split(',')
+                parts = my_split(line,',')
                 if len(parts) < 9:
                     continue
 
@@ -3087,7 +3105,7 @@ def filter_products():
             '5': 'Cupcakes & Muffins', '6': 'Cookies', '7': 'Pies & Tarts',
             '8': 'Savories & Sandwiches'
         }
-        for key, value in categories.items():
+        for key, value in raw_items(categories):
             print(f"| {key}. {value:<69}|")
         print(f"| {'9. Back to Main Menu':<72}|")
         print("===========================================================================")
