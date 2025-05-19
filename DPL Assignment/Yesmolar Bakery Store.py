@@ -118,14 +118,16 @@ def get_attribute(obj, attr):
     except (AttributeError, KeyError):
         return None
 
-def my_split(s, delimiter=' '):
+def my_split(s, delimiter=','):
     result = []
     temp = ''
+    found_delimiter = False
     
     for char in s:
-        if char == delimiter:
+        if char == delimiter and not found_delimiter:
             result.append(temp)
             temp = ''
+            found_delimiter = True
         else:
             temp += char
 
@@ -1876,7 +1878,7 @@ def edit_product(products, category):
     
     # Edit price
     while True:
-        price_input = input(f"\nsEnter new price [{product_to_edit.price}]: ").strip()
+        price_input = input(f"\nEnter new price [{product_to_edit.price}]: ").strip()
         if len(price_input) == 0:
             new_price = product_to_edit.price
             break
@@ -3210,8 +3212,14 @@ def view_dashboard():
                     if len(parts) >= 6:
                         stock_str = parts[4].strip()    
                         stock = 0
-                        if stock_str and all('0' <= ch <= '9' for ch in stock_str):
-                            stock = int(stock_str)       
+                        is_all_digits = True
+                        if stock_str:
+                            for ch in stock_str:
+                                if not ('0' <= ch <= '9'):
+                                    is_all_digits = False
+                                    break
+                            if is_all_digits:
+                                stock = int(stock_str)       
                         
                         status = parts[5].strip()
                         if status == "Active":
@@ -3234,10 +3242,10 @@ def view_dashboard():
             lines = split_lines(content)
             
             member_count = len(lines) // 8
-            for i in range(0, len(lines), 8):
-                if i + 7 < len(lines) and lines[i+7] == "Active":
+            for i in range(0, len(lines), 9):
+                if i + 7 < len(lines) and lines[i+7].strip() == "Active":
                     active_member += 1
-                else:
+                elif i + 7 < len(lines) and lines[i+7].strip() == "Inactive":
                     inactive_member += 1
     except FileNotFoundError:
         pass
