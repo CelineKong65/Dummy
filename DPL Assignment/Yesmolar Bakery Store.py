@@ -103,6 +103,20 @@ def custom_chr(code):
         return ascii_table[code]
     else:
         return ascii_table[code % 128]
+    
+def has_attribute(obj, attr):
+    try:
+        obj.__dict__
+    except AttributeError:
+        return False
+
+    return attr in obj.__dict__
+
+def get_attribute(obj, attr):
+    try:
+        return obj.__dict__[attr]
+    except (AttributeError, KeyError):
+        return None
 
 #bubble sort 在这里
 def bubble_sort(arr, key=None, reverse=False):
@@ -112,8 +126,8 @@ def bubble_sort(arr, key=None, reverse=False):
         for j in range(0, n - i - 1):
             if key:
                 # Access attribute manually without getattr()
-                a = getattr(arr[j], key) if hasattr(arr[j], key) else arr[j]
-                b = getattr(arr[j+1], key) if hasattr(arr[j+1], key) else arr[j+1]
+                a = get_attribute(arr[j], key) if has_attribute(arr[j], key) else arr[j]
+                b = get_attribute(arr[j+1], key) if has_attribute(arr[j+1], key) else arr[j+1]
             else:
                 a = arr[j]
                 b = arr[j + 1]
@@ -146,7 +160,7 @@ def jump_search(arr, target, key=None):
             index = n - 1
 
         if key:
-            current_val = getattr(arr[min_val(step, n)-1], key) if hasattr(arr[min_val(step, n)-1], key) else None
+            current_val = get_attribute(arr[min_val(step, n)-1], key) if has_attribute(arr[min_val(step, n)-1], key) else None
         else:
             current_val = arr[min_val(step, n)-1]
 
@@ -163,7 +177,7 @@ def jump_search(arr, target, key=None):
 
     # Perform Linear search in the indentified block
     if key:
-        while getattr(arr[prev], key) < target:
+        while get_attribute(arr[prev], key) < target:
             prev += 1
             if prev == min_val(step, n):
                 return None
@@ -176,7 +190,7 @@ def jump_search(arr, target, key=None):
             
     # Check if found the target
     if key:
-        if getattr(arr[prev], key) == target:
+        if get_attribute(arr[prev], key) == target:
             return arr[prev]
         
     else:
