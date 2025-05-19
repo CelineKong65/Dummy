@@ -188,7 +188,7 @@ def raw_replace(s, old, new):
     result = ""
     i = 0
     while i < len(s):
-        if s[I:I+len(old)] == old:
+        if s[i:i+len(old)] == old:
             result += new
             i += len(old)
         else:
@@ -1385,16 +1385,19 @@ def filter_feedback_rating():
 
             try:
                 with open(RATING_FILE, 'r', encoding='utf-8') as file:
-                    for line in file:
-                        parts = line.strip().split(', ', 3)
-                        if len(parts) == 4:
-                            name, rating, comment, timestamp = parts
-                            if str(rate_filter) == rating:
-                                found = True
-                                print(f"| Name         : {name:<57}|")
-                                print(f"| Rating       : {rating:<57}|")
-                                print(f"| Comment      : {comment:<57}|")
-                                print(f"| Date & Time  : {timestamp:<57}|")
+                    content = file.read()
+                    for line in split_lines(content):
+                        line = line.strip()
+                        if line:
+                            parts = my_split(line, ',')
+                            if len(parts) == 4:
+                                name, rating, comment, timestamp = parts
+                                if str(rate_filter) == rating:
+                                    found = True
+                                    print(f"| Name         : {name:<57}|")
+                                    print(f"| Rating       : {rating:<57}|")
+                                    print(f"| Comment      : {comment:<57}|")
+                                    print(f"| Date & Time  : {timestamp:<57}|")
                                 print("===========================================================================")
                                  
                                 
@@ -1419,10 +1422,11 @@ def sort_feedback_rating():
     try:
         feedback_rating = []
         with open(RATING_FILE, 'r', encoding='utf-8') as file:
-            for line in file:
+            content = file.read()
+            for line in split_lines(content):
                 line = line.strip()
                 if line:
-                    parts = line.split(', ', 3)
+                    parts = my_split(line, ',')
                     if len(parts) == 4:
                         name, rating, comment, timestamp = parts
                         feedback_rating.append(Feedback(name, rating, comment, timestamp))
@@ -1497,7 +1501,8 @@ def view_feedback_rating():
 
     try:
         with open(RATING_FILE, 'r', encoding='utf-8') as file:
-            lines = file.readlines()
+            content = file.read()
+            lines = split_lines(content)
 
         if not lines:
             print("|                                                                         |")
@@ -1508,13 +1513,15 @@ def view_feedback_rating():
             return admin_menu()
 
         for line in lines:
-            parts = line.strip().split(', ', 3)
-            if len(parts) == 4:
-                name, rating, comment, timestamp = parts
-                print(f"| Name         : {name:<57}|")
-                print(f"| Rating       : {rating:<57}|")
-                print(f"| Comment      : {comment:<57}|")
-                print(f"| Date & Time  : {timestamp:<57}|")
+            line = line.strip()
+            if line:
+                parts = my_split(line, ',')
+                if len(parts) == 4:
+                    name, rating, comment, timestamp = parts
+                    print(f"| Name         : {name:<57}|")
+                    print(f"| Rating       : {rating:<57}|")
+                    print(f"| Comment      : {comment:<57}|")
+                    print(f"| Date & Time  : {timestamp:<57}|")
                 print("---------------------------------------------------------------------------")
 
     except FileNotFoundError:
@@ -1953,7 +1960,13 @@ def feedback_rating():
             clear_screen()
             main_menu()
 
-        if rate_input.isdigit():
+        only_digits = True
+        for c in rate_input:
+            if not ('0' <= c <= '9'):
+                only_digits = False
+                break
+
+        if only_digits:
             rate = int(rate_input)
             if 1 <= rate <= 5:
                 break
@@ -1967,7 +1980,7 @@ def feedback_rating():
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     with open(RATING_FILE, "a", encoding="utf-8") as file:
-        file.write(f"{logged_in_member.full_name}, {rate}, {comment}, {now}\n")
+        file.write(f"{logged_in_member.full_name},{rate},{comment},{now}\n")
 
     input("\nPress [ENTER] to return to main menu.")
     clear_screen()
