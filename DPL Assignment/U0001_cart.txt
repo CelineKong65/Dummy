@@ -1,3 +1,4 @@
-U0001,106,Lawrence Miguel,20.00,20,400.00
-U0001,404,Sugar Donut,2.50,4,10.00
-U0001,600,Chocolate Chip Cookie,2.00,12,24.00
+U0001,102,Sourdough,5.50,9,49.50
+U0001,105,Supa Mega Jumbo Bread uwu,10.50,7,73.50
+U0001,503,Red Velvet Cupcake,4.20,6,25.20
+U0001,204,Apple Turnover,4.00,7,28.00

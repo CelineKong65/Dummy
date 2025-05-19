@@ -217,7 +217,6 @@ def bubble_sort(arr, key=None, reverse=False):
         if not swapped:
             break
 
-
 #Jump Search here
 def min_val(a, b):
     return a if a < b else b
@@ -2121,13 +2120,14 @@ def load_cart(cart):
 
     cart_file = get_cart_filename(logged_in_member.member_id)
     cart.clear()
-    
+
     if not products and not load_products():
         print("Error: Failed to load products.")
         return False
 
     try:
         if not os.path.exists(cart_file) or os.path.getsize(cart_file) == 0:
+            print("Cart file is empty or does not exist.")
             return True
 
         with open(cart_file, 'r', encoding='utf-8') as file:
@@ -2136,31 +2136,49 @@ def load_cart(cart):
                 if not line:
                     continue
 
-                parts = my_split(line, ',')  #
+                parts = []
+                temp = ""
+                comma_count = 0
+                for char in line:
+                    if char == ',' and comma_count < 5:
+                        parts.append(temp)
+                        temp = ""
+                        comma_count += 1
+                    else:
+                        temp += char
+                parts.append(temp)
+
                 if len(parts) != 6:
+                    print(f"Skipping malformed line: {line}")
                     continue
 
-                item = CartItem()
-                item.product_id = parts[1].strip()
-                item.name = parts[2].strip()
-                
                 try:
+                    item = CartItem()
+                    item.product_id = parts[1].strip()
+                    item.name = parts[2].strip()
                     item.price = float(parts[3].strip())
                     item.quantity = int(parts[4].strip())
                     item.total = float(parts[5].strip())
-                except ValueError:
+                except ValueError as e:
+                    print(f"Skipping line due to conversion error: {line} - {e}")
                     continue
 
+                # Attach latest product info
                 for p in products:
                     if p.product_id == item.product_id:
                         item.product = p
+                        item.status = p.status
                         break
+                else:
+                    print(f"Warning: Product ID {item.product_id} not found.")
 
                 cart.append(item)
+
+        return True
+
     except IOError as e:
         print(f"Error reading cart file: {e}")
         return False
-    return True
 
 def save_cart(cart):
     if not logged_in_member:
@@ -2168,15 +2186,15 @@ def save_cart(cart):
         return False
 
     cart_file = get_cart_filename(logged_in_member.member_id)
+
     try:
         with open(cart_file, 'w', encoding='utf-8') as file:
-            for item in cart:
+            for index, item in enumerate(cart, start=1):
                 pid = item.product_id if item.product_id else (item.product.product_id if item.product else "")
                 name = item.name if item.name else (item.product.name if item.product else "")
                 price = item.price if item.price is not None else (item.product.price if item.product else 0.0)
                 quantity = item.quantity
                 total = item.total if item.total is not None else (price * quantity)
-                status = item.status if item.status else (item.product.status if item.product else "")
 
                 file.write(f"{logged_in_member.member_id},{pid},{name},{price:.2f},{quantity},{total:.2f}\n")
         return True
@@ -2949,6 +2967,8 @@ def display_cart(cart):
                 return
             else:
                 print("Invalid choice. Please enter 1 or 2.")
+    
+    bubble_sort(cart, key='product_id')
 
     print("===========================================================================")
     print("|                                 MY CART                                 |")
