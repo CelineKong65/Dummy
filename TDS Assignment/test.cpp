@@ -1160,7 +1160,9 @@ void saveSortedProducts(Product products[], int productCount) {
 
 //----------------------------------------------------------- SAVE SORTED ORDERS -----------------------------------------------
 void saveSortedOrders(Order orders[], int orderCount) {
-    ofstream outFile("sorted_order.txt");
+    
+    shellSortOrdersByDateTime(orders,orderCount);
+	ofstream outFile("sorted_order.txt");
     if (!outFile) {
         cout << "Error opening file for writing!" << endl;
         return;
@@ -1176,6 +1178,8 @@ void saveSortedOrders(Order orders[], int orderCount) {
     
     outFile.close();
     cout << "Sorted orders saved to sorted_order.txt\n";
+    cout << "Press [ENTER] to return to Product Menu.";
+	cin.get();   
 }
 
 //----------------------------------------------------------- ADD PRODUCT-------------------------------------------------------
@@ -1622,9 +1626,15 @@ void addOrders(Order orders[]) {
     int orderCount = loadOrders(orders);
     Order newOrder;
     bool idExist = false;
-    int choice;
+    string choice;
     int addCount = 0;
     const int MAX_ADD = 5;
+    
+    // Load customer and product data for validation
+    HashCustomer HC;
+    HC.loadFromFile();
+    Product products[MAX_PRODUCTS];
+    int productCount = loadProducts(products);
     
     system("cls");
     
@@ -1637,36 +1647,241 @@ void addOrders(Order orders[]) {
         }
         
         cout << endl;
+        
+        // Validate Order ID
+        bool validOrderID = false;
         do {
-            idExist = false;
-            cout << "Enter Order ID [Press 0 to return to Order Menu] : ";
-            cin >> newOrder.orderID;
+            cout << "Enter Order ID (format: ORD followed by 3 digits, e.g. ORD001) [Press 0 to return to Order Menu]: ";
+            getline(cin, newOrder.orderID);
             
-            if(newOrder.orderID == "0"){
+            if(newOrder.orderID == "0") {
                 return;
             }
-        
+            
+            // Check if starts with ORD and has exactly 3 digits after
+            if(newOrder.orderID.length() != 6 || 
+               newOrder.orderID[0] != 'O' || 
+               newOrder.orderID[1] != 'R' || 
+               newOrder.orderID[2] != 'D') {
+                cout << "Invalid Order ID format! Must be ORD followed by 3 digits (e.g. ORD001).\n\n";
+                continue;
+            }
+            
+            // Check the last 3 characters are digits (0-9)
+            bool allDigits = true;
+            for(int i = 3; i < 6; i++) {
+                if(newOrder.orderID[i] < '0' || newOrder.orderID[i] > '9') {
+                    allDigits = false;
+                    break;
+                }
+            }
+            
+            if(!allDigits) {
+                cout << "Invalid Order ID format! Last 3 characters must be digits.\n\n";
+                continue;
+            }
+            
+            // Check if ID exists
+            idExist = false;
             for(int i = 0; i < orderCount; i++) {
                 if(orders[i].orderID == newOrder.orderID) {
-                    cout << "This Order ID already exists! Please re-enter.\n";
+                    cout << "This Order ID already exists! Please re-enter.\n\n";
                     idExist = true;
                     break;
                 }
             }
-        } while (idExist);
+            
+            if(!idExist) {
+                validOrderID = true;
+            }
+        } while(!validOrderID);
+        
+        // Validate Customer ID
+        bool validCustomer = false;
+        string customerIDStr;
+        do {
+            cout << "\nEnter Customer ID (must exist in system): ";
+            getline(cin, customerIDStr);
+            
+            if(isEmpty(customerIDStr)) {
+                cout << "Customer ID cannot be empty!\n";
+                continue;
+            }
+            
+            // Check if customer ID contains only digits (0-9)
+            bool allDigits = true;
+            for(int i = 0; i < customerIDStr.length(); i++) {
+                if(customerIDStr[i] < '0' || customerIDStr[i] > '9') {
+                    allDigits = false;
+                    break;
+                }
+            }
+            
+            if(!allDigits) {
+                cout << "Customer ID must contain only digits!\n";
+                continue;
+            }
+            
+            // Manual string to int conversion
+            int customerID = StringToInt(customerIDStr);
 
-        cout << "Enter Customer ID: ";
-        cin >> newOrder.customerID;
+            
+            Customer* foundCustomer = HC.search(customerIDStr);
+            if(foundCustomer == NULL) {
+                cout << "Customer ID not found in system! Please enter a valid customer ID.\n";
+            } else {
+                validCustomer = true;
+                newOrder.customerID = customerID;
+            }
+        } while(!validCustomer);
         
-        cout << "Enter Product ID: ";
-        cin >> newOrder.productID;
+        // Validate Product ID
+        bool validProduct = false;
+        string productIDStr;
+        do {
+            cout << "\nEnter Product ID (must exist in system): ";
+            getline(cin, productIDStr);
+            
+            if(isEmpty(productIDStr)) {
+                cout << "Product ID cannot be empty!\n";
+                continue;
+            }
+            
+            // Check if product ID contains only digits (0-9)
+            bool allDigits = true;
+            for(int i = 0; i < productIDStr.length(); i++) {
+                if(productIDStr[i] < '0' || productIDStr[i] > '9') {
+                    allDigits = false;
+                    break;
+                }
+            }
+            
+            if(!allDigits) {
+                cout << "Product ID must contain only digits!\n";
+                continue;
+            }
+            
+            // Manual string to int conversion
+            int productID = StringToInt(productIDStr);
+            
+            bool productFound = false;
+            for(int i = 0; i < productCount; i++) {
+                if(products[i].id == productID) {
+                    productFound = true;
+                    break;
+                }
+            }
+            
+            if(!productFound) {
+                cout << "Product ID not found in system! Please enter a valid product ID.\n";
+            } else {
+                validProduct = true;
+                newOrder.productID = productID;
+            }
+        } while(!validProduct);
         
-        cout << "Enter Date/Time (format: YYYY-MM-DD HH:MM:SS): ";
-        cin.ignore();
-        getline(cin, newOrder.dateTime);
+        // Validate Date/Time
+        bool validDateTime = false;
+        do {
+            cout << "\nEnter Date/Time (format: YYYY-MM-DD HH:MM:SS): ";
+            getline(cin, newOrder.dateTime);
+            
+            if(isEmpty(newOrder.dateTime)) {
+                cout << "Date/Time cannot be empty!\n";
+                continue;
+            }
+            
+            // Basic format validation
+            if(newOrder.dateTime.length() != 19 || 
+               newOrder.dateTime[4] != '-' || 
+               newOrder.dateTime[7] != '-' || 
+               newOrder.dateTime[10] != ' ' || 
+               newOrder.dateTime[13] != ':' || 
+               newOrder.dateTime[16] != ':') {
+                cout << "Invalid date/time format! Please use YYYY-MM-DD HH:MM:SS\n";
+                continue;
+            }
+            
+            // Check all other characters are digits (0-9) except the separators
+            bool validFormat = true;
+            for(int i = 0; i < 19; i++) {
+                if(i == 4 || i == 7 || i == 10 || i == 13 || i == 16) continue;
+                if(newOrder.dateTime[i] < '0' || newOrder.dateTime[i] > '9') {
+                    validFormat = false;
+                    break;
+                }
+            }
+            
+            if(!validFormat) {
+                cout << "Invalid characters in date/time! Please use format YYYY-MM-DD HH:MM:SS\n";
+                continue;
+            }
+            
+            validDateTime = true;
+        } while(!validDateTime);
         
-        cout << "Enter Total Amount: ";
-        cin >> newOrder.totalAmount;
+        // Validate Total Amount
+        bool validAmount = false;
+        string amountStr;
+        do {
+            cout << "\nEnter Total Amount (must be positive number): ";
+            getline(cin, amountStr);
+            
+            if(isEmpty(amountStr)) {
+                cout << "Amount cannot be empty!\n";
+                continue;
+            }
+            
+            // Check for valid number format
+            bool hasDecimal = false;
+            bool validNumber = true;
+            int decimalPlaces = 0;
+            for(int i = 0; i < amountStr.length(); i++) {
+                if(amountStr[i] == '.') {
+                    if(hasDecimal) {
+                        validNumber = false;
+                        break;
+                    }
+                    hasDecimal = true;
+                }
+                else if(amountStr[i] < '0' || amountStr[i] > '9') {
+                    validNumber = false;
+                    break;
+                }
+                else if(hasDecimal) {
+                    decimalPlaces++;
+                }
+            }
+            
+            if(!validNumber) {
+                cout << "Invalid amount! Please enter a valid positive number.\n";
+                continue;
+            }
+            
+            // Manual string to double conversion
+            double amount = 0.0;
+            double decimalMultiplier = 0.1;
+            bool decimalReached = false;
+            for(int i = 0; i < amountStr.length(); i++) {
+                if(amountStr[i] == '.') {
+                    decimalReached = true;
+                }
+                else if(!decimalReached) {
+                    amount = amount * 10 + (amountStr[i] - '0');
+                }
+                else {
+                    amount += (amountStr[i] - '0') * decimalMultiplier;
+                    decimalMultiplier *= 0.1;
+                }
+            }
+            
+            if(amount <= 0) {
+                cout << "Amount must be a positive number!\n";
+            } else {
+                validAmount = true;
+                newOrder.totalAmount = amount;
+            }
+        } while(!validAmount);
 
         orders[orderCount] = newOrder;
         orderCount++;
@@ -1683,7 +1898,7 @@ void addOrders(Order orders[]) {
                 << newOrder.customerID << " "
                 << newOrder.productID << " "
                 << "\"" << newOrder.dateTime << "\" " 
-                << newOrder.totalAmount << "\n";
+                << fixed << setprecision(2) << newOrder.totalAmount << "\n";
         outFile.close();
 
         cout << "\nOrder added successfully!" << endl;
@@ -1695,15 +1910,14 @@ void addOrders(Order orders[]) {
             cout << "| 2. NO  |" << endl;
             cout << "|________|" << endl;
             cout << "\nEnter your choice : ";
-            cin >> choice;
+            getline(cin, choice);
         } else {
             cout << "Maximum of 5 orders added.\n";
-            choice = 2;
+            choice = "2";
         }
-    } while(choice == 1 && addCount < MAX_ADD);
+    } while(choice == "1" && addCount < MAX_ADD);
 
     cout << "Press [ENTER] to return to Order Menu.";
-    cin.ignore(); 
     cin.get();     
     system("cls");
 }
@@ -1711,7 +1925,7 @@ void addOrders(Order orders[]) {
 // --------------------- ORDER MENU ---------------------
 void orderMenu(){
 	Order orders[MAX_ORDERS];
-	int choice;
+	string choice;
 
 	do {
 		int  orderCount = loadOrders(orders);
@@ -1731,80 +1945,81 @@ void orderMenu(){
         cout << "|================================================|" << endl;
         cout << "|                 Available Actions              |" << endl;
         cout << "|================================================|" << endl;
-        cout << "|1. Add New Order (min. 5 entries)               |" << endl;
+        cout << "|1. Add New Order                                |" << endl;
         cout << "|2. Search Data by ID                            |" << endl;
-        cout << "|3. Display Sorted Data                          |" << endl;
+        cout << "|3. Display Sorted Data (Latest first)           |" << endl;
         cout << "|4. Save Sorted Data                             |" << endl;
         cout << "|5. Return to Team B Menu                        |" << endl;
         cout << "|________________________________________________|" << endl;
         cout << "Enter your choice: ";
-        cin >> choice;
+        getline(cin,choice);
         
-        switch(choice) {
-        	case 1:
-                system("cls");
-                addOrders(orders);
-                break;
-            case 2:
-			{
-			    system("cls");
-			    orderCount = loadOrders(orders);
-			    string searchOrderID;  
+        if(choice=="1"){
+            system("cls");
+            addOrders(orders);
+    	}
+      	else if(choice=="2"){
+			system("cls");
+			orderCount = loadOrders(orders);
+			string searchOrderID;  
 			    
-			    cout << "\nEnter Order ID to search: ";
-			    cin >> searchOrderID;
+			cout << "\nEnter Order ID to search: ";
+			cin >> searchOrderID;
 			    
-			    bool found = false;
-			    for (int i = 0; i < orderCount; i++) {
-			        if (orders[i].orderID == searchOrderID) {
-			            cout << "\nOrder Found:" << endl;
-			            cout << "==================================================================" << endl;
-			            cout << "Order ID    : " << orders[i].orderID << endl;
-			            cout << "Customer ID : " << orders[i].customerID << endl;
-			            cout << "Product ID  : " << orders[i].productID << endl;
-			            cout << "Date/Time   : " << orders[i].dateTime << endl;
-			            cout << "Total Amount: " << orders[i].totalAmount << endl;
-			            cout << "==================================================================" << endl;
-			            found = true;
-			            break;
-			        }
+			bool found = false;
+			for (int i = 0; i < orderCount; i++) {
+			if (orders[i].orderID == searchOrderID) {
+			    cout << "\nOrder Found:" << endl;
+			    cout << "==================================================================" << endl;
+			        cout << "Order ID    : " << orders[i].orderID << endl;
+			        cout << "Customer ID : " << orders[i].customerID << endl;
+			        cout << "Product ID  : " << orders[i].productID << endl;
+			        cout << "Date/Time   : " << orders[i].dateTime << endl;
+			        cout << "Total Amount: " << orders[i].totalAmount << endl;
+			        cout << "==================================================================" << endl;
+			        found = true;
+			        break;
 			    }
+			}
 			    
-			    if (!found) {
-			        cout << "Order not found.\n";
-			    }
-			    cout << "Press [ENTER] to Refresh.";
-			    cin.ignore();
-			    cin.get();     
-			    break;
-			}   
-            case 3:
-                system("cls");
-                shellSortOrdersByDateTime(orders, orderCount);
-                cout << "Orders sorted by Date/Time:\n";
-                for (int i = 0; i < orderCount; i++) {
-                    cout << "\nOrder ID: " << orders[i].orderID << endl;
-                    cout << "Date/Time: " << orders[i].dateTime << endl;
-                    cout << "Customer: " << orders[i].customerID << endl;
-                    cout << "Product: " << orders[i].productID << endl;
-                    cout << "Amount: RM" << orders[i].totalAmount << endl;
-                    cout << "_________________________________________________________________________________________" << endl;
-                }
-                cout << "\nPress [Enter] to continue...";
-		        cin.ignore();
-		        cin.get();
-                break;
-			case 4:
-	            system("cls");
-	            saveSortedOrders(orders, orderCount);
-	            break;
-	        case 5:
-                system("cls");
-                teamBMenu();
-                return;
-            default:
-                cout << "Invalid choice. Please try again.\n";
-                break;   
+			if (!found) {
+			    cout << "Order not found.\n";
+			}
+			cout << "Press [ENTER] to Refresh.";
+			cin.ignore();
+			cin.get();     
+		}   
+		else if(choice=="3"){
+            system("cls");
+            shellSortOrdersByDateTime(orders, orderCount);
+            cout << "Orders sorted by Date/Time:\n";
+            for (int i = 0; i < orderCount; i++) {
+                cout << "\nOrder ID: " << orders[i].orderID << endl;
+                cout << "Date/Time: " << orders[i].dateTime << endl;
+                cout << "Customer: " << orders[i].customerID << endl;
+                cout << "Product: " << orders[i].productID << endl;
+                cout << "Amount: RM" << orders[i].totalAmount << endl;
+                cout << "_________________________________________________________________________________________" << endl;
+            }
+            cout << "\nPress [Enter] to continue...";
+		    cin.ignore();
+		    cin.get();
+		}
+ 		else if(choice=="4"){
+	        system("cls");
+	        saveSortedOrders(orders, orderCount);
+		}
+		else if(choice=="5"){
+            system("cls");
+            teamBMenu();
+            return;
+		}
+		else{
+	    	cout << "Invalid input. Please enter a number between 1 and 5.\n";
+		    cout << "Press [Enter] to continue...";
+		    cin.get();
+		    system("cls");
+		    orderMenu();
 		}
         system("cls");
 	}while (true);
@@ -1816,3 +2031,4 @@ int main() {
 
     return 0;
 }
+
