@@ -1861,6 +1861,40 @@ void printWrappedText(const string& text) {
     cout << endl;
 }
 
+bool isValidDateTime(string dt) {
+    // Check length first
+    if (dt.length() != 16) {
+        return false;
+    }
+
+    // Check if the fixed characters are correct
+    if (dt[4] != '-' || dt[7] != '-' || dt[10] != ' ' || dt[13] != ':') {
+        return false;
+    }
+
+    // Check if the other characters are digits
+    for (int i = 0; i < dt.length(); i++) {
+        if (i == 4 || i == 7 || i == 10 || i == 13) continue; // skip -, space, :
+        if (!isdigit(dt[i])) return false; // not a number
+    }
+
+    // Check hour (HH)
+    int hour = (dt[11] - '0') * 10 + (dt[12] - '0');
+    if (hour < 0 || hour > 23) {
+        cout << "Hour must be between 00 and 23.\n";
+        return false;
+    }
+
+    // Check minute (MM)
+    int minute = (dt[14] - '0') * 10 + (dt[15] - '0');
+    if (minute < 0 || minute > 59) {
+        cout << "Minute must be between 00 and 59.\n";
+        return false;
+    }
+
+    return true;
+}
+
 //---------------------------------------------------- ADD ORDER ----------------------------------------------------
 void addOrders(Order orders[],OrderQueue &oq) {
 
@@ -2029,7 +2063,7 @@ void addOrders(Order orders[],OrderQueue &oq) {
         // Validate Date/Time
         bool validDateTime = false;
         do {
-            cout << "\nEnter Date/Time (format: YYYY-MM-DD HH:MM:SS): ";
+            cout << "\nEnter Date/Time (format: YYYY-MM-DD HH:MM): ";
             getline(cin, newOrder.dateTime);
             
             if(isEmpty(newOrder.dateTime)) {
@@ -2038,20 +2072,15 @@ void addOrders(Order orders[],OrderQueue &oq) {
             }
             
             // Basic format validation
-            if(newOrder.dateTime.length() != 19 || 
-               newOrder.dateTime[4] != '-' || 
-               newOrder.dateTime[7] != '-' || 
-               newOrder.dateTime[10] != ' ' || 
-               newOrder.dateTime[13] != ':' || 
-               newOrder.dateTime[16] != ':') {
-                cout << "Invalid date/time format! Please use YYYY-MM-DD HH:MM:SS\n";
+            if(!isValidDateTime(newOrder.dateTime)) {
+                cout << "Invalid date/time format! Please use YYYY-MM-DD HH:MM\n";
                 continue;
             }
             
             // Check all other characters are digits (0-9) except the separators
             bool validFormat = true;
-            for(int i = 0; i < 19; i++) {
-                if(i == 4 || i == 7 || i == 10 || i == 13 || i == 16) continue;
+            for(int i = 0; i < 15; i++) {
+                if(i == 4 || i == 7 || i == 10 || i == 13 ) continue;
                 if(newOrder.dateTime[i] < '0' || newOrder.dateTime[i] > '9') {
                     validFormat = false;
                     break;
