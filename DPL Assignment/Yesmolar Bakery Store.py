@@ -141,6 +141,36 @@ def my_enumerate(iterable, start=0):
         index += 1
     return result
 
+def join_strings(separator, sequence):
+    if not sequence:
+        return ""
+    
+    result = ""
+    first_item = True
+    
+    for item in sequence:
+        if not first_item:
+            result += separator
+        result += str(item)
+        first_item = False
+    
+    return result
+
+def split_lines(text):
+    lines = []
+    current_line = []
+    
+    for char in text:
+        if char == '\n' or char == '\r':
+            lines.append(join_strings("", current_line))
+            current_line = []
+        else:
+            current_line.append(char)
+    
+    if current_line:
+        lines.append(join_strings("", current_line))
+    
+    return lines
 
 #bubble sort 在这里
 def bubble_sort(arr, key=None, reverse=False):
@@ -276,15 +306,19 @@ def load_admins():
 def get_next_member_id():
     try:
         with open(MEMBERS_ID_FILE, "r", encoding='utf-8') as file:
-            read_current_id = file.read().splitlines()
-            if read_current_id:
-                last_id = read_current_id[-1].strip()
-                last_id_number = int(last_id[1:])
-                next_id_number = last_id_number + 1 
-                next_id = f"U{next_id_number:04d}"
+            file_content = file.read()
+            all_lines = split_lines(file_content)
+            non_empty_lines = [line.strip() for line in all_lines if line.strip()]
+            
+            if non_empty_lines:
+                last_id = non_empty_lines[-1] 
+                last_id_number = int(last_id[1:]) 
+                next_id_number = last_id_number + 1
+                next_id = f"U{next_id_number:04d}" 
                 return next_id
             else:
                 return "U0001"
+                
     except FileNotFoundError:
         with open(MEMBERS_ID_FILE, "w", encoding='utf-8') as file:
             file.write("U0001\n")
@@ -617,12 +651,30 @@ def update_member(updated_member):
         with open(MEMBERS_FILE, "r", encoding='utf-8') as file:
             content = file.read().strip()
 
-        members = content.split("\n\n")
+        members = []
+        current_member = []
+        blank_line_count = 0
+        
+        for char in content:
+            if char == '\n':
+                blank_line_count += 1
+                if blank_line_count == 2:
+                    members.append(join_strings("", current_member))
+                    current_member = []
+                    blank_line_count = 0
+            else:
+                if blank_line_count == 1:
+                    current_member.append('\n')
+                    blank_line_count = 0
+                current_member.append(char)
+        
+        if current_member:
+            members.append(join_strings("", current_member))
 
         updated_members = []
 
         for member_data in members:
-            fields = member_data.splitlines()
+            fields = split_lines(member_data)
 
             if fields and fields[0] == updated_member.member_id:
                 new_member_data = [
@@ -635,11 +687,11 @@ def update_member(updated_member):
                     updated_member.contact,
                     updated_member.status,
                 ]
-                updated_members.append("\n".join(new_member_data))
+                updated_members.append(join_strings("\n", new_member_data))
             else:
                 updated_members.append(member_data)
 
-        new_content = "\n\n".join(updated_members)
+        new_content = join_strings("\n\n", updated_members)
 
         with open(MEMBERS_FILE, "w", encoding='utf-8') as file:
             file.write(new_content)
