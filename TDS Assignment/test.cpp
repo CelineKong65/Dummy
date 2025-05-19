@@ -53,6 +53,171 @@ struct Order {
     double totalAmount;
 };
 
+template <typename T>
+class ADTqueue {
+private: 
+    T queue[100]; 
+    int head, tail;
+    
+public: 
+    ADTqueue() { 
+        tail = -1; 
+        head = 0; 
+    } 
+    
+    int empty() { 
+        return head > tail;
+    } 
+    
+    int full() { 
+        return tail == 99; // 99 is last index of the array
+    } 
+    
+    void append(T num) { 
+        if (!full()) { 
+            queue[++tail] = num; 
+        } 
+        else { 
+            cout << "Queue is Full" << endl; 
+        } 
+    } 
+    
+    T serve() { 
+        if(!empty()) { 
+            return queue[head++]; 
+        }
+        else { 
+            cout << "Queue is Empty" << endl; 
+            return T(); // Return default value for type
+        }
+    }
+    void display() {
+        if(empty()) {
+            cout << "Order queue is empty\n";
+            return;
+        }
+
+        cout << "\nUnsorted Orders:\n";
+        for(int i = head; i <= tail; i++) {
+            cout << "\nOrder ID     : " << queue[i].orderID << endl;
+        	cout << "Customer ID  : " << queue[i].customerID << endl;
+            cout << "Product ID   : " << queue[i].productID << endl;
+            cout << "Date/Time    : " << queue[i].dateTime << endl;
+            cout << "Total Amount : RM " << fixed << setprecision(2) << queue[i].totalAmount << endl;
+            cout << "\n";
+			cout << "_________________________________________________________________________________________" << endl;
+        }
+        cout << "\nTotal orders in queue: " << (tail-head+1) << "/100\n\n";
+    }
+};
+
+class OrderQueue : public ADTqueue<Order> {
+public:
+	OrderQueue() {
+        loadFromFile(); // Load data in constructor
+    }
+    
+    void loadFromFile() {
+        ifstream inFile("order.txt");
+        if (!inFile) return;
+
+        Order order;
+        while (inFile >> order.orderID) {
+            inFile >> order.customerID;
+            inFile >> order.productID;
+            inFile.ignore(); // Ignore space before datetime
+            getline(inFile, order.dateTime, '"'); // Read until opening quote
+            getline(inFile, order.dateTime, '"'); // Read actual datetime
+            inFile >> order.totalAmount;
+            
+            if (!full()) {
+                append(order);
+            }
+        }
+        inFile.close();
+    }
+    
+    void processNextOrder() {
+	    if(!empty()) {
+	        // Get the order to be processed
+	        Order nextOrder = serve();
+	        
+	        // Display processing information
+	        cout << "\nProcessing order: " << nextOrder.orderID << endl;
+	        cout << "Customer ID     : " << nextOrder.customerID << endl;
+			cout << "Product ID      : " << nextOrder.productID << endl;
+	        cout << "Date/Time       : " << nextOrder.dateTime << endl;
+			cout << "Total Amount    : RM " << fixed << setprecision(2) << nextOrder.totalAmount << endl;
+	        
+	        // Read all orders from file into an array
+	        const int MAX_ORDERS = 1000; // Adjust as needed
+	        Order orders[MAX_ORDERS];
+	        int orderCount = 0;
+	        
+	        ifstream inFile("order.txt");
+	        if (!inFile) {
+	            cout << "Error opening order file for reading!\n";
+	            return;
+	        }
+	
+	        while (orderCount < MAX_ORDERS && 
+	               inFile >> orders[orderCount].orderID) {
+	            inFile >> orders[orderCount].customerID;
+	            inFile >> orders[orderCount].productID;
+	            inFile.ignore(); // Ignore space before datetime
+	            getline(inFile, orders[orderCount].dateTime, '"'); // Read until opening quote
+	            getline(inFile, orders[orderCount].dateTime, '"'); // Read actual datetime
+	            inFile >> orders[orderCount].totalAmount;
+	            orderCount++;
+	        }
+	        inFile.close();
+	        
+	        // Find and remove the processed order
+	        bool found = false;
+	        for (int i = 0; i < orderCount; i++) {
+	            if (orders[i].orderID == nextOrder.orderID) {
+	                // Shift remaining elements left
+	                for (int j = i; j < orderCount - 1; j++) {
+	                    orders[j] = orders[j + 1];
+	                }
+	                orderCount--;
+	                found = true;
+	                break;
+	            }
+	        }
+	        
+	        if (!found) {
+	            cout << "Warning: Processed order not found in file!\n";
+	        }
+	        
+	        // Rewrite the file without the processed order
+	        ofstream outFile("order.txt");
+	        if (!outFile) {
+	            cout << "Error opening order file for writing!\n";
+	            return;
+	        }
+	
+	        for (int i = 0; i < orderCount; i++) {
+	            outFile << orders[i].orderID << " "
+	                    << orders[i].customerID << " "
+	                    << orders[i].productID << " "
+	                    << "\"" << orders[i].dateTime << "\" " 
+	                    << fixed << setprecision(2) << orders[i].totalAmount;
+	            
+	            // Add newline unless it's the last order
+	            if (i < orderCount - 1) {
+	                outFile << "\n";
+	            }
+	        }
+	        outFile.close();
+	        
+	        cout << "\nOrder processed successfully and removed from file.\n";
+	    } else {
+	        cout << "No orders to process.\n";
+	    }
+	}
+};
+
 // --------------------- HASHING + LINKED LIST QUEUE ---------------------
 class HashCustomer {
 	private:
@@ -1178,7 +1343,7 @@ void saveSortedOrders(Order orders[], int orderCount) {
     
     outFile.close();
     cout << "Sorted orders saved to sorted_order.txt\n";
-    cout << "Press [ENTER] to return to Product Menu.";
+    cout << "Press [ENTER] to return to Order Menu.";
 	cin.get();   
 }
 
@@ -1622,7 +1787,13 @@ void printWrappedText(const string& text) {
 }
 
 //---------------------------------------------------- ADD ORDER ----------------------------------------------------
-void addOrders(Order orders[]) {
+void addOrders(Order orders[],OrderQueue &oq) {
+
+	if(oq.full()) {
+        cout << "Queue is full, cannot add more orders.\n";
+        return;
+    }
+
     int orderCount = loadOrders(orders);
     Order newOrder;
     bool idExist = false;
@@ -1883,6 +2054,8 @@ void addOrders(Order orders[]) {
             }
         } while(!validAmount);
 
+		oq.append(newOrder);
+
         orders[orderCount] = newOrder;
         orderCount++;
         addCount++;
@@ -1926,21 +2099,10 @@ void addOrders(Order orders[]) {
 void orderMenu(){
 	Order orders[MAX_ORDERS];
 	string choice;
-
+	OrderQueue oq;
 	do {
 		int  orderCount = loadOrders(orders);
-		
-	    cout << "\nUnsorted Orders:\n";
-		for (int i = 0; i < orderCount; i++) {
-		    cout << "\nOrder ID : " << orders[i].orderID << endl;
-		    cout << "Customer ID: " << orders[i].customerID << endl;
-		    cout << "Product ID: " << orders[i].productID << endl;
-		    cout << "Date/Time: " << orders[i].dateTime << endl;
-		    cout << "Total Amount: " << orders[i].totalAmount << endl;
-		    cout << "\n";
-		        
-		    cout << "_________________________________________________________________________________________" << endl;
-		}
+		oq.display();
 	    
         cout << "|================================================|" << endl;
         cout << "|                 Available Actions              |" << endl;
@@ -1949,14 +2111,15 @@ void orderMenu(){
         cout << "|2. Search Data by ID                            |" << endl;
         cout << "|3. Display Sorted Data (Latest first)           |" << endl;
         cout << "|4. Save Sorted Data                             |" << endl;
-        cout << "|5. Return to Team B Menu                        |" << endl;
+        cout << "|5. Process Next Order                           |" << endl;
+		cout << "|6. Return to Team B Menu                        |" << endl;
         cout << "|________________________________________________|" << endl;
         cout << "Enter your choice: ";
         getline(cin,choice);
         
         if(choice=="1"){
             system("cls");
-            addOrders(orders);
+            addOrders(orders,oq);
     	}
       	else if(choice=="2"){
 			system("cls");
@@ -2010,6 +2173,12 @@ void orderMenu(){
 	        saveSortedOrders(orders, orderCount);
 		}
 		else if(choice=="5"){
+            system("cls");
+		    oq.processNextOrder();
+		    cout << "\nPress [Enter] to return to Order Menu.";
+		    cin.get();
+		}
+		else if(choice=="6"){
             system("cls");
             teamBMenu();
             return;
