@@ -1168,6 +1168,22 @@ int loadOrders(Order orders[]) {
     file.close();
     return count;
 }
+
+//---------------------------------------------------------------raw code function to convert lowercase-----------------------------------------------
+string toLowerCase(const string& str) {
+    string result = "";
+    for (char c : str) {
+        // Check if uppercase A-Z
+        if (c >= 'A' && c <= 'Z') {
+            // Convert to lowercase by adding 32
+            result += (c + 32);
+        } else {
+            result += c;
+        }
+    }
+    return result;
+}
+
 //-------------------------------------------------------- MAIN MENU ------------------------------------------------------
 void mainMenu(){
 	system("cls");
@@ -1431,21 +1447,29 @@ void addProducts(Product products[]) {
         string idStr;
         int idToAdd = -1;
         do {
-            cout << "Enter ID in 3 digits [Press 0 to return to Product Menu] : ";
+            cout << "\nEnter ID in 3 digits [Press 0 to return to Product Menu] : ";
             getline(cin, idStr);
 
             // Check all digits
             idToAdd = StringToInt(idStr);
             if (idToAdd == -1) {
-                cout << "Invalid input! ID must be digits only.\n";
+            	cout << "_________________________________________" << endl;
+                cout << "|Invalid Product ID!                    |" << endl;
+                cout << "|1. ID must be digits only.             |" << endl;
+                cout << "|2. ID must be exactly 3 digits.        |" << endl;
+                cout << "|_______________________________________|" << endl << endl;
                 continue;
             }
             if (idToAdd == 0) {
                 return;
             }
             if (idStr.length() != 3) {
-                cout << "ID must be exactly 3 digits!\n";
-                idToAdd = -1; // force re-entry
+                cout << "_________________________________________" << endl;
+                cout << "|Invalid Product ID!                    |" << endl;
+                cout << "|1. ID must be digits only.             |" << endl;
+                cout << "|2. ID must be exactly 3 digits.        |" << endl;
+                cout << "|_______________________________________|" << endl << endl;
+                idToAdd = -1; 
                 continue;
             }
 
@@ -1453,7 +1477,9 @@ void addProducts(Product products[]) {
             idExist = false;
             for (int i = 0; i < productCount; i++) {
                 if (products[i].id == idToAdd) {
-                    cout << "This Product ID already exists! Please re-enter.\n";
+                	cout << "_________________________________________" << endl;
+	                cout << "|This Product ID already exists!        |" << endl;
+	                cout << "|_______________________________________|" << endl << endl;
                     idExist = true;
                     break;
                 }
@@ -1463,13 +1489,56 @@ void addProducts(Product products[]) {
         newProduct.id = idToAdd;
 
         // Enter Product Name
-        do {
-            cout << "Enter Product Name      : ";
-            getline(cin, newProduct.name);
-            if (isEmpty(newProduct.name)) {
-                cout << "Name cannot be empty or only spaces!\n";
-            }
-        } while (isEmpty(newProduct.name));
+		do {
+		    cout << "Enter Product Name      : ";
+		    getline(cin, newProduct.name);
+		
+		    // Cannot be empty or just spaces
+		    if (isEmpty(newProduct.name)) {
+		        cout << "_______________________________________________" << endl;
+		        cout << "|Product Name cannot be empty or spaces only! |" << endl;
+		        cout << "|_____________________________________________|" << endl << endl;
+		        continue;
+		    }
+		
+		    // can only be letters (no number or symbol)
+		    bool symbolAndNumber = false;
+		    for (char c : newProduct.name) {
+		        int ascii = (int)c;
+		        if (!(ascii == 32 || (ascii >= 65 && ascii <= 90) || (ascii >= 97 && ascii <= 122))) {
+		            symbolAndNumber = true;
+		            break;
+		        }
+		    }
+		
+		    if (symbolAndNumber) {
+		        cout << "________________________________________________________" << endl;
+		        cout << "|Number(s) & special character(s) are not allowed!     |" << endl;
+		        cout << "|______________________________________________________|" << endl << endl;
+		        continue;
+		    }
+		
+		    // Check product name already exists
+		    bool exists = false;
+		    string newProductNameLower = toLowerCase(newProduct.name);
+		
+		    for (int i = 0; i < productCount; i++) {
+		        if (toLowerCase(products[i].name) == newProductNameLower) {
+		            exists = true;
+		            break;
+		        }
+		    }
+		
+		    if (exists) {
+		        cout << "_________________________________________" << endl;
+		        cout << "|This Product Name already exists!      |" << endl;
+		        cout << "|_______________________________________|" << endl << endl;
+		        continue;
+		    }
+		
+		    break;
+		
+		} while (true);
 
         // Enter Price
         string priceStr;
@@ -1478,10 +1547,14 @@ void addProducts(Product products[]) {
             cout << "Enter Price             : ";
             getline(cin, priceStr);
             price = StringToFloat(priceStr);
-            if (price < 0) {
-                cout << "Invalid price input. Only digits and at most one dot allowed.\n";
+            if (price <= 0) {
+            	cout << "_________________________________________" << endl;
+                cout << "|Invalid price!                         |" << endl;
+                cout << "|1. Only digits are allowed             |" << endl;
+                cout << "|2. Price value must be greater than 0. |" << endl;
+                cout << "|_______________________________________|" << endl << endl;
             }
-        } while (price < 0);
+        } while (price <= 0);
         newProduct.price = price;
 
         // Enter Description
@@ -1489,7 +1562,9 @@ void addProducts(Product products[]) {
             cout << "Enter Description       : ";
             getline(cin, newProduct.description);
             if (isEmpty(newProduct.description)) {
-                cout << "Description cannot be empty or only spaces!\n";
+            	cout << "________________________________________________________" << endl;
+	        	cout << "|Description cannot be empty or spaces only!           |" << endl;
+	        	cout << "|______________________________________________________|" << endl << endl;
             }
         } while (isEmpty(newProduct.description));
 
@@ -2200,4 +2275,3 @@ int main() {
 
     return 0;
 }
-
