@@ -39,3 +39,9 @@ U0008,Lee Ching,ORD0016,303,Fruit Cake,Cakes,14.50,2,29.00
 U0008,Lee Ching,ORD0016,404,Sugar Donut,Donuts,2.50,10,25.00
 U0008,Lee Ching,ORD0016,TOTAL,54.00
 
+U0002,Celine,ORD0017,2025-05-20 14:17:03,Debit Card
+U0002,Celine,ORD0017,105,Supa Mega Bread,Bread,10.50,15,157.50
+U0002,Celine,ORD0017,202,Puff Pastry,Pastries,3.80,10,38.00
+U0002,Celine,ORD0017,203,Pain au Chocolat,Pastries,4.20,3,12.60
+U0002,Celine,ORD0017,TOTAL,197.69
+
