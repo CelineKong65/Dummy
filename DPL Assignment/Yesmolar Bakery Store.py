@@ -1,9 +1,6 @@
 import os
 from datetime import datetime
-
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-
-# Define file paths
 PRODUCT_FILE = os.path.join(SCRIPT_DIR, "product.txt")
 MEMBERS_FILE = os.path.join(SCRIPT_DIR, "member.txt")
 MEMBERS_ID_FILE = os.path.join(SCRIPT_DIR, "member_id.txt")
@@ -12,7 +9,6 @@ PURCHASE_HISTORY_FILE = os.path.join(SCRIPT_DIR, "purchase_history.txt")
 ORDER_ID_FILE = os.path.join(SCRIPT_DIR, "order_id_counter.txt")
 RATING_FILE = os.path.join(SCRIPT_DIR, "rating.txt") 
 
-# Structures
 class Member:
     def __init__(self, full_name="", member_id="", email="", password="", age="", gender="" , contact="", status="Active"):
         self.member_id = member_id
@@ -78,7 +74,6 @@ class Feedback:
         self.timestamp = timestamp
         self.datetime = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
 
-# Global variables
 products = []
 members = []
 admins = []
@@ -113,6 +108,14 @@ def custom_chr(code):
     else:
         return ascii_table[code % 128]
     
+def is_integer(string):
+    if string == "":
+        return False
+    for char in string:
+        if char < '0' or char > '9':
+            return False
+    return True
+    
 def has_attribute(obj, attr):
     try:
         obj.__dict__
@@ -142,7 +145,6 @@ def my_split(s, delimiter=' '):
             i += 1
     result.append(temp)
     return result
-
 
 def second_split(s, delimiter=','):
     result = []
@@ -224,7 +226,43 @@ def raw_replace(s, old, new):
             i += 1
     return result
 
-#bubble sort 在这里
+def get_quoted_field(ss):
+    field = ""
+    ss = ss.strip()
+    
+    if not ss:
+        return "", ""
+
+    if len(ss) > 0 and ss[0] == '"':
+        ss = ss[1:]
+        try:
+            quote_end_index = -1
+            for i in range(len(ss)):
+                if ss[i] == '"':
+                    quote_end_index = i
+                    break
+
+            if quote_end_index == -1:
+                # No closing quote found
+                field = ss
+                ss = ""
+            else:
+                field = ss[:quote_end_index]
+                ss = ss[quote_end_index + 1:]
+
+                if len(ss) > 0 and ss[0] == ',':
+                    ss = ss[1:]
+
+        except IndexError:
+            field = ss
+            ss = ""
+    else:
+        line = second_split(ss, ',')
+        field = line[0]
+        ss = line[1] if len(line) > 1 else ""
+
+    return field.strip(), ss.strip()
+
 def bubble_sort(arr, key=None, reverse=False):
     n = len(arr)
     for i in range(n - 1):
@@ -243,7 +281,6 @@ def bubble_sort(arr, key=None, reverse=False):
         if not swapped:
             break
 
-#Jump Search here
 def min_val(a, b):
     return a if a < b else b
 
@@ -252,7 +289,6 @@ def jump_search(arr, target, key=None):
     if n == 0:
         return None
 
-    # Calculate jump step
     step = 1
     while step * step < n:
         step += 1
@@ -279,7 +315,6 @@ def jump_search(arr, target, key=None):
         else:
             break
 
-    # Perform Linear search in the indentified block
     if key:
         while get_attribute(arr[prev], key) < target:
             prev += 1
@@ -292,7 +327,6 @@ def jump_search(arr, target, key=None):
             if prev == min_val(step, n):
                 return None
             
-    # Check if found the target
     if key:
         if get_attribute(arr[prev], key) == target:
             return arr[prev]
@@ -367,8 +401,7 @@ def get_next_member_id():
                 next_id = f"U{next_id_number:04d}" 
                 return next_id
             else:
-                return "U0001"
-                
+                return "U0001"                
     except FileNotFoundError:
         with open(MEMBERS_ID_FILE, "w", encoding='utf-8') as file:
             file.write("U0001\n")
@@ -1686,46 +1719,7 @@ def admin_menu():
         else:
             input("\nInvalid choice. Press [ENTER] to try again.")
             clear_screen()
-            
-            
-def get_quoted_field(ss):
-    field = ""
-    ss = ss.strip()
-    
-    if not ss:
-        return "", ""
 
-    if len(ss) > 0 and ss[0] == '"':
-        ss = ss[1:]
-        try:
-            quote_end_index = -1
-            for i in range(len(ss)):
-                if ss[i] == '"':
-                    quote_end_index = i
-                    break
-
-            if quote_end_index == -1:
-                # No closing quote found
-                field = ss
-                ss = ""
-            else:
-                field = ss[:quote_end_index]
-                ss = ss[quote_end_index + 1:]
-
-                if len(ss) > 0 and ss[0] == ',':
-                    ss = ss[1:]
-
-        except IndexError:
-            field = ss
-            ss = ""
-    else:
-        line = second_split(ss, ',')
-        field = line[0]
-        ss = line[1] if len(line) > 1 else ""
-
-    return field.strip(), ss.strip()
-
-#filter product admin
 def filter_product_admin():
     global products
 
@@ -1770,8 +1764,6 @@ def filter_product_admin():
 
             display_product_admin(products, selected_category)
             print("\n---------------------------------------------------------------------------")
-
-            # Admin options
             print(" ________________________________________")
             print("|                                        |")
             print("|    Options:                            |")
@@ -1801,23 +1793,19 @@ def add_product(products, category):
     new_product = Product()
     new_product.category = category
     
-    # Get product ID
     while True:
-        new_product.product_id = input("\nEnter ID in 3 digits: ")
-        if len(new_product.product_id) != 3:
-            print("ID must be exactly 3 digits!")
+        new_product.product_id = input("\nEnter ID in 3 digits: ").strip()
+        if len(new_product.product_id) != 3 or not is_integer(new_product.product_id):
+            print("ID must be exactly 3 digits and numeric only!")
             continue
-            
-        # Check if ID already exists
-        id_exists = False
+
         id_exists = jump_search(products, new_product.product_id, key='product_id')
-                
         if id_exists:
             print("Product ID already exists! Please enter a different ID.")
         else:
             break
+
     
-    # Get product name
     while True:
         new_product.name = input("\nEnter product name: ").strip()
         if len(new_product.name) == 0:
@@ -1825,7 +1813,6 @@ def add_product(products, category):
             continue
         break
     
-    # Get product price
     while True:
         price_input = input("\nEnter price: ")
         try:
@@ -1837,7 +1824,6 @@ def add_product(products, category):
         except:
             print("Invalid price! Please enter a valid number.")
     
-    # Get product stock
     while True:
         stock_input = input("\nEnter stock quantity: ")
         try:
@@ -1848,8 +1834,7 @@ def add_product(products, category):
             break
         except:
             print("Invalid quantity! Please enter a whole number.")
-    
-    # Get product status
+
     while True:
         status_input = input("\nEnter status [Active/Inactive]: ").strip()
         if len(status_input) > 0:
@@ -1861,7 +1846,6 @@ def add_product(products, category):
             continue
         break
     
-    # Add to products list and update file
     products.append(new_product)
     if update_product_file():
         print("\nProduct added successfully!\n")
@@ -1879,7 +1863,6 @@ def edit_product(products, category):
         
     product_id = input("\nEnter the Product ID to edit: ")
     
-    # Find product to edit
     product_to_edit = None
     product_to_edit = jump_search(products, product_id, key='product_id')
     
@@ -1890,7 +1873,6 @@ def edit_product(products, category):
     
     print(f"\nEditing product: {product_to_edit.name}")
     
-    # Edit name
     while True:
         new_name = input(f"\nEnter new name [{product_to_edit.name}]: ").strip()
         if len(new_name) == 0:
@@ -1901,7 +1883,6 @@ def edit_product(products, category):
             continue
         break
     
-    # Edit price
     while True:
         price_input = input(f"\nEnter new price [{product_to_edit.price}]: ").strip()
         if len(price_input) == 0:
@@ -1916,7 +1897,6 @@ def edit_product(products, category):
         except:
             print("Invalid price! Please enter a valid number.")
     
-    # Edit stock
     while True:
         stock_input = input(f"\nEnter new stock [{product_to_edit.stock}]: ").strip()
         if len(stock_input) == 0:
@@ -1931,7 +1911,6 @@ def edit_product(products, category):
         except:
             print("Invalid quantity! Please enter a whole number.")
     
-    # Edit status
     while True:
         status_input = input("\nEnter status [Active/Inactive]: ").strip()
 
@@ -1945,8 +1924,6 @@ def edit_product(products, category):
         new_status = status_input
         break
 
-    
-    # Update product
     product_to_edit.name = new_name
     product_to_edit.price = new_price
     product_to_edit.stock = new_stock
@@ -1968,7 +1945,6 @@ def restock_product(products, category):
         
     product_id = input("\nEnter the Product ID to restock: ")
     
-    # Find product to restock
     product_to_restock = None
     product_to_restock = jump_search(products, product_id, key='product_id')
     
@@ -1979,8 +1955,7 @@ def restock_product(products, category):
     
     print(f"\nRestocking product: {product_to_restock.name}")
     print(f"Current stock: {product_to_restock.stock}")
-    
-    # Get additional stock
+
     while True:
         add_stock_input = input("\nEnter quantity to add: ").strip()
         try:
@@ -1992,14 +1967,13 @@ def restock_product(products, category):
         except:
             print("Invalid quantity! Please enter a whole number.")
     
-    # Update stock
     product_to_restock.stock += add_stock
     
     if update_product_file():
         print(f"\nProduct restocked successfully! New stock: {product_to_restock.stock}\n")
     else:
         print("\nError saving changes to file!")
-        product_to_restock.stock -= add_stock  # Revert if save failed
+        product_to_restock.stock -= add_stock
     
     input("Press [ENTER] to continue.")
     filter_product_admin()
@@ -2153,7 +2127,6 @@ def load_cart(cart):
 
     try:
         if not os.path.exists(cart_file) or os.path.getsize(cart_file) == 0:
-            print("Cart file is empty or does not exist.")
             return True
 
         with open(cart_file, 'r', encoding='utf-8') as file:
@@ -2227,14 +2200,6 @@ def save_cart(cart):
     except IOError as e:
         print(f"Error: Could not update cart file: {e}")
         return False
-    
-def is_integer(string):
-    if string == "":
-        return False
-    for char in string:
-        if char < '0' or char > '9':
-            return False
-    return True
     
 def delete_cart(cart):
     while True:

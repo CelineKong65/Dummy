@@ -34,3 +34,4 @@
 801,Tuna Sandwich,Savories & Sandwiches,5.0,100,Active
 802,Quiche,Savories & Sandwiches,6.0,100,Active
 803,Sausage Roll,Savories & Sandwiches,4.2,90,Inactive
+105,W,Bread,100.0,10,Active
