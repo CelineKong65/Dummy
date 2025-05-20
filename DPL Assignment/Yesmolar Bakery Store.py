@@ -645,6 +645,16 @@ def signup():
         if len(combined) != 10 and len(combined) != 11:
             print("Phone number must be 10 or 11 digits!")
             continue
+
+        phone_exists = False
+        for member in members: 
+            if member.contact == contact:  
+                phone_exists = True
+                break
+
+        if phone_exists:
+            print("This phone number is already registered! Please use a different one.")
+            continue 
     
         break
    
@@ -1064,19 +1074,19 @@ def edit_member_profile():
 
         elif choice == "7":
             while True:
-                logged_in_member.contact  = input("\nEnter your contact number (example: 012-34567890): ")
+                new_contact = input("\nEnter your contact number (example: 012-34567890): ")
 
-                if len(logged_in_member.contact) < 4 or logged_in_member.contact[3] != '-':
+                if len(new_contact) < 4 or new_contact[3] != '-':
                     print("Format must be like 012-34567890 with a dash at the 4th position!")
                     continue
 
                 part1 = ""
                 part2 = ""
-                for i in range(len(logged_in_member.contact)):
+                for i in range(len(new_contact)):
                     if i < 3:
-                        part1 += logged_in_member.contact[i]
+                        part1 += new_contact[i]
                     elif i > 3:
-                        part2 += logged_in_member.contact[i]
+                        part2 += new_contact[i]
 
 
                 if not (part1[0] == '0' and part1[1] == '1'):
@@ -1096,7 +1106,18 @@ def edit_member_profile():
                 if len(combined) != 10 and len(combined) != 11:
                     print("Phone number must be 10 or 11 digits!")
                     continue
+                
+                phone_exists = False
+                for member in members:
+                    if member.contact == new_contact and member.contact != logged_in_member.contact:
+                        phone_exists = True
+                        break
+
+                if phone_exists:
+                    print("This phone number is already registered by another user! Please use a different one.")
+                    continue
     
+                logged_in_member.contact = new_contact
                 update_member(logged_in_member)
                 print("\nContact Number updated successfully!")
                 input("\nPress [ENTER] to continue.")
@@ -1400,19 +1421,19 @@ def edit_admin_profile():
 
         elif choice == "3":
             while True:
-                logged_in_admin.contact  = input("\nEnter your contact number (example: 012-34567890): ")
+                new_contact = input("\nEnter your contact number (example: 012-34567890): ")
 
-                if len(logged_in_admin.contact) < 4 or logged_in_admin.contact[3] != '-':
+                if len(new_contact) < 4 or new_contact[3] != '-':
                     print("Format must be like 012-34567890 with a dash at the 4th position!")
                     continue
 
                 part1 = ""
                 part2 = ""
-                for i in range(len(logged_in_admin.contact)):
+                for i in range(len(new_contact)):
                     if i < 3:
-                        part1 += logged_in_admin.contact[i]
+                        part1 += new_contact[i]
                     elif i > 3:
-                        part2 += logged_in_admin.contact[i]
+                        part2 += new_contact[i]
 
 
                 if not (part1[0] == '0' and part1[1] == '1'):
@@ -1432,7 +1453,19 @@ def edit_admin_profile():
                 if len(combined) != 10 and len(combined) != 11:
                     print("Phone number must be 10 or 11 digits!")
                     continue
-    
+
+                load_admins()
+                phone_exists = False
+                for admin in admins:
+                    if admin.contact == new_contact and admin != logged_in_admin:
+                        phone_exists = True
+                        break
+
+                if phone_exists:
+                    print("This phone number is already registered! Please use a different one.")
+                    continue
+
+                logged_in_admin.contact = new_contact
                 update_admin(logged_in_admin, logged_in_admin.name)
                 print("\nContact Number updated successfully!")
                 input("\nPress [ENTER] to continue.")
