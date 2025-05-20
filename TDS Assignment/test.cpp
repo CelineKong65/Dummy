@@ -488,13 +488,15 @@ class HashCustomer {
 	
 		// Display all customers from the linked list
 		void display() {
+			cout << "Customer List\n" << endl;
 			Node* current = front;
 			int i = 1;
 			while (current != NULL) {
-				cout << i << "." << current->data.cus_id << " " 
-								 << current->data.cus_name << " " 
-								 << current->data.cus_email << " "
-								 << current->data.cus_phone << endl;
+				cout << "Cust ID  : " << current->data.cus_id << endl;
+				cout << "Name     : " << current->data.cus_name << endl;
+				cout << "Email    : " << current->data.cus_email << endl;
+				cout << "Phone    : " << current->data.cus_phone << endl;
+				cout << "_________________________________________________________________________________________" << endl;
 				current = current->next;
 				i++;
 			}
@@ -583,17 +585,17 @@ class HashCustomer {
 					{
 						// Search customer information by ID
 						string searchID;
-	                    cout << "Search Customer Information (4 digits): " << endl;
-	                    cout << "Enter customer ID: ";
+	                    cout << "Search Customer Information \n" << endl;
+	                    cout << "Enter customer ID (4 digits): ";
 	                    getline(cin, searchID);
 	            
 	                    Customer* foundCustomer = search(searchID);
 	                    if (foundCustomer != NULL) {
-	                        cout << "\nCustomer Found:" << endl;
-	                        cout << "ID: " << foundCustomer->cus_id << endl;
-	                        cout << "Name: " << foundCustomer->cus_name << endl;
-	                        cout << "Email: " << foundCustomer->cus_email << endl;
-	                        cout << "Phone: " << foundCustomer->cus_phone << endl;
+	                        cout << "\nCustomer Found:\n" << endl;
+	                        cout << "Cust ID  : " << foundCustomer->cus_id << endl;
+	                        cout << "Name     : " << foundCustomer->cus_name << endl;
+	                        cout << "Email    : " << foundCustomer->cus_email << endl;
+	                        cout << "Phone    : " << foundCustomer->cus_phone << endl;
 	                    } else {
 	                        cout << "\nCustomer not found!" << endl;
 	                    }
@@ -917,14 +919,16 @@ class HashAdmin {
 	
 		// Display all admin from the linked list
 		void displayAdmin() {
+			cout << "Admin List\n" << endl;
 			Node* current = front;
 			int i = 1;
 			while (current != NULL) {
-				cout << i << "." << current->data.admin_id << " "
-								 << current->data.admin_name << " "
-								 << current->data.admin_email << " "
-								 << current->data.admin_phone << " "
-								 << current->data.admin_position << endl;
+				cout << "Admin ID  : " << current->data.admin_id << endl;
+				cout << "Name      : " << current->data.admin_name << endl;
+				cout << "Email     : " << current->data.admin_email << endl;
+				cout << "Phone     : " << current->data.admin_phone << endl;
+				cout << "Position  : " << current->data.admin_position << endl;
+				cout << "_________________________________________________________________________________________" << endl;
 				current = current->next;
 				i++;
 			}
@@ -1021,18 +1025,18 @@ class HashAdmin {
 					{
 						// Search admin information by ID
 						string searchID;
-	                    cout << "Search Admin Information" << endl;
+	                    cout << "Search Admin Information\n" << endl;
 	                    cout << "Enter Admin ID (3 digits): ";
 	                    getline(cin, searchID);
 	                    
 	                    Admin* foundAdmin = search(searchID);
 	                    if (foundAdmin != NULL) {
-	                        cout << "\nAdmin Found:" << endl;
-	                        cout << "ID: " << foundAdmin->admin_id << endl;
-	                        cout << "Name: " << foundAdmin->admin_name << endl;
-	                        cout << "Email: " << foundAdmin->admin_email << endl;
-	                        cout << "Phone: " << foundAdmin->admin_phone << endl;
-	                        cout << "Position: " << foundAdmin->admin_position << endl;
+	                        cout << "\nAdmin Found:\n" << endl;
+	                        cout << "Admin ID  : " << foundAdmin->admin_id << endl;
+	                        cout << "Name      : " << foundAdmin->admin_name << endl;
+	                        cout << "Email     : " << foundAdmin->admin_email << endl;
+	                        cout << "Phone     : " << foundAdmin->admin_phone << endl;
+	                        cout << "Position  : " << foundAdmin->admin_position << endl;
 	                    } else {
 	                        cout << "\nAdmin not found!" << endl;
 	                    }
