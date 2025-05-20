@@ -1,4 +1,6 @@
+U0001,100,White Bread,4.50,10,45.00
 U0001,102,Sourdough,5.50,9,49.50
 U0001,105,Supa Mega Jumbo Bread uwu,10.50,7,73.50
+U0001,204,Apple Turnover,4.00,17,68.00
 U0001,503,Red Velvet Cupcake,4.20,6,25.20
-U0001,204,Apple Turnover,4.00,7,28.00
+U0001,603,Shortbread,2.50,10,25.00

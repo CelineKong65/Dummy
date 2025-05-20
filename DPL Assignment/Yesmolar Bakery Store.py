@@ -1729,7 +1729,7 @@ def get_quoted_field(ss):
             field = ss
             ss = ""
     else:
-        line = my_split(ss, ',')
+        line = second_split(ss, ',')
         field = line[0]
         ss = line[1] if len(line) > 1 else ""
 

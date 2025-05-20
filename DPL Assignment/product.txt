@@ -1,15 +1,13 @@
-100,White Bread,Bread,4.5,90,Inactive
+100,White Bread,Bread,4.5,90,Active
 101,Whole Wheat Bread,Bread,4.8,0,Active
-102,Sourdough,Bread,5.5,10,Inactive
-103,Baguette,Bread,4.2,78,Inactive
+102,Sourdough,Bread,5.5,100,Active
+103,Baguette,Bread,4.2,78,Active
 104,Rye Bread,Bread,5.0,100,Inactive
-105,Supa Mega Jumbo Bread uwu,Bread,10.5,80,Active
-106,Lawrence Miguel,Bread,20.0,110,Inactive
 200,Croissant,Pastries,3.5,79,Inactive
 201,Danish Pastry,Pastries,4.0,46,Active
 202,Puff Pastry,Pastries,3.8,7,Active
 203,Pain au Chocolat,Pastries,4.2,0,Active
-204,Apple Turnover,Pastries,4.0,70,Active
+204,Apple Turnover,Pastries,4.0,60,Active
 300,Chocolate Cake,Cakes,15.0,100,Active
 301,Cheesecake,Cakes,16.5,58,Active
 302,Sponge Cake,Cakes,13.0,58,Active
@@ -20,14 +18,14 @@
 402,Custard-Filled Donut,Donuts,3.0,100,Active
 403,Jam-Filled Donut,Donuts,2.9,100,Active
 404,Sugar Donut,Donuts,2.5,71,Active
-500,Vanilla Cupcake,Cupcakes & Muffins,3.5,100,Active
+500,Vanilla Cupcake,Cupcakes & Muffins,3.5,110,Active
 501,Chocolate Muffin,Cupcakes & Muffins,3.8,100,Active
 502,Blueberry Muffin,Cupcakes & Muffins,4.0,20,Active
 503,Red Velvet Cupcake,Cupcakes & Muffins,4.2,82,Inactive
 600,Chocolate Chip Cookie,Cookies,2.0,88,Active
 601,Oatmeal Raisin Cookie,Cookies,2.2,100,Active
 602,Butter Cookie,Cookies,1.8,100,Active
-603,Shortbread,Cookies,2.5,100,Active
+603,Shortbread,Cookies,2.5,90,Active
 700,Apple Pie,Pies & Tarts,6.0,100,Active
 701,Lemon Tart,Pies & Tarts,5.5,87,Active
 702,Pumpkin Pie,Pies & Tarts,6.5,100,Active
