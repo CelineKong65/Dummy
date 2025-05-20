@@ -3,6 +3,7 @@
 102,Sourdough,Bread,5.5,100,Active
 103,Baguette,Bread,4.2,78,Active
 104,Rye Bread,Bread,5.0,100,Inactive
+105,W,Bread,100.0,0,Active
 200,Croissant,Pastries,3.5,79,Inactive
 201,Danish Pastry,Pastries,4.0,46,Active
 202,Puff Pastry,Pastries,3.8,7,Active
@@ -34,4 +35,3 @@
 801,Tuna Sandwich,Savories & Sandwiches,5.0,100,Active
 802,Quiche,Savories & Sandwiches,6.0,100,Active
 803,Sausage Roll,Savories & Sandwiches,4.2,90,Inactive
-105,W,Bread,100.0,10,Active

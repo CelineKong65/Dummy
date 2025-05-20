@@ -1737,7 +1737,6 @@ def purchase_history(cart, total_payment, payment_method):
         return False
     
     try:
-        from datetime import datetime
         purchase_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         order_id = get_order_id()
 
@@ -1806,8 +1805,7 @@ def view_purchase_history():
             print("===========================================================================")
             input("\nPress [ENTER] to continue.")
             return
-
-        from datetime import datetime
+        
         records = my_split(content.strip(), '\n\n')
         user_records = []
 
