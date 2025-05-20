@@ -3374,7 +3374,7 @@ def view_order_history():
         
         search_id = None
         while True:
-            search_input = input("| Enter Member ID to filter (or press ENTER for all): ").strip().upper()
+            search_input = input("Enter Member ID to filter (or press ENTER for all): ").strip().upper()
             
             if not search_input:
                 break
@@ -3386,9 +3386,11 @@ def view_order_history():
                 break
             else:
                 print(f"\nMember ID {search_input} not found in order history.")
+                print("|_________________________________________________________________________|")
                 print("Available Member IDs:")
                 for member_id in member_ids:
-                    print(f"⨠ {member_id}")
+                    print(f"| ⨠ {member_id:<70}|")
+                print("|_________________________________________________________________________|")
                 continue
         
         search_order_id = None
