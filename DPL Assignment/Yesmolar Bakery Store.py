@@ -70,16 +70,6 @@ class PurchaseRecord:
         self.order_id = record_dict["order_id"]
         self.payment_method = record_dict["payment_method"]
 
-class PurchaseRecord:
-    def __init__(self, record_dict):
-        self.lines = record_dict["lines"]
-        self.datetime = record_dict["datetime"]
-        self.datetime_obj = record_dict["datetime_obj"]
-        self.total = record_dict["total"]
-        self.order_id = record_dict["order_id"]
-        self.payment_method = record_dict["payment_method"]
-
-
 class Feedback:
     def __init__(self, name, rating, comment, timestamp):
         self.name = name
