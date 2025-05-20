@@ -198,7 +198,43 @@ def raw_replace(s, old, new):
             i += 1
     return result
 
-#bubble sort 在这里
+def get_quoted_field(ss):
+    field = ""
+    ss = ss.strip()
+    
+    if not ss:
+        return "", ""
+
+    if len(ss) > 0 and ss[0] == '"':
+        ss = ss[1:]
+        try:
+            quote_end_index = -1
+            for i in range(len(ss)):
+                if ss[i] == '"':
+                    quote_end_index = i
+                    break
+
+            if quote_end_index == -1:
+                # No closing quote found
+                field = ss
+                ss = ""
+            else:
+                field = ss[:quote_end_index]
+                ss = ss[quote_end_index + 1:]
+
+                if len(ss) > 0 and ss[0] == ',':
+                    ss = ss[1:]
+
+        except IndexError:
+            field = ss
+            ss = ""
+    else:
+        line = my_split(ss, ',')
+        field = line[0]
+        ss = line[1] if len(line) > 1 else ""
+
+    return field.strip(), ss.strip()
+
 def bubble_sort(arr, key=None, reverse=False):
     n = len(arr)
     for i in range(n - 1):
@@ -1661,45 +1697,6 @@ def admin_menu():
             input("\nInvalid choice. Press [ENTER] to try again.")
             clear_screen()
             
-            
-def get_quoted_field(ss):
-    field = ""
-    ss = ss.strip()
-    
-    if not ss:
-        return "", ""
-
-    if len(ss) > 0 and ss[0] == '"':
-        ss = ss[1:]
-        try:
-            quote_end_index = -1
-            for i in range(len(ss)):
-                if ss[i] == '"':
-                    quote_end_index = i
-                    break
-
-            if quote_end_index == -1:
-                # No closing quote found
-                field = ss
-                ss = ""
-            else:
-                field = ss[:quote_end_index]
-                ss = ss[quote_end_index + 1:]
-
-                if len(ss) > 0 and ss[0] == ',':
-                    ss = ss[1:]
-
-        except IndexError:
-            field = ss
-            ss = ""
-    else:
-        line = my_split(ss, ',')
-        field = line[0]
-        ss = line[1] if len(line) > 1 else ""
-
-    return field.strip(), ss.strip()
-
-#filter product admin
 def filter_product_admin():
     global products
 
