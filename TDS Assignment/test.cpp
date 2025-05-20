@@ -6,7 +6,7 @@
 #include <sstream>
 #include <iomanip>
 
-#define TABLE_SIZE 10
+#define TABLE_SIZE 11
 
 using namespace std;
 const int MAX_PRODUCTS = 100;
@@ -244,10 +244,6 @@ class HashCustomer {
 		        return false;
 		    }
 		
-		    if (id[0] != '1') {
-		        return false;
-		    }
-		
 		    for (int i = 0; i < length; i++) {
 		        if (id[i] < '0' || id[i] > '9') {
 		            return false;
@@ -405,23 +401,23 @@ class HashCustomer {
 		// Insert a customer into both linked list and hash table
 		void insert(const Customer& customer) {
 			// Insert to linked list
-		    Node* newNode = new Node;
-		    newNode->data = customer;
-		    newNode->next = NULL;
+		    Node* listNode = new Node;
+		    listNode->data = customer;
+		    listNode->next = NULL;
 		
 		    if (isEmpty()) {
-		        front = rear = newNode;
+		        front = rear = listNode;
 		    } else {
-		        rear->next = newNode;
-		        rear = newNode;
+		        rear->next = listNode;
+		        rear = listNode;
 		    }
 		
 			// Insert to hash table
+		    Node* hashNode = new Node;
+		    hashNode->data = customer;
 		    int index = hashFunction(customer.cus_id);
-		    newNode = new Node;
-		    newNode->data = customer;
-		    newNode->next = table[index];
-		    table[index] = newNode;
+		    hashNode->next = table[index];
+		    table[index] = hashNode;
 		}
 		
 		// Search customer by ID in hash table
@@ -540,10 +536,10 @@ class HashCustomer {
 					{
 						// Add customer information and validate customer details
 						do{
-							cout << "Enter customer ID : ";
+							cout << "Enter customer ID (4 digits): ";
 							getline(cin, cus.cus_id);
 							if (!isValidID(cus.cus_id)){
-						        cout << "ID must contain digits only! Please try again.\n";
+						        cout << "ID must contain digits only and exactly 4 digits! Please try again.\n";
 						    }else if (isIDExists(cus.cus_id)){
 						        cout << "This ID already exists! Please enter a different ID.\n";
 						    }
@@ -587,10 +583,10 @@ class HashCustomer {
 					{
 						// Search customer information by ID
 						string searchID;
-	                    cout << "Search Customer Information" << endl;
+	                    cout << "Search Customer Information (4 digits): " << endl;
 	                    cout << "Enter customer ID: ";
 	                    getline(cin, searchID);
-	                    
+	            
 	                    Customer* foundCustomer = search(searchID);
 	                    if (foundCustomer != NULL) {
 	                        cout << "\nCustomer Found:" << endl;
@@ -646,7 +642,7 @@ class HashAdmin {
 		Node* front;// Front pointer of the linked list
 		Node* rear;// Rear pointer of the linked list
 		string filename;// File name for data persistence
-		Node* table[TABLE_SIZE];// Hash table array for customer data
+		Node* table[TABLE_SIZE];// Hash table array for admin data
 		
 		// ID validate
 		bool isValidID(const string& id) {
@@ -657,10 +653,6 @@ class HashAdmin {
 		    }
 		
 		    if (length != 3) {
-		        return false;
-		    }
-		    
-		    if (id[0] != '1') {
 		        return false;
 		    }
 		
@@ -792,7 +784,7 @@ class HashAdmin {
 		}
 		
 		// Position validate
-		bool isValidPosition(const std::string& position) {
+		bool isValidPosition(const string& position) {
 			return position == "admin" || position == "superadmin";
 		}
 		
@@ -815,34 +807,45 @@ class HashAdmin {
 	
 		// Destructor: clean up linked list memory
 		~HashAdmin() {
-			Node* current = front;
-			while (current != NULL) {
-				Node* next = current->next;
-				delete current;
-				current = next;
-			}
+		    // Clean up queue
+		    Node* current = front;
+		    while (current != NULL) {
+		        Node* next = current->next;
+		        delete current;
+		        current = next;
+		    }
+		    
+		    // Clean up hash table
+		    for(int i = 0; i < TABLE_SIZE; i++) {
+		        current = table[i];
+		        while(current != NULL) {
+		            Node* next = current->next;
+		            delete current;
+		            current = next;
+		        }
+		    }
 		}
 		
-		// Insert a customer into both linked list and hash table
+		// Insert a admin into both linked list and hash table
 		void insert(const Admin& admin) {
-			// Insert to linked list
-		    Node* newNode = new Node;
-		    newNode->data = admin;
-		    newNode->next = NULL;
+		    // Insert to linked list
+		    Node* listNode = new Node;
+		    listNode->data = admin;
+		    listNode->next = NULL;
 		
 		    if (isEmpty()) {
-		        front = rear = newNode;
+		        front = rear = listNode;
 		    } else {
-		        rear->next = newNode;
-		        rear = newNode;
+		        rear->next = listNode;
+		        rear = listNode;
 		    }
 		
-			// Insert to hash table
+		    // Insert to hash table (separate node)
+		    Node* hashNode = new Node;
+		    hashNode->data = admin;
 		    int index = hashFunction(admin.admin_id);
-		    newNode = new Node;
-		    newNode->data = admin;
-		    newNode->next = table[index];
-		    table[index] = newNode;
+		    hashNode->next = table[index];
+		    table[index] = hashNode;
 		}
 		
 		// Search admin by ID in hash table
@@ -860,7 +863,7 @@ class HashAdmin {
 	    }
 		
 		// Convert a line of text into a admin object
-		Admin parseCustomer(const string& line) {
+		Admin parseAdmin(const string& line) {
 			Admin a;
 			stringstream ss(line);
 			ss >> a.admin_id >> a.admin_name >> a.admin_email >> a.admin_phone >> a.admin_position;
@@ -904,7 +907,7 @@ class HashAdmin {
 			string line;
 			while (getline(file, line)) {
 				if(!line.empty()) {
-					Admin a = parseCustomer(line);
+					Admin a = parseAdmin(line);
 					insert(a);
 				}
 			}
@@ -961,12 +964,12 @@ class HashAdmin {
 						
 					case 2: 
 					{
-						// Add customer information and validate customer details
+						// Add admin information and validate admin details
 						do{
-							cout << "Enter admin ID : ";
+							cout << "Enter Admin ID (3 digits): ";
 							getline(cin, ad.admin_id);
 							if (!isValidID(ad.admin_id)){
-						        cout << "Admin ID must contain digits only! Please try again.\n";
+						        cout << "Admin ID must contain digits only and exactly 3 digits! Please try again.\n";
 						    }else if (isIDExists(ad.admin_id)){
 						        cout << "This admin ID already exists! Please enter a different ID.\n";
 						    }
@@ -992,7 +995,7 @@ class HashAdmin {
 						}while(!isValidPhone(ad.admin_phone));
 						
 						do{
-							cout << "Enter customer email (e.g. john@example.com) : ";
+							cout << "Enter admin email (e.g. john@example.com) : ";
 							getline(cin, ad.admin_email);
 							if (!isValidEmail(ad.admin_email)){
 								cout << "Invalid email address! Make sure it contains '@' and a '.' and they are not at the beginning or end.\n";
@@ -1018,8 +1021,8 @@ class HashAdmin {
 					{
 						// Search admin information by ID
 						string searchID;
-	                    cout << "Search Customer Information" << endl;
-	                    cout << "Enter customer ID: ";
+	                    cout << "Search Admin Information" << endl;
+	                    cout << "Enter Admin ID (3 digits): ";
 	                    getline(cin, searchID);
 	                    
 	                    Admin* foundAdmin = search(searchID);
@@ -1031,7 +1034,7 @@ class HashAdmin {
 	                        cout << "Phone: " << foundAdmin->admin_phone << endl;
 	                        cout << "Position: " << foundAdmin->admin_position << endl;
 	                    } else {
-	                        cout << "\nCustomer not found!" << endl;
+	                        cout << "\nAdmin not found!" << endl;
 	                    }
 	                    
 	                    cout << "\nPress [Enter] back to menu...";
