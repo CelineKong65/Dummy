@@ -3386,8 +3386,8 @@ def view_order_history():
                 break
             else:
                 print(f"\nMember ID {search_input} not found in order history.")
-                print("|_________________________________________________________________________|")
-                print("Available Member IDs:")
+                print("___________________________________________________________________________")
+                print("| Available Member IDs:                                                   |")
                 for member_id in member_ids:
                     print(f"| ⨠ {member_id:<70}|")
                 print("|_________________________________________________________________________|")
