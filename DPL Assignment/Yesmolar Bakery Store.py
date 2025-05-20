@@ -1450,11 +1450,31 @@ def edit_admin_profile():
 
 def filter_feedback_rating():
     try:
-        rate_filter = int(input("Enter the rating level to filter by (1 to 5): "))
+        rate_input = input("Enter the rating level to filter by (1 to 5): ")
+
+        if rate_input == "":
+            print("Invalid input. Rating cannot be empty.\n")
+            return filter_feedback_rating()
+        
+        only_digits = True
+        for ch in rate_input:
+            if not ('0' <= ch <= '9'):
+                only_digits = False
+                break
+
+        if not only_digits:
+            print("Invalid input. Please enter a valid number between 1 and 5.\n")
+            return filter_feedback_rating()
+        
+        rate_filter = int(rate_input)
+
+        if not (1 <= rate_filter <= 5):
+            print("Invalid rating. Please enter a number between 1 and 5.\n")
+            return filter_feedback_rating()
+
         if 1 <= rate_filter <= 5:       
             print("===========================================================================")
             print(f"|                    Filtered Feedback (Rating = {rate_filter})                       |")
-            print("===========================================================================")
 
             found = False
 
@@ -1469,14 +1489,17 @@ def filter_feedback_rating():
                                 name, rating, comment, timestamp = parts
                                 if str(rate_filter) == rating:
                                     found = True
+                                    print("===========================================================================")
+                                    print(f"| Date & Time  : {timestamp:<57}|")
+                                    print("===========================================================================")
                                     print(f"| Name         : {name:<57}|")
                                     print(f"| Rating       : {rating:<57}|")
                                     print(f"| Comment      : {comment:<57}|")
-                                    print(f"| Date & Time  : {timestamp:<57}|")
-                                print("===========================================================================")
+                                    print("---------------------------------------------------------------------------")
                                  
                                 
                 if not found:
+                    print("===========================================================================")
                     print("|                                                                         |")
                     print(f"|                   No records found for rating level {rate_filter}                   |")
                     print("|                                                                         |")
@@ -1484,9 +1507,6 @@ def filter_feedback_rating():
 
             except FileNotFoundError:
                 print("Feedback file not found.")
-        else:
-            print("Invalid rating. Please enter a number between 1 and 5.\n")
-            return filter_feedback_rating()
     except ValueError:
         print("Invalid input. Please enter a valid number.\n")
     input("\nPress [ENTER] to return to feedback menu.")
@@ -1507,7 +1527,11 @@ def sort_feedback_rating():
                         feedback_rating.append(Feedback(name, rating, comment, timestamp))
 
         if not feedback_rating:
-            print("No feedback records found to sort.")
+            print("============================================================================")
+            print("|                                                                         |")
+            print("|                    No feedback records found to sort.                   |")
+            print("|                                                                         |")
+            print("---------------------------------------------------------------------------")
             input("\nPress [ENTER] to return to feedback menu.")
             clear_screen()
             return view_feedback_rating()
@@ -1524,23 +1548,22 @@ def sort_feedback_rating():
         if choice == '1':
             print("============================================================================")
             print("|            SORTED FEEDBACK & RATING (Rating - Highest First)             |")
-            print("============================================================================")
             bubble_sort(feedback_rating, key='rating', reverse=True)
         elif choice == '2':
             print("============================================================================")
             print("|            SORTED FEEDBACK & RATING (Rating - Lowest First)              |")
-            print("============================================================================")
             bubble_sort(feedback_rating, key='rating', reverse=False)
         elif choice == '3':
             print("============================================================================")
             print("|             SORTED FEEDBACK & RATING (Date – Newest First)               |")
-            print("============================================================================")
             bubble_sort(feedback_rating, key='datetime', reverse=True)
         elif choice == '4':
             print("============================================================================")
             print("|             SORTED FEEDBACK & RATING (Date – Oldest First)               |")
-            print("============================================================================")
             bubble_sort(feedback_rating, key='datetime', reverse=False)
+        elif not choice:
+            print("Invalid input. The choice cannot be empty.\n")
+            return sort_feedback_rating()
         elif choice == '5':
             input("\nPress [ENTER] to return rating menu.")
             clear_screen()
@@ -1550,10 +1573,12 @@ def sort_feedback_rating():
             return sort_feedback_rating()
 
         for record in feedback_rating:
+            print("============================================================================")
+            print(f"| Date & Time  : {record.timestamp:<58}|")
+            print("===========================================================================")
             print(f"| Name         : {record.name:<58}|")
             print(f"| Rating       : {record.rating:<58}|")
             print(f"| Comment      : {record.comment:<58}|")
-            print(f"| Date & Time  : {record.timestamp:<58}|")
             print("----------------------------------------------------------------------------")
 
         input("\nPress [ENTER] to return to feedback menu.")
@@ -1572,7 +1597,6 @@ def view_feedback_rating():
 
     print("===========================================================================")
     print("|                        Feedback and Rating Records                      |")
-    print("===========================================================================")
 
     try:
         with open(RATING_FILE, 'r', encoding='utf-8') as file:
@@ -1593,10 +1617,12 @@ def view_feedback_rating():
                 parts = my_split(line, ',')
                 if len(parts) == 4:
                     name, rating, comment, timestamp = parts
+                    print("===========================================================================")
+                    print(f"| Date & Time  : {timestamp:<57}|")
+                    print("===========================================================================")
                     print(f"| Name         : {name:<57}|")
                     print(f"| Rating       : {rating:<57}|")
                     print(f"| Comment      : {comment:<57}|")
-                    print(f"| Date & Time  : {timestamp:<57}|")
                 print("---------------------------------------------------------------------------")
 
     except FileNotFoundError:
@@ -1621,6 +1647,9 @@ def view_feedback_rating():
             input("Press [Enter] to return to the admin menu.")
             clear_screen()
             return admin_menu()
+        
+        elif not choice:
+            print("Invalid input. The choice cannot be empty.\n")
 
         else:
             print("Invalid choice. Please enter 1, 2 or R.\n")
@@ -1996,6 +2025,10 @@ def feedback_rating():
             clear_screen()
             main_menu()
 
+        if not rate_input:
+            print("Invalid input. Rating cannot be empty.\n")
+            continue
+
         only_digits = True
         for c in rate_input:
             if not ('0' <= c <= '9'):
@@ -2016,7 +2049,10 @@ def feedback_rating():
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     with open(RATING_FILE, "a", encoding="utf-8") as file:
-        file.write(f"{logged_in_member.full_name},{rate},{comment},{now}\n")
+        if comment == "":
+            file.write(f"{logged_in_member.full_name},{rate},-,{now}\n")
+        else:
+            file.write(f"{logged_in_member.full_name},{rate},{comment},{now}\n")
 
     input("\nPress [ENTER] to return to main menu.")
     clear_screen()
