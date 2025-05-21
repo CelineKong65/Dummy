@@ -33,7 +33,7 @@ class Admin:
         self.status = status
 
 class Product:
-    def __init__(self, product_id="", name="", category="", price=0.0, stock=0, status=""):
+    def set_product(self, product_id="", name="", category="", price=0.0, stock=0, status="Active"):
         self.product_id = product_id
         self.name = name
         self.category = category
@@ -42,7 +42,7 @@ class Product:
         self.status = status
 
 class CartItem:
-    def __init__(self, product=None, product_id="", name="", price=0.0, quantity=0, total=0.0, status=""):
+    def set_cart(self, product=None, product_id="", name="", price=0.0, quantity=0, total=0.0, status=""):
         self.product = product if product else Product()
         self.product_id = product_id if product_id else (product.product_id if product else "")
         self.name = name if name else (product.name if product else "")
@@ -111,20 +111,6 @@ def is_integer(string):
         if char < '0' or char > '9':
             return False
     return True
-    
-def has_attribute(obj, attr):
-    try:
-        obj.__dict__
-    except AttributeError:
-        return False
-
-    return attr in obj.__dict__
-
-def get_attribute(obj, attr):
-    try:
-        return obj.__dict__[attr]
-    except (AttributeError, KeyError):
-        return None
 
 def my_split(s, delimiter=' '):
     result = []
@@ -259,14 +245,41 @@ def get_quoted_field(ss):
 
     return field.strip(), ss.strip()
 
-
 def get_attr(obj, key):
-    if key == "rating":
-        return obj.rating
+    if key == "product_id":
+        return obj.product_id
+    elif key == "name":
+        return obj.name
+    elif key == "category":
+        return obj.category
+    elif key == "price":
+        return obj.price
+    elif key == "stock":
+        return obj.stock
+    elif key == "status":
+        return obj.status
+    elif key == "rating":
+        return obj.rating if hasattr(obj, "rating") else 0.0
     elif key == "datetime":
-        return obj.datetime
+        return obj.datetime if hasattr(obj, "datetime") else ""
     else:
-        return obj
+        return None
+
+def has_attr(obj, key):
+    if key == "rating":
+        try:
+            _ = obj.rating
+            return True
+        except AttributeError:
+            return False
+    elif key == "datetime":
+        try:
+            _ = obj.datetime
+            return True
+        except AttributeError:
+            return False
+    else:
+        return False
 
 def bubble_sort(arr, key=None, reverse=False):
     # Manual length calculation
@@ -313,14 +326,12 @@ def jump_search(arr, target, key=None):
 
     prev = 0
     while True:
-        index = step - 1
-        if index >= n:
-            index = n - 1
+        index = min_val(step, n) - 1
 
         if key:
-            current_val = get_attribute(arr[min_val(step, n)-1], key) if has_attribute(arr[min_val(step, n)-1], key) else None
+            current_val = get_attr(arr[index], key)
         else:
-            current_val = arr[min_val(step, n)-1]
+            current_val = arr[index]
 
         if current_val is None:
             return None
@@ -333,26 +344,24 @@ def jump_search(arr, target, key=None):
         else:
             break
 
+    limit = min_val(step, n)
+
     if key:
-        while get_attribute(arr[prev], key) < target:
+        while prev < limit and get_attr(arr[prev], key) < target:
             prev += 1
-            if prev == min_val(step, n):
-                return None
-            
+        if prev == limit:
+            return None
+        if prev < n and get_attr(arr[prev], key) == target:
+            return arr[prev]
     else:
-        while arr[prev] < target:
+        while prev < limit and arr[prev] < target:
             prev += 1
-            if prev == min_val(step, n):
-                return None
-            
-    if key:
-        if get_attribute(arr[prev], key) == target:
+        if prev == limit:
+            return None
+        if prev < n and arr[prev] == target:
             return arr[prev]
-        
-    else:
-        if arr[prev] == target:
-            return arr[prev]
-    return None 
+
+    return None
 
 def load_members():
     global members
@@ -917,11 +926,12 @@ def filter_products():
                 return
 
             product_id = selection
-            product = None
-            product = jump_search(products, selection, key='product_id')
+            
+            bubble_sort(filtered, key='product_id')
+            product = jump_search(filtered, product_id, key='product_id')
 
             if not product:
-                print(f"Product with ID '{product_id}' not found.\n")
+                print(f"Product with ID '{product_id}' not found under this category.\n")
                 input("Press [ENTER] to continue.")
                 continue
 
@@ -1206,14 +1216,17 @@ def add_to_cart(cart, product_id, quantity):
         item.price = selected_product.price
         item.total = item.quantity * item.price
     else:
-        cart.append(CartItem(
+        cart_item = CartItem()  # Create an empty object
+        cart_item.set_cart(
             product=selected_product,
             product_id=selected_product.product_id,
             name=selected_product.name,
             price=selected_product.price,
             quantity=quantity,
+            total=selected_product.price * quantity,
             status=selected_product.status
-        ))
+        )
+        cart.append(cart_item)
 
     selected_product.stock -= quantity
 
@@ -2602,8 +2615,10 @@ def filter_product_admin():
                 filter_product_admin()
                 continue
             else:
-                print("Invalid option, returning to category selection.")
+                print("Invalid option. Press [ENTER] to retry.")
+                input()
                 clear_screen()
+                continue
 
 def add_product(products, category):
     new_product = Product()
@@ -2662,6 +2677,8 @@ def add_product(products, category):
         break
     
     products.append(new_product)
+    bubble_sort(products, key='product_id')
+
     if update_product_file():
         print("\nProduct added successfully!\n")
     else:
@@ -2680,8 +2697,8 @@ def edit_product(products, category):
     
     product_to_edit = None
     product_to_edit = jump_search(products, product_id, key='product_id')
-    
-    if not product_to_edit:
+
+    if not product_to_edit or product_to_edit.category != category:
         print("No product found with that ID in this category!")
         input("\nPress [ENTER] to continue.")
         return
@@ -2763,7 +2780,9 @@ def restock_product(products, category):
     product_to_restock = None
     product_to_restock = jump_search(products, product_id, key='product_id')
     
-    if not product_to_restock:
+    product_to_edit = jump_search(products, product_id, key='product_id')
+    
+    if not product_to_restock or product_to_restock.category != category:
         print("No product found with that ID in this category!")
         input("\nPress [ENTER] to continue.")
         return
