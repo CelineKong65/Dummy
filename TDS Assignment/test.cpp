@@ -345,7 +345,7 @@ class HashCustomer {
 			bool hasAt = false;
 			int atPos = -1;
 			int i = 0;
-			while(email[i] != '0'){
+			while(email[i] != '\0'){
 				if(email[i] == '@'){
 					hasAt = true;
 					atPos = i;
@@ -970,7 +970,7 @@ class HashAdmin {
 					{
 						// Add admin information and validate admin details
 						do{
-							cout << "Enter Admin ID (3 digits): ";
+							cout << "Enter admin ID (3 digits): ";
 							getline(cin, ad.admin_id);
 							if (!isValidID(ad.admin_id)){
 						        cout << "Admin ID must contain digits only and exactly 3 digits! Please try again.\n";
@@ -1026,7 +1026,7 @@ class HashAdmin {
 						// Search admin information by ID
 						string searchID;
 	                    cout << "Search Admin Information\n" << endl;
-	                    cout << "Enter Admin ID (3 digits): ";
+	                    cout << "Enter admin ID (3 digits): ";
 	                    getline(cin, searchID);
 	                    
 	                    Admin* foundAdmin = search(searchID);
@@ -1804,9 +1804,9 @@ void productMenu(){
         cout << "|================================================|" << endl;
         cout << "|1. Add New Product (min. 5 entries)             |" << endl;
         cout << "|2. Delete Product                               |" << endl;
-        cout << "|3. Search Product by ID                         |" << endl;
-        cout << "|4. Display Sorted Product                       |" << endl;
-        cout << "|5. Save Sorted Product                          |" << endl;
+        cout << "|3. Search Data by ID                            |" << endl;
+        cout << "|4. Display Sorted Data                          |" << endl;
+        cout << "|5. Save Sorted Data                             |" << endl;
         cout << "|6. Return to Team B Menu                        |" << endl;
         cout << "|________________________________________________|" << endl;
         cout << "Enter your choice: ";
@@ -2235,9 +2235,9 @@ void orderMenu(){
         cout << "|                 Available Actions              |" << endl;
         cout << "|================================================|" << endl;
         cout << "|1. Add New Order                                |" << endl;
-        cout << "|2. Search Order by ID                           |" << endl;
-        cout << "|3. Display Sorted Order (Latest first)          |" << endl;
-        cout << "|4. Save Sorted Order                            |" << endl;
+        cout << "|2. Search Data by ID                            |" << endl;
+        cout << "|3. Display Sorted Data (Latest first)           |" << endl;
+        cout << "|4. Save Sorted Data                             |" << endl;
         cout << "|5. Process Next Order                           |" << endl;
 		cout << "|6. Return to Team B Menu                        |" << endl;
         cout << "|________________________________________________|" << endl;
