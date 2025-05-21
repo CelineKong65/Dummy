@@ -1117,19 +1117,27 @@ void shellSortOrdersByDateTime(Order arr[], int n) {
     }
 }
 
+int getMin(int a, int b) {
+    if (a < b) {
+        return a;
+    } else {
+        return b;
+    }
+}
+
 // --------------------- JUMP SEARCH ---------------------
 template<typename T>
 int jumpSearch(T arr[], int size, int targetID) {
     int step = sqrt(size);
     int prev = 0;
 
-    while (arr[min(step, size) - 1].id < targetID) {
+    while (arr[getMin(step, size) - 1].id < targetID) {
         prev = step;
         step += sqrt(size);
         if (prev >= size) return -1;
     }
 
-    for (int i = prev; i < min(step, size); i++) {
+    for (int i = prev; i < getMin(step, size); i++) {
         if (arr[i].id == targetID) return i;
     }
 
@@ -1868,9 +1876,17 @@ void printWrappedText(const string& text) {
     cout << endl;
 }
 
+int getStringLength(string s) {
+    int count = 0;
+    while (s[count] != '\0') {
+        count++;
+    }
+    return count;
+}
+
 bool isValidDateTime(string dt) {
     // Check length first
-    if (dt.length() != 16) {
+    if (getStringLength(dt) != 16) {
         return false;
     }
 
@@ -1879,10 +1895,10 @@ bool isValidDateTime(string dt) {
         return false;
     }
 
-    // Check if the other characters are digits
-    for (int i = 0; i < dt.length(); i++) {
+    // Check if the other characters are digits (without using isdigit)
+    for (int i = 0; i < getStringLength(dt); i++) {
         if (i == 4 || i == 7 || i == 10 || i == 13) continue; // skip -, space, :
-        if (!isdigit(dt[i])) return false; // not a number
+        if (dt[i] < '0' || dt[i] > '9') return false; // not a digit
     }
 
     // Check hour (HH)
@@ -2237,8 +2253,12 @@ void orderMenu(){
 			orderCount = loadOrders(orders);
 			string searchOrderID;  
 			    
-			cout << "\nEnter Order ID to search: ";
-			cin >> searchOrderID;
+			cout << "\nEnter Order ID to search / 0 to return to Order Menu: ";
+			getline(cin,searchOrderID);
+			
+			if(searchOrderID=="0"){
+				orderMenu();
+			}
 			    
 			bool found = false;
 			for (int i = 0; i < orderCount; i++) {
@@ -2259,9 +2279,9 @@ void orderMenu(){
 			if (!found) {
 			    cout << "Order not found.\n";
 			}
-			cout << "Press [ENTER] to Refresh.";
+			cout << "Press [ENTER] to Return.";
 			cin.ignore();
-			cin.get();     
+			cin.get();  
 		}   
 		else if(choice=="3"){
             system("cls");
