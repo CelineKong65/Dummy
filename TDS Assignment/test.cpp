@@ -1804,9 +1804,9 @@ void productMenu(){
         cout << "|================================================|" << endl;
         cout << "|1. Add New Product (min. 5 entries)             |" << endl;
         cout << "|2. Delete Product                               |" << endl;
-        cout << "|3. Search Data by ID                            |" << endl;
-        cout << "|4. Display Sorted Data                          |" << endl;
-        cout << "|5. Save Sorted Data                             |" << endl;
+        cout << "|3. Search Product by ID                         |" << endl;
+        cout << "|4. Display Sorted Product                       |" << endl;
+        cout << "|5. Save Sorted Product                          |" << endl;
         cout << "|6. Return to Team B Menu                        |" << endl;
         cout << "|________________________________________________|" << endl;
         cout << "Enter your choice: ";
@@ -2235,9 +2235,9 @@ void orderMenu(){
         cout << "|                 Available Actions              |" << endl;
         cout << "|================================================|" << endl;
         cout << "|1. Add New Order                                |" << endl;
-        cout << "|2. Search Data by ID                            |" << endl;
-        cout << "|3. Display Sorted Data (Latest first)           |" << endl;
-        cout << "|4. Save Sorted Data                             |" << endl;
+        cout << "|2. Search Order by ID                           |" << endl;
+        cout << "|3. Display Sorted Order (Latest first)          |" << endl;
+        cout << "|4. Save Sorted Order                            |" << endl;
         cout << "|5. Process Next Order                           |" << endl;
 		cout << "|6. Return to Team B Menu                        |" << endl;
         cout << "|________________________________________________|" << endl;
