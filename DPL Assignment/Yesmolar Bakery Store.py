@@ -245,20 +245,6 @@ def get_quoted_field(ss):
 
     return field.strip(), ss.strip()
 
-def get_attr(obj, key):
-    if key == "product_id":
-        return obj.product_id
-    elif key == "rating":
-        return obj.rating
-    elif key == "datetime":
-        return obj.datetime
-    elif key == "datetime_obj":  
-        return obj.datetime_obj
-    elif key == "total":       
-        return obj.total 
-    else:
-        return None
-
 def get_attr(obj, key, default=None):
     if key == "product_id":
         return obj.product_id
