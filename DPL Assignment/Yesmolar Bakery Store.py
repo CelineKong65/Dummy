@@ -19,16 +19,6 @@ class Member:
         self.gender = gender
         self.contact = contact
         self.status = status
-
-    def display(self):
-        print(self.member_id)
-        print(self.full_name)
-        print(self.email)
-        print(self.password)
-        print(self.age)
-        print(self.gender)
-        print(self.contact)
-        print(self.status)
     
 class Admin:
     def set_admin(self, name, password, contact, position="admin", status="Active"):
@@ -41,13 +31,6 @@ class Admin:
         self.contact = contact
         self.position = position
         self.status = status
-
-    def display(self):
-        print(self.name)
-        print(self.password)
-        print(self.contact)
-        print(self.position)
-        print(self.status)
 
 class Product:
     def __init__(self, product_id="", name="", category="", price=0.0, stock=0, status=""):
@@ -288,7 +271,7 @@ def get_attr(obj, key):
 def bubble_sort(arr, key=None, reverse=False):
     # Manual length calculation
     n = 0
-    for _ in arr:
+    for item in arr:
         n += 1
 
     i = 0
