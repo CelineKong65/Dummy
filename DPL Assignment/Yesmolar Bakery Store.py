@@ -78,12 +78,14 @@ class PurchaseRecord:
         self.payment_method = record_dict["payment_method"]
 
 class Feedback:
-    def create_feedback(self, name, rating, comment, timestamp):
-        self.name = name
-        self.rating = int(rating)
-        self.comment = comment
-        self.timestamp = timestamp
-        self.datetime = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
+    def create_feedback(name, rating, comment, timestamp):
+        obj = Feedback()
+        obj.name = name
+        obj.rating = int(rating)
+        obj.comment = comment
+        obj.timestamp = timestamp
+        obj.datetime = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
+        return obj
 
 products = []
 members = []
@@ -274,23 +276,48 @@ def get_quoted_field(ss):
 
     return field.strip(), ss.strip()
 
+
+def get_attr(obj, key):
+    if key == "rating":
+        return obj.rating
+    elif key == "datetime":
+        return obj.datetime
+    else:
+        return obj
+
 def bubble_sort(arr, key=None, reverse=False):
-    n = len(arr)
-    for i in range(n - 1):
+    # Manual length calculation
+    n = 0
+    for _ in arr:
+        n += 1
+
+    i = 0
+    while i < n - 1:
         swapped = False
-        for j in range(0, n - i - 1):
+        j = 0
+        while j < n - i - 1:
             if key:
-                a = get_attribute(arr[j], key) if has_attribute(arr[j], key) else arr[j]
-                b = get_attribute(arr[j+1], key) if has_attribute(arr[j+1], key) else arr[j+1]
+                a = get_attr(arr[j], key)
+                b = get_attr(arr[j + 1], key)
             else:
                 a = arr[j]
                 b = arr[j + 1]
 
-            if (a > b) if not reverse else (a < b):
-                arr[j], arr[j+1] = arr[j+1], arr[j]
+            # Convert to comparable types if needed (e.g., rating to float, timestamp to datetime)
+            if key == "rating":
+                a = float(a)
+                b = float(b)
+            elif key == "datetime":
+                # assume timestamp is a string and already in comparable format
+                pass
+
+            if (a > b and not reverse) or (a < b and reverse):
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
                 swapped = True
+            j += 1
         if not swapped:
             break
+        i += 1
 
 def jump_search(arr, target, key=None):
     n = len(arr)
@@ -3399,7 +3426,7 @@ def sort_feedback_rating():
                     parts = my_split(line, ',')
                     if len(parts) == 4:
                         name, rating, comment, timestamp = parts
-                        feedback_rating.append(Feedback(name, rating, comment, timestamp))
+                        feedback_rating.append(Feedback.create_feedback(name, rating, comment, timestamp))
 
         if not feedback_rating:
             print("============================================================================")
