@@ -32,5 +32,5 @@
 703,Egg Tart,Pies & Tarts,3.5,100,Active
 800,Chicken Puff,Savories & Sandwiches,4.5,78,Active
 801,Tuna Sandwich,Savories & Sandwiches,5.0,100,Active
-802,Quiche,Savories & Sandwiches,6.0,100,Active
+802,Quiche,Savories & Sandwiches,6.0,90,Active
 803,Sausage Roll,Savories & Sandwiches,4.2,90,Inactive

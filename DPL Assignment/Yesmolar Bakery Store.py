@@ -52,7 +52,7 @@ class CartItem:
         self.status = status if status else (product.status if product else "")
 
 class PurchaseRecord:
-    def __init__(self, record_dict):
+    def set_purchase_record(self, record_dict):
         self.lines = record_dict["lines"]
         self.datetime = record_dict["datetime"]
         self.datetime_obj = record_dict["datetime_obj"]
@@ -248,39 +248,41 @@ def get_quoted_field(ss):
 def get_attr(obj, key):
     if key == "product_id":
         return obj.product_id
-    elif key == "name":
-        return obj.name
-    elif key == "category":
-        return obj.category
-    elif key == "price":
-        return obj.price
-    elif key == "stock":
-        return obj.stock
-    elif key == "status":
-        return obj.status
     elif key == "rating":
-        return obj.rating if hasattr(obj, "rating") else 0.0
+        return obj.rating
     elif key == "datetime":
-        return obj.datetime if hasattr(obj, "datetime") else ""
+        return obj.datetime
+    elif key == "datetime_obj":  
+        return obj.datetime_obj
+    elif key == "total":       
+        return obj.total 
     else:
         return None
 
-def has_attr(obj, key):
-    if key == "rating":
-        try:
-            _ = obj.rating
-            return True
-        except AttributeError:
-            return False
+def get_attr(obj, key, default=None):
+    if key == "product_id":
+        return obj.product_id
+    elif key == "rating":
+         return obj.rating
     elif key == "datetime":
-        try:
-            _ = obj.datetime
-            return True
-        except AttributeError:
-            return False
+        return obj.datetime
+    elif key == "name":
+        return obj.name 
+    elif key == "price":
+        return obj.price
+    elif key == "quantity":
+        return obj.quantity
+    elif key == "product":
+        return obj.product 
+    elif key == "category":
+        return obj.category 
+    elif key == "datetime_obj":
+        return obj.datetime_obj
+    elif key == "total":
+        return obj.total
     else:
-        return False
-
+        return default
+        
 def bubble_sort(arr, key=None, reverse=False):
     # Manual length calculation
     n = 0
@@ -1791,18 +1793,24 @@ def purchase_history(cart, total_payment, payment_method):
         order_id = get_order_id()
 
         with open(PURCHASE_HISTORY_FILE, "a", encoding="utf-8") as file:
+            # Write order header line: member_id, full_name, order_id, datetime, payment_method
             file.write(f"{logged_in_member.member_id},{logged_in_member.full_name},{order_id},{purchase_time},{payment_method}\n")
 
             for item in cart:
-                product_id = item.product_id if item.product_id else (item.product.product_id if item.product else "")
-                name = item.name if item.name else (item.product.name if item.product else "")
-                category = item.product.category if item.product else ""
-                price = item.price if item.price is not None else (item.product.price if item.product else 0.0)
-                quantity = item.quantity
-                total = item.total if item.total is not None else (price * quantity)
+                product_id = get_attr(item, 'product_id') or get_attr(get_attr(item, 'product'), 'product_id', '')
+                name = get_attr(item, 'name') or get_attr(get_attr(item, 'product'), 'name', '')
+                category = get_attr(get_attr(item, 'product'), 'category', '')
+                price = get_attr(item, 'price')
+                if price is None:
+                    price = get_attr(get_attr(item, 'product'), 'price', 0.0)
+                quantity = get_attr(item, 'quantity', 0)
+                total = get_attr(item, 'total')
+                if total is None:
+                    total = price * quantity
                 
                 file.write(f"{logged_in_member.member_id},{logged_in_member.full_name},{order_id},{product_id},{name},{category},{price:.2f},{quantity},{total:.2f}\n")
             
+            # Write total payment summary line
             file.write(f"{logged_in_member.member_id},{logged_in_member.full_name},{order_id},TOTAL,{total_payment:.2f}\n\n")
         
         return True
@@ -1810,6 +1818,7 @@ def purchase_history(cart, total_payment, payment_method):
     except Exception as e:
         print(f"Error recording purchase history: {e}")
         return False
+
 
 def get_order_id():
     try:
@@ -1921,13 +1930,17 @@ def view_purchase_history():
                     main_menu()
                     return
                 elif choice in (1, 2):
-                    record_objects = [PurchaseRecord(rec) for rec in user_records]
+                    record_objects = []
+                    for rec in user_records:
+                        pr = PurchaseRecord()
+                        pr.set_purchase_record(rec)
+                        record_objects.append(pr)
+
                     if choice == 1:
                         bubble_sort(record_objects, key="datetime_obj", reverse=True)
                     elif choice == 2:
                         bubble_sort(record_objects, key="total", reverse=True)
-
-                    user_records = [record.__dict__ for record in record_objects]
+                    user_records = record_objects
                     break
                 else:
                     print("Invalid choice. Please try again.")
@@ -1941,11 +1954,11 @@ def view_purchase_history():
         print("|                           YOUR PURCHASE HISTORY                         |")
         for record in user_records:
             print("===========================================================================")
-            print(f"| Purchase Time : {record['datetime']:<56}|")
-            print(f"| Payment Method: {record['payment_method']:<56}|")
+            print(f"| Purchase Time : {record.datetime:<56}|")
+            print(f"| Payment Method: {record.payment_method:<56}|")
             print("===========================================================================")
 
-            for line in record["lines"][1:-1]:
+            for line in record.lines[1:-1]:
                 parts = my_split(line, ',')
                 if len(parts) < 9:
                     continue
@@ -1966,7 +1979,7 @@ def view_purchase_history():
                 print(f"| Total      : RM {total:<56.2f}|")
 
             print("===========================================================================")
-            print(f"| Total Purchase: RM {record['total']:<53.2f}|")
+            print(f"| Total Purchase: RM {record.total:<53.2f}|")
             print("===========================================================================\n")
 
         input("\nPress [ENTER] to return.")
