@@ -10,7 +10,7 @@ ORDER_ID_FILE = os.path.join(SCRIPT_DIR, "order_id_counter.txt")
 RATING_FILE = os.path.join(SCRIPT_DIR, "rating.txt") 
 
 class Member:
-    def __init__(self, full_name="", member_id="", email="", password="", age="", gender="" , contact="", status="Active"):
+    def set_customer(self, member_id, full_name, email, password, age, gender, contact, status="Active"):
         self.member_id = member_id
         self.full_name = full_name
         self.email = email
@@ -19,12 +19,19 @@ class Member:
         self.gender = gender
         self.contact = contact
         self.status = status
-    
-    def __str__(self):
-        return f"{self.member_id}\n{self.full_name}\n{self.email}\n{self.password}\n{self.age}\n{self.gender}\n{self.contact}\n{self.status}"
+
+    def display(self):
+        print(self.member_id)
+        print(self.full_name)
+        print(self.email)
+        print(self.password)
+        print(self.age)
+        print(self.gender)
+        print(self.contact)
+        print(self.status)
     
 class Admin:
-    def __init__(self, name="", password="", contact="", position="admin", status="Active"):
+    def set_admin(self, name, password, contact, position="admin", status="Active"):
         allowed_positions = ["admin", "superadmin"]
         if position not in allowed_positions:
             raise ValueError(f"Invalid position: {position}. Must be 'admin' or 'superadmin'.")
@@ -35,8 +42,12 @@ class Admin:
         self.position = position
         self.status = status
 
-    def __str__(self):
-        return f"{self.name}\n{self.password}\n{self.contact}\n{self.position}\n{self.status}"
+    def display(self):
+        print(self.name)
+        print(self.password)
+        print(self.contact)
+        print(self.position)
+        print(self.status)
 
 class Product:
     def __init__(self, product_id="", name="", category="", price=0.0, stock=0, status=""):
@@ -67,7 +78,7 @@ class PurchaseRecord:
         self.payment_method = record_dict["payment_method"]
 
 class Feedback:
-    def __init__(self, name, rating, comment, timestamp):
+    def create_feedback(self, name, rating, comment, timestamp):
         self.name = name
         self.rating = int(rating)
         self.comment = comment
@@ -345,7 +356,8 @@ def load_members():
                     data_lines.append(line)
 
                 if len(data_lines) == 8:
-                    member = Member(
+                    member = Member()
+                    member.set_customer(
                         member_id=data_lines[0],
                         full_name=data_lines[1],
                         email=data_lines[2],
@@ -679,9 +691,10 @@ def signup():
     
         break
    
-    new_member = Member(
-        full_name=full_name,
+    new_member = Member()
+    new_member.set_customer(
         member_id=member_id,
+        full_name=full_name,
         email=email,
         password=password,
         age=age,
@@ -745,9 +758,10 @@ def login():
                 while attempts < 3:
                     if password == stored_password:
                         print("\nLogged in Successfully!")
-                        logged_in_member = Member(
-                            full_name=lines[i + 1],
+                        logged_in_member = Member()
+                        logged_in_member.set_customer(
                             member_id=lines[i],
+                            full_name=lines[i + 1],
                             email=lines[i + 2],
                             password=lines[i + 3],
                             age=lines[i + 4],
@@ -755,6 +769,7 @@ def login():
                             contact=lines[i + 6],
                             status=lines[i + 7]
                         )
+
                         input("\nPress [ENTER] to continue.")
                         return main_menu()
                     else:
@@ -2385,7 +2400,8 @@ def load_admins():
             i = 0
             while i < len(lines):
                 if i + 4 < len(lines):
-                    admin = Admin(
+                    admin = Admin()
+                    admin.set_admin(
                         name=lines[i],
                         password=lines[i+1],
                         contact=lines[i+2],
@@ -2433,7 +2449,8 @@ def admin_login():
                     if password == stored_password:
                         print("\nLogged in Successfully!")
                         print(f"Welcome {stored_position}!")
-                        logged_in_admin = Admin(
+                        logged_in_admin = Admin()
+                        logged_in_admin.set_admin(
                             name=lines[i],
                             password=lines[i + 1],
                             contact=lines[i + 2],
@@ -2816,7 +2833,8 @@ def view_member_list(status_filter):
             
             for i in range(0, len(lines), 8):
                 if i + 7 < len(lines):
-                    member = Member(
+                    logged_in_member = Member()
+                    logged_in_member.set_customer(
                         member_id=lines[i],
                         full_name=lines[i+1],
                         email=lines[i+2],
@@ -2826,7 +2844,7 @@ def view_member_list(status_filter):
                         contact=lines[i+6],
                         status=lines[i+7]
                     )
-                    members.append(member)
+                    members.append(logged_in_member)
         
         filtered_members = []
         for m in members:
@@ -3041,7 +3059,8 @@ def view_admin_list(status_filter):
             for i in range(0, len(lines), 5):
                 if i + 4 < len(lines):
                     try:
-                        admin = Admin(
+                        admin = Admin()
+                        admin.set_admin(
                             name=lines[i],
                             password=lines[i+1],
                             contact=lines[i+2],
