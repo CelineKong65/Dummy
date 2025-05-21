@@ -1361,8 +1361,20 @@ def edit_cart(cart):
 
             if new_qty == 0:
                 product.stock += selected_item.quantity
-                cart.pop(original_index)
-                
+                if new_qty == 0:
+                    product.stock += selected_item.quantity
+                    deleted_item = selected_item
+                    new_cart = cart[:original_index] + cart[original_index + 1:]
+                    original_cart = cart[:]
+                    cart[:] = new_cart
+
+                    if save_cart(cart) and update_product_file():
+                        print("Item removed from cart successfully!\n")
+                    else:
+                        cart[:] = original_cart
+                        product.stock -= deleted_item.quantity
+                        print("Failed to update cart. Changes reverted.")
+                    break
                 if save_cart(cart) and update_product_file():
                     print("Item removed from cart successfully!\n")
                 else:
