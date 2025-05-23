@@ -1,3 +1,4 @@
+//Declare the used library
 #include <iostream>
 #include <fstream>
 #include <cmath>
@@ -6,16 +7,18 @@
 #include <sstream>
 #include <iomanip>
 
-// Chosen as a small prime number to reduce clustering and ensure better distribution in hash table
+//Chosen as a small prime number to reduce clustering and ensure better distribution in hash table
 #define TABLE_SIZE 11
 
 using namespace std;
+
+//Declare constant & global variables 
 const int MAX_PRODUCTS = 100;
 const int MAX_ORDERS = 100;
 const int MAX_LINE_LENGTH = 256;
 int productCount = 0;
 
-// --------------------- FUNCTION PROTOTYPE ---------------------
+//----------------------------------------------- FUNCTION PROTOTYPES ----------------------------------------------
 void mainMenu();
 void teamAMenu();
 void teamBMenu();
@@ -23,21 +26,200 @@ void productMenu();
 void orderMenu();
 void printWrappedText(const string& text);
 
-// --------------------- STRUCTURES ---------------------
+//------------------------------------------------- HELPER FUNCTIONS -----------------------------------------------
+//Function to determine minimum value
+int getMin(int a, int b) {
+    if (a < b) {
+        return a;
+    } else {
+        return b;
+    }
+}
+
+//Function to determine whether a string is "empty" ignoring whitespace like spaces ' ' & '\t'.
+bool isEmpty(const string& str) {
+    for (size_t i = 0; i < str.length(); i++) {
+        if (str[i] != ' ' && str[i] != '\t') {
+            return false;
+        }
+    }
+    return true;
+}
+
+//Function to print '0' or '00' to ensure displayed product id is exactly 3 digits
+void printIdWithLeadingZeros(int id) {
+    if (id < 10) cout << "00" << id;
+    else if (id < 100) cout << "0" << id;
+    else cout << id;
+}
+
+//Function to wrapped the product description
+void printWrappedText(const string& text) {
+	int lineLength = 60;
+    int count = 0;
+    for (size_t i = 0; i < text.length(); ++i) {
+        cout << text[i];
+        count++;
+
+        // Wrap at space only
+        if (count >= lineLength && text[i] == ' ') {
+            cout << '\n';
+            count = 0;
+        }
+    }
+    cout << endl;
+}
+
+//Function to get the string length
+int getStringLength(string s) {
+    int count = 0;
+    while (s[count] != '\0') {
+        count++;
+    }
+    return count;
+}
+
+//Function to check if the date-time is valid
+bool isValidDateTime(string dt) {
+    // Check length first
+    if (getStringLength(dt) != 16) {
+        return false;
+    }
+
+    // Check if the fixed characters are correct
+    if (dt[4] != '-' || dt[7] != '-' || dt[10] != ' ' || dt[13] != ':') {
+        return false;
+    }
+
+    // Check if the other characters are digits (without using isdigit)
+    for (int i = 0; i < getStringLength(dt); i++) {
+        if (i == 4 || i == 7 || i == 10 || i == 13) continue; // skip -, space, :
+        if (dt[i] < '0' || dt[i] > '9') return false; // not a digit
+    }
+
+    // Check hour (HH)
+    int hour = (dt[11] - '0') * 10 + (dt[12] - '0');
+    if (hour < 0 || hour > 23) {
+        cout << "Hour must be between 00 and 23.\n";
+        return false;
+    }
+
+    // Check minute (MM)
+    int minute = (dt[14] - '0') * 10 + (dt[15] - '0');
+    if (minute < 0 || minute > 59) {
+        cout << "Minute must be between 00 and 59.\n";
+        return false;
+    }
+
+    return true;
+}
+
+//Function to convert string into int; while returning -1 if invalid character or format
+/*
+    Function Logic:
+    1. Check each character to ensure it is a digit ('0' to '9').
+    2. Convert the string to an integer by:
+       - Multiplying the current result by 10 and adding the digit value.
+    3. Return -1 if:
+       - The string is empty.
+       - Any character is not a digit.
+    4. Otherwise, return the converted integer.
+*/
+int StringToInt(const string& str) {
+    int result = 0;
+    if (str.length() == 0) 
+		return -1;
+
+    for (size_t i = 0; i < str.length(); i++) {
+        char c = str[i];
+        if (c < '0' || c > '9') return -1;
+        result = result * 10 + (c - '0');
+    }
+    return result;
+}
+
+//Function to convert string into float; while returning -1 if invalid character or format
+/*
+    Function Logic:
+    1. Check for valid characters (digits and at maximum one decimal).
+    2. Convert the string into a float:
+       - Multiply and accumulate digits before the decimal point.
+       - Divide and accumulate digits after the decimal point.
+    3. Return -1.0f if:
+       - The string is empty / multiple decimal points / no digits / non-digit & dot characters.
+    4. Otherwise, return the converted float.
+*/
+float StringToFloat(const string& str) {
+    float result = 0.0f;
+    bool decimalFound = false;
+    float decimalDivisor = 10.0f;
+    int digitCount = 0;
+    if (str.length() == 0) return -1.0f;
+
+    for (size_t i = 0; i < str.length(); i++) {
+        char c = str[i];
+        if (c == '.') {
+            if (decimalFound) return -1.0f; // multiple dots
+            decimalFound = true;
+        }
+        else if (c >= '0' && c <= '9') {
+            int digit = c - '0';
+            if (!decimalFound) {
+                result = result * 10 + digit;
+            } else {
+                result = result + digit / decimalDivisor;
+                decimalDivisor *= 10;
+            }
+            digitCount++;
+        }
+        else {
+            return -1.0f; // invalid character
+        }
+    }
+    if (digitCount == 0) return -1.0f; // no digits found
+    return result;
+}
+
+//Function to convert uppercase to lowercase (Added to avoid using built-in function tolower())
+/*
+	Logic of this function
+	1. declare an empty result first
+	2. use for loop to check the received char
+		- if there's uppercase: 
+			i ) convert it to lowercase by adding 32 (according to ASCII) 
+			ii) assign it to variable 'result'
+		- if there's no uppercase: 
+			i ) directly assign it to variable 'result'
+*/
+string toLowerCase(const string& str) {
+	string result = "";
+	
+    for (char c : str) {
+        if (c >= 'A' && c <= 'Z') {
+            result += (c + 32);
+        } else {
+            result += c;
+        }
+    }
+    return result;
+}
+
+//---------------------------------------------------- STRUCTURES --------------------------------------------------
+//Structure to store product attributes
 struct Product {
     int id;
     string name;
     double price;
     string description;
 };
-
+//Structure to store customer attributes
 struct Customer {
     string cus_id;
     string cus_name;
     string cus_email;
     string cus_phone;
 };
-
+//Structure to store admin attributes
 struct Admin {
     string admin_id;
     string admin_name;
@@ -45,7 +227,7 @@ struct Admin {
     string admin_phone;
     string admin_position;
 };
-
+//Structure to store order attributes
 struct Order {
     string orderID;
     int customerID;
@@ -54,6 +236,7 @@ struct Order {
     double totalAmount;
 };
 
+//------------------------------------------------------ QUEUE -----------------------------------------------------
 template <typename T>
 class ADTqueue {
 private: 
@@ -219,7 +402,7 @@ public:
 	}
 };
 
-// --------------------- HASHING + LINKED LIST QUEUE ---------------------
+//---------------------------------------------HASHING + LINKED LIST QUEUE------------------------------------------
 /*
  	Class: HashCustomer
 	Implements a hash table with separate chaining for storing Customer records
@@ -1198,7 +1381,8 @@ class HashAdmin {
 		}
 };
 
-// --------------------- SHELL SORT ---------------------
+// ---------------------------------------------- SHELL SORT ALGORITHM ---------------------------------------------
+//Shell sort for product data
 void shellSort(Product arr[], int n)
 {
     // Start with a big gap, then reduce the gap
@@ -1225,6 +1409,7 @@ void shellSort(Product arr[], int n)
     }
 }
 
+//Shell sort for order data
 void shellSortOrdersByDateTime(Order arr[], int n) {
     // Convert datetime strings to comparable format and sort
     for (int gap = n/2; gap > 0; gap /= 2) {
@@ -1241,93 +1426,108 @@ void shellSortOrdersByDateTime(Order arr[], int n) {
     }
 }
 
-int getMin(int a, int b) {
-    if (a < b) {
-        return a;
-    } else {
-        return b;
-    }
-}
-
-// --------------------- JUMP SEARCH ---------------------
-template<typename T>
-int jumpSearch(T arr[], int size, int targetID) {
-    int step = sqrt(size);
+//--------------------------------------------------JUMP SEARCH ALGORITHM-------------------------------------------
+/*
+	Logic of JumpSearch
+	1. declare a fixed step size (usually is the square-root of array size)
+	2. jump through the array with fixed step size
+	3. once reached the jump position, check if the value of the element is the target
+		- 	if jump position=target, target found
+		-	if jump position<target, proceed with another jump
+		-	if jump position>target, return to the previous jump position and perform linear search to look for the target
+	4. if it jump until the end of array without any result, then the target does not exist in this array
+*/
+int jumpSearch(Product arr[], int size, int targetID) {
+    
+    //declare and calculate the fixed step size
+	int step = sqrt(size);
+	
+	//track the previous jump position
     int prev = 0;
-
+	
+	//while loop to jump throught the array until element >= target is found
     while (arr[getMin(step, size) - 1].id < targetID) {
         prev = step;
         step += sqrt(size);
-        if (prev >= size) return -1;
+        if (prev >= size) 
+			return -1; //target is not in the array
     }
-
+	
+	//for loop to perform linear search
     for (int i = prev; i < getMin(step, size); i++) {
-        if (arr[i].id == targetID) return i;
+        if (arr[i].id == targetID) 
+			return i; //target found
     }
-
+	
+	//return -1 if target not found
     return -1;
 }
 
-// ------------------------------------------- READ FROM FILE (load function)-------------------------------------------
+//---------------------------------------------READ FROM FILE (load function)----------------------------------------
+//Load products
 int loadProducts(Product products[]) {
-    ifstream file("raw_product.txt");
+	//Open the raw_product.txt in read mode
+    ifstream file("raw_product.txt"); 
+    
+    //Error handling if file not found
+    if (!file) {
+        cout << "Error opening product file!\n";
+        return 0;
+    }
+    
+    //Initialize a count variable for reading the products with a loop
     int count = 0;
+    
+    //While loop to read unsorted product data line-by-line
     while (file >> products[count].id) {
 	    file.ignore(); // Ignore the whitespace after ID
 	    getline(file, products[count].name, '"');
-	    getline(file, products[count].name, '"'); // Read name inside quotes
-	    file >> products[count].price;
-	    file.ignore(); // Ignore space after price
+	    getline(file, products[count].name, '"'); // Read the product name inside quotes
+	    file >> products[count].price; // Read the product price
+	    file.ignore(); // Ignore space after product price
 	    getline(file, products[count].description, '"');
-	    getline(file, products[count].description, '"'); // Read description inside quotes
-	    count++;
+	    getline(file, products[count].description, '"'); // Read product description inside quotes
+	    count++; //increase count variable to loop again
 	}
-    file.close();
-    return count;
+    file.close(); //Close the raw_product.txt
+    return count; //Return count value to get total of product data
 }
 
+//Load orders
 int loadOrders(Order orders[]) {
-    ifstream file("order.txt");
-    if (!file) {
+    //Open the order.txt in read mode
+	ifstream file("order.txt");
+    
+    //Error handling if file not found
+	if (!file) {
         cout << "Error opening order file!\n";
         return 0;
     }
-
+	
+	//Initialize a count variable for reading the orders with a loop
     int count = 0;
+    
+    //While loop to read unsorted order data line-by-line
     while (file >> orders[count].orderID) {
-        file >> orders[count].customerID;
-        file >> orders[count].productID;
+        file >> orders[count].customerID; // Read the pcustomer id
+        file >> orders[count].productID; // Read the product id
         file.ignore(); // Ignore space before datetime
-        getline(file, orders[count].dateTime, '"'); // Read until opening quote
-        getline(file, orders[count].dateTime, '"'); // Read actual datetime
-        file >> orders[count].totalAmount;
+        getline(file, orders[count].dateTime, '"'); 
+        getline(file, orders[count].dateTime, '"'); // Read the order date inside quotes
+        file >> orders[count].totalAmount; // Read the total amount
         count++;
     }
 
-    file.close();
-    return count;
+    file.close(); //Close the order.txt
+    return count; //Return count value to get total of order data
 }
 
-//---------------------------------------------------------------raw code function to convert lowercase-----------------------------------------------
-string toLowerCase(const string& str) {
-    string result = "";
-    for (char c : str) {
-        // Check if uppercase A-Z
-        if (c >= 'A' && c <= 'Z') {
-            // Convert to lowercase by adding 32
-            result += (c + 32);
-        } else {
-            result += c;
-        }
-    }
-    return result;
-}
-
-//-------------------------------------------------------- MAIN MENU ------------------------------------------------------
+//-------------------------------------------------------- Main Menu ------------------------------------------------------
 void mainMenu(){
 	system("cls");
 	string choice;
 	
+	//Display the main menu
 	cout<<"=================================================="<<endl;
     cout<<"                  TDS Assignment                  "<<endl;
     cout<<"=================================================="<<endl;
@@ -1335,30 +1535,32 @@ void mainMenu(){
     cout<<"2. Team B"<<endl;
     cout<<"3. Exit System"<<endl;
     cout<<"--------------------------------------------------"<<endl;
-    cout<<"Enter your choice: ";
+    
+    //Prompt user to enter the choice
+	cout<<"Enter your choice: ";
     getline(cin, choice);
-
+	
+	//If-else case to determine the choice and its corresponding actions
     if(choice=="1"){
     	system("cls");
-    	teamAMenu();
+    	teamAMenu(); //Display Team A Menu
 	}
 	else if(choice=="2"){
 		system("cls");
-		teamBMenu();
+		teamBMenu(); //Display Team B Menu
 	}
     else if(choice=="3"){
     	cout<<"\nThank you for using the system. Goodbye!"<<endl;
-		exit(1);
+		exit(1); //Exit the program
 	}
 	else{
 		cout<<"Invalid choice. Press Enter to try again";
 		cin.get();		
-		mainMenu();
+		mainMenu(); // Error handling if choice invalid
 	}
 }
 
-
-//--------------------------------------------------- TEAM A MENU -----------------------------------------------------
+//--------------------------------------------------- Team A MENU -----------------------------------------------------
 void teamAMenu(){
 	HashCustomer HC;
 	HashAdmin HA;
@@ -1404,10 +1606,11 @@ void teamAMenu(){
 	}
 }
 
-//-------------------------------------------------- TEAM B MENU ----------------------------------------------
+//-------------------------------------------------- Team B MENU ----------------------------------------------
 void teamBMenu(){
 	string choice;
-
+	
+	//Display the team b menu
 	cout<<"=================================================="<<endl;
     cout<<"                    Team B Menu                   "<<endl;
     cout<<"=================================================="<<endl;
@@ -1415,37 +1618,44 @@ void teamBMenu(){
     cout<<"2. Display Unsorted Order History"<<endl;
     cout<<"3. Return to Main Menu"<<endl;
     cout<<"--------------------------------------------------"<<endl;
-    cout<<"Enter your choice: ";
+    
+	//Get user choice
+	cout<<"Enter your choice: ";
     getline(cin,choice);
-
+	
+	//If-else case to determine the choice and its corresponding actions
     if (choice == "1") {
 	    system("cls");
-	    productMenu();
+	    productMenu(); //Display product menu
 	}
 	else if (choice == "2") {
 	    system("cls");
-	    orderMenu();
+	    orderMenu(); //Display order menu
 	}
 	else if (choice == "3") {
 	    system("cls");
-	    mainMenu();
+	    mainMenu(); //Display main menu
 	}
 	else {
 	    cout << "Invalid choice. Press Enter to try again";
 	    cin.get();
 	    system("cls");
-	    teamBMenu();
+	    teamBMenu(); //Error handling for invalid choice input
 	}
 }
 
-//----------------------------------------------------save products to raw product.txt----------------------------------------
+//------------------------------------Save Unsorted Products data to "raw_product.txt"------------------------------
 void saveRawProducts(Product products[], int productCount) {
-    ofstream outFile("raw_product.txt");
+    //Open "raw_product.txt" in write mode
+	ofstream outFile("raw_product.txt");
+	
+	//Error handling if unable to open the file
     if (!outFile) {
         cout << "Error opening file for writing!" << endl;
         return;
     }
     
+    //For loop to write the product data into file
     for (int i = 0; i < productCount; i++) {
         outFile << setw(3) << setfill('0') << products[i].id << " \"" 
                 << products[i].name << "\" " 
@@ -1453,18 +1663,25 @@ void saveRawProducts(Product products[], int productCount) {
                 << products[i].description << "\"\n";
     }
     
+    //Close the file
     outFile.close();
 }
 
-//---------------------------------------------------- SAVE SORTED PRODUCTS --------------------------------------------------
+//------------------------------------Save Sorted Products data to "sorted_product.txt"-----------------------------
 void saveSortedProducts(Product products[], int productCount) {
-    ofstream outFile("sorted_product.txt");
-    if (!outFile) {
+    //Open "sorted_product.txt" in write mode
+	ofstream outFile("sorted_product.txt");
+    
+	//Error handling if unable to open the file
+	if (!outFile) {
         cout << "Error opening file for writing!" << endl;
         return;
     }
     
+    //Call shellsort function to sort products according to product id
     shellSort(products, productCount);
+    
+    //For loop to write the product data into file
     for (int i = 0; i < productCount; i++) {
         outFile << setw(3) << setfill('0') << products[i].id << " \"" 
                 << products[i].name << "\" " 
@@ -1472,22 +1689,31 @@ void saveSortedProducts(Product products[], int productCount) {
                 << products[i].description << "\"\n";
     }
     
+    //Close the file
     outFile.close();
+    
+    //Message to notify user data have been saved successfully
     cout << "Sorted products saved to sorted_product.txt" << endl;
     cout << "Press [ENTER] to return to Product Menu.";
 	cin.get();    
 }
 
-//----------------------------------------------------------- SAVE SORTED ORDERS -----------------------------------------------
+//----------------------------------Save Sorted Orders data to "sorted_order.txt"-----------------------------------
 void saveSortedOrders(Order orders[], int orderCount) {
     
+    //Call shellsort function to sort orders according to date-time
     shellSortOrdersByDateTime(orders,orderCount);
+	
+	//Open "sorted_order.txt" in write mode
 	ofstream outFile("sorted_order.txt");
-    if (!outFile) {
+    
+	//Error handling if unable to open the file
+	if (!outFile) {
         cout << "Error opening file for writing!" << endl;
         return;
     }
     
+    //For loop to write the order data into file
     for (int i = 0; i < orderCount; i++) {
         outFile << orders[i].orderID << " "
                 << orders[i].customerID << " "
@@ -1496,72 +1722,32 @@ void saveSortedOrders(Order orders[], int orderCount) {
                 << orders[i].totalAmount << "\n";
     }
     
+    //Close the file
     outFile.close();
+    
+    //Message to notify user data have been saved successfully
     cout << "Sorted orders saved to sorted_order.txt\n";
     cout << "Press [ENTER] to return to Order Menu.";
 	cin.get();   
 }
 
-//----------------------------------------------------------- ADD PRODUCT-------------------------------------------------------
-bool isEmpty(const string& str) {
-    for (size_t i = 0; i < str.length(); i++) {
-        if (str[i] != ' ' && str[i] != '\t') {
-            return false;
-        }
-    }
-    return true;
-}
-
-// Manual string to int conversion; returns -1 if invalid
-int StringToInt(const string& str) {
-    int result = 0;
-    if (str.length() == 0) 
-		return -1;
-
-    for (size_t i = 0; i < str.length(); i++) {
-        char c = str[i];
-        if (c < '0' || c > '9') return -1;
-        result = result * 10 + (c - '0');
-    }
-    return result;
-}
-
-// Manual string to float conversion; returns -1.0f if invalid
-float StringToFloat(const string& str) {
-    float result = 0.0f;
-    bool decimalFound = false;
-    float decimalDivisor = 10.0f;
-    int digitCount = 0;
-    if (str.length() == 0) return -1.0f;
-
-    for (size_t i = 0; i < str.length(); i++) {
-        char c = str[i];
-        if (c == '.') {
-            if (decimalFound) return -1.0f; // multiple dots
-            decimalFound = true;
-        }
-        else if (c >= '0' && c <= '9') {
-            int digit = c - '0';
-            if (!decimalFound) {
-                result = result * 10 + digit;
-            } else {
-                result = result + digit / decimalDivisor;
-                decimalDivisor *= 10;
-            }
-            digitCount++;
-        }
-        else {
-            return -1.0f; // invalid character
-        }
-    }
-    if (digitCount == 0) return -1.0f; // no digits found
-    return result;
-}
-
+//-------------------------------------------------Add New Products-------------------------------------------------
 void addProducts(Product products[]) {
-    productCount = loadProducts(products);
-    Product newProduct;
-    bool idExist = false;
+    // Call loadProducts() to get the total of products
+	productCount = loadProducts(products);
+
+    // Temporary sorted copy of product data
+    Product sortedProducts[MAX_PRODUCTS];
+    for (int i = 0; i < productCount; i++) {
+        sortedProducts[i] = products[i];
+    }
+    shellSort(sortedProducts, productCount);
+    
+	// Create a temporary Product object to store new product details before adding
+	Product newProduct;
+    
+	//Declare variables
+	bool idExist = false;
     string choice;
     int addCount = 0;
     const int MAX_ADD = 5;
@@ -1569,28 +1755,25 @@ void addProducts(Product products[]) {
     system("cls");
 
     do {
-        // Sort and display current products (Assuming shellSort exists)
-        // shellSort(products, productCount);
+    	system("cls");
+        // Display current products
+	    cout << "\nCurrent Products:\n";
+	    for (int i = 0; i < productCount; i++) {
+	        printIdWithLeadingZeros(sortedProducts[i].id);
+	        cout << " - " << sortedProducts[i].name << endl;
+	    }
 
-        cout << "\nCurrent Products:\n";
-        for (int i = 0; i < productCount; i++) {
-            // Print ID with leading zeros manually (3 digits)
-            int id = products[i].id;
-            if (id < 10) cout << "00" << id;
-            else if (id < 100) cout << "0" << id;
-            else cout << id;
-            cout << " - " << products[i].name << endl;
-        }
-
-        // Enter ID
+        //Get new product id from user
         string idStr;
         int idToAdd = -1;
         do {
             cout << "\nEnter ID in 3 digits [Press 0 to return to Product Menu] : ";
             getline(cin, idStr);
 
-            // Check all digits
+            // Convert id from string to int
             idToAdd = StringToInt(idStr);
+            
+            // Check ID is digits
             if (idToAdd == -1) {
             	cout << "_________________________________________" << endl;
                 cout << "|Invalid Product ID!                    |" << endl;
@@ -1599,9 +1782,11 @@ void addProducts(Product products[]) {
                 cout << "|_______________________________________|" << endl << endl;
                 continue;
             }
+            // Return to Product Menu id enter '0'
             if (idToAdd == 0) {
                 return;
             }
+            // Check ID is exactly 3 digits
             if (idStr.length() != 3) {
                 cout << "_________________________________________" << endl;
                 cout << "|Invalid Product ID!                    |" << endl;
@@ -1611,7 +1796,6 @@ void addProducts(Product products[]) {
                 idToAdd = -1; 
                 continue;
             }
-
             // Check ID already exists
             idExist = false;
             for (int i = 0; i < productCount; i++) {
@@ -1624,23 +1808,22 @@ void addProducts(Product products[]) {
                 }
             }
         } while (idToAdd == -1 || idExist);
-
+		// Assign the new id
         newProduct.id = idToAdd;
 
-        // Enter Product Name
+        //Get new product name from user
 		do {
 		    cout << "Enter Product Name      : ";
 		    getline(cin, newProduct.name);
-		
-		    // Cannot be empty or just spaces
+		    
+		    // Check name is empty or just spaces
 		    if (isEmpty(newProduct.name)) {
 		        cout << "_______________________________________________" << endl;
 		        cout << "|Product Name cannot be empty or spaces only! |" << endl;
 		        cout << "|_____________________________________________|" << endl << endl;
 		        continue;
 		    }
-		
-		    // can only be letters (no number or symbol)
+		    // Check name contain number / special character
 		    bool symbolAndNumber = false;
 		    for (char c : newProduct.name) {
 		        int ascii = (int)c;
@@ -1649,14 +1832,12 @@ void addProducts(Product products[]) {
 		            break;
 		        }
 		    }
-		
 		    if (symbolAndNumber) {
 		        cout << "________________________________________________________" << endl;
 		        cout << "|Number(s) & special character(s) are not allowed!     |" << endl;
 		        cout << "|______________________________________________________|" << endl << endl;
 		        continue;
 		    }
-		
 		    // Check product name already exists
 		    bool exists = false;
 		    string newProductNameLower = toLowerCase(newProduct.name);
@@ -1667,25 +1848,25 @@ void addProducts(Product products[]) {
 		            break;
 		        }
 		    }
-		
 		    if (exists) {
 		        cout << "_________________________________________" << endl;
 		        cout << "|This Product Name already exists!      |" << endl;
 		        cout << "|_______________________________________|" << endl << endl;
 		        continue;
 		    }
-		
 		    break;
-		
 		} while (true);
 
-        // Enter Price
+        //Get new product price from user
         string priceStr;
         float price = -1.0f;
         do {
             cout << "Enter Price             : ";
             getline(cin, priceStr);
+            
+            // Convert price from string to float
             price = StringToFloat(priceStr);
+            // Check price value <=0
             if (price <= 0) {
             	cout << "_________________________________________" << endl;
                 cout << "|Invalid price!                         |" << endl;
@@ -1694,12 +1875,14 @@ void addProducts(Product products[]) {
                 cout << "|_______________________________________|" << endl << endl;
             }
         } while (price <= 0);
+        // Assign the new price
         newProduct.price = price;
 
-        // Enter Description
+        //Get new product description from user
         do {
             cout << "Enter Description       : ";
             getline(cin, newProduct.description);
+            // Check description is empty
             if (isEmpty(newProduct.description)) {
             	cout << "________________________________________________________" << endl;
 	        	cout << "|Description cannot be empty or spaces only!           |" << endl;
@@ -1712,26 +1895,28 @@ void addProducts(Product products[]) {
         productCount++;
         addCount++;
 
-        // Save to raw file immediately
-        ofstream outFile("raw_product.txt", ios::app);
-        if (!outFile) {
-            cout << "Error opening file for writing!" << endl;
-            return;
-        }
+        // Update the sortedProducts array with the new product
+		for (int i = 0; i < productCount; i++) {
+		    sortedProducts[i] = products[i];
+		}
+		shellSort(sortedProducts, productCount);
+		
+		// Save to "raw_product.txt"
+		ofstream outFile("raw_product.txt", ios::app);
+		if (!outFile) {
+		    cout << "Error opening file for writing!" << endl;
+		    return;
+		}
+		outFile << newProduct.id;
+		outFile << " \"" << newProduct.name << "\" ";
+		outFile.setf(ios::fixed);
+		outFile.precision(2);
+		outFile << newProduct.price << " \"" << newProduct.description << "\"\n";
+		outFile.close();
+		
+		cout << "\nProduct added successfully!" << endl;
 
-        // Manually write ID with leading zeros
-        if (newProduct.id < 10) outFile << "00" << newProduct.id;
-        else if (newProduct.id < 100) outFile << "0" << newProduct.id;
-        else outFile << newProduct.id;
-
-        outFile << " \"" << newProduct.name << "\" ";
-        outFile.setf(ios::fixed);
-        outFile.precision(2);
-        outFile << newProduct.price << " \"" << newProduct.description << "\"\n";
-        outFile.close();
-
-        cout << "\nProduct added successfully!" << endl;
-
+		// Ask user if they want to add another product (maximum 5 in a row)
         if (addCount < MAX_ADD) {
             cout << "Do you want to continue adding other products? [" << (MAX_ADD - addCount) << " times left]" << endl;
             cout << "___________________________________________" << endl;
@@ -1744,7 +1929,6 @@ void addProducts(Product products[]) {
             cout << "Maximum of 5 products added.\n";
             choice = "2";
         }
-
     } while (choice == "1" && addCount < MAX_ADD);
 
     cout << "Press [ENTER] to return to Product Menu.";
@@ -1752,58 +1936,56 @@ void addProducts(Product products[]) {
     system("cls");
 }
 
-//----------------------------------------------------------------------------Delete PRODUCTS----------------------------------------------------------------------------
-void printIdWithLeadingZeros(int id) {
-    if (id < 10) cout << "00" << id;
-    else if (id < 100) cout << "0" << id;
-    else cout << id;
-}
-
+//--------------------------------------------------Delete Products-------------------------------------------------
 void deleteProducts(Product products[]) {
-    productCount = loadProducts(products);
-    string idToDeleteString;
+    // Call loadProducts() to get the total of products
+	productCount = loadProducts(products);
+    
+	// Declare variables
+	string idToDeleteString;
     int idToDelete = -1;
     bool productFound = false;
 
-    // Temporary sorted copy
+    // Temporary sorted copy of product data
     Product sortedProducts[MAX_PRODUCTS];
     for (int i = 0; i < productCount; i++) {
         sortedProducts[i] = products[i];
     }
     shellSort(sortedProducts, productCount);
-
+	
+	// Display current products
     cout << "\nCurrent Products:\n";
     for (int i = 0; i < productCount; i++) {
         printIdWithLeadingZeros(sortedProducts[i].id);
         cout << " - " << sortedProducts[i].name << endl;
     }
-
+	
+	// Ask user to enter product id of product to be deleted
     while (!productFound) {
         cout << "\nEnter ID in 3 digits [Press 0 to return to Product Menu] : ";
         getline(cin, idToDeleteString);
 
-        // Convert string to int manually
+        // Convert input product id string to int
         idToDelete = StringToInt(idToDeleteString);
 
-        if (idToDelete == -1) {
+        // If unable to convert to int
+		if (idToDelete == -1) {
             cout << "Invalid input! Please enter digits only.\n";
-            continue; // ask again
+            continue;
         }
-
+		// Return to Produst Menu if enter '0'
         if (idToDelete == 0) {
-            return; // exit to menu
+            return;
         }
-
+		// If input id != 3 digits
         if (idToDeleteString.length() != 3) {
             cout << "ID must be exactly 3 digits!\n";
-            continue; // ask again
+            continue;
         }
 
-        // Search in sortedProducts with jumpSearch
+        // Search the targeted product in sortedProducts with jumpSearch
         int prodIndex = jumpSearch(sortedProducts, productCount, idToDelete);
-
         if (prodIndex != -1) {
-            // Find actual index in unsorted products
             int actualID = -1;
             for (int i = 0; i < productCount; i++) {
                 if (products[i].id == sortedProducts[prodIndex].id) {
@@ -1811,34 +1993,33 @@ void deleteProducts(Product products[]) {
                     break;
                 }
             }
-
+			
+			// Display found results
             cout << "\nProduct Selected: ";
             printIdWithLeadingZeros(products[actualID].id);
             cout << " - " << products[actualID].name << endl;
 
-            cout << "\nAre you sure you want to delete this product? "<< endl;
+            // Confirm with user to delete product
+			cout << "\nAre you sure you want to delete this product? "<< endl;
             cout << "___________________________________________" << endl;
             cout << "| Press 1 for YES / any other keys for NO |" << endl;
             cout << "|_________________________________________|" << endl;
             cout << "Enter you choice: ";
             string confirmString;
             getline(cin, confirmString);
-
             int confirm = StringToInt(confirmString);
             if (confirm == 1) {
-                // Shift left to delete
+                // Decrease product Count to delete
                 for (int i = actualID; i < productCount - 1; i++) {
                     products[i] = products[i + 1];
                 }
                 productCount--;
-
-                // Save to file
+                // Save to "raw_product.txt"
                 ofstream outFile("raw_product.txt");
                 if (!outFile) {
                     cout << "Error opening file for writing!" << endl;
                     return;
                 }
-
                 for (int i = 0; i < productCount; i++) {
                     // Print ID with leading zeros manually
                     if (products[i].id < 10) outFile << "00" << products[i].id;
@@ -1861,28 +2042,33 @@ void deleteProducts(Product products[]) {
             cout << "Product not found. Please re-enter!\n";
         }
     }
-
     cout << "Press [ENTER] to return to Product Menu.";
     cin.get();
 }
 
-//-------------------------------------------------------- SEARCH PRODUCT ----------------------------------------------------
+//------------------------------------------------- Search Product -------------------------------------------------
 void searchProducts(Product products[]){
+	// Call loadProducts() to get the total of products
 	productCount = loadProducts(products);
-	string IDToSearchString;
-			
+	
+	// Ask user to enter targeted product id
+	string IDToSearchString;		
 	cout << "\nEnter Product ID to search / 0 to return to Product Menu: ";
 	getline(cin,IDToSearchString);
 	
-	if(IDToSearchString=="0"){
+	// Return to Product Menu if entered '0'
+	 if(IDToSearchString=="0"){
 		productMenu();
 	}
 			
+	// Convert targeted product id into int
 	int IDToSearch = StringToInt(IDToSearchString);
 			    
+	// Shellsort the products data and search the target product with jumpsearch
 	shellSort(products, productCount);
 	int prodIndex = jumpSearch(products, productCount, IDToSearch);
 			
+	// Display seraching result
 	if (prodIndex != -1)
 	{
 		cout << "\nProduct Found:" << endl;
@@ -1904,16 +2090,17 @@ void searchProducts(Product products[]){
 	searchProducts(products);  
 }
 
-//-------------------------------------------------------- PRODUCT MENU ----------------------------------------------------
+//-------------------------------------------------- Product Menu --------------------------------------------------
 void productMenu(){
 	Product products[MAX_PRODUCTS];
 	string choice;
 
 	do {
-		//display unsorted products first
+		// Call loadProducts() to get the total of products
 		int productCount = loadProducts(products);
 		
-	    cout << "\nUnsorted Products:\n";
+	    // Display unsorted products
+		cout << "\nUnsorted Products:\n";
 	    for (int i = 0; i < productCount; i++) {
 	                    cout << "\nID   : " << setw(3) << setfill('0') << products[i].id << endl;
 	                    cout << "Name : " << products[i].name << endl;
@@ -1922,7 +2109,7 @@ void productMenu(){
 	                    printWrappedText(products[i].description);
 	                    cout << "_________________________________________________________________________________________" << endl;
 	    }
-	    
+	    // Display available operations
         cout << "|================================================|" << endl;
         cout << "|                 Available Actions              |" << endl;
         cout << "|================================================|" << endl;
@@ -1933,22 +2120,25 @@ void productMenu(){
         cout << "|5. Save Sorted Data                             |" << endl;
         cout << "|6. Return to Team B Menu                        |" << endl;
         cout << "|________________________________________________|" << endl;
-        cout << "Enter your choice: ";
-        getline(cin,choice);
         
+		// Get choice from user
+		cout << "Enter your choice: ";
+        getline(cin,choice);
+        // If-else case to determine the choice with corresponding actions
         if(choice=="1"){
         	system("cls");
-            addProducts(products);
+            addProducts(products); // call add product function
 		}
         else if(choice=="2"){
         	system("cls");
-            deleteProducts(products);
+            deleteProducts(products); // call delete product function
 		}
         else if(choice=="3"){
         	system("cls");
-        	searchProducts(products);
+        	searchProducts(products); // call search product function
 		}
 		else if(choice=="4"){
+			// Display sorted products
 			system("cls");
             shellSort(products, productCount);
             cout << "Products sorted by ID:\n";
@@ -1965,11 +2155,11 @@ void productMenu(){
 		}
     	else if(choice=="5"){
     		system("cls");
-	        saveSortedProducts(products, productCount);
+	        saveSortedProducts(products, productCount); // call save sorted product function
 		}
 		else if(choice=="6"){
 			system("cls");
-            teamBMenu();
+            teamBMenu(); // Return to Team B Menu
             return;
 		}
 	    else{
@@ -1977,81 +2167,26 @@ void productMenu(){
 		    cout << "Press [Enter] to continue...";
 		    cin.get();
 		    system("cls");
-		    productMenu();
+		    productMenu(); // Error handling for invalid input
 		}
-            
         system("cls");
 	}while (true);
 }
-//---------------------- function to wrapped the description----------
-void printWrappedText(const string& text) {
-	int lineLength = 60;
-    int count = 0;
-    for (size_t i = 0; i < text.length(); ++i) {
-        cout << text[i];
-        count++;
 
-        // Wrap at space only
-        if (count >= lineLength && text[i] == ' ') {
-            cout << '\n';
-            count = 0;
-        }
-    }
-    cout << endl;
-}
-
-int getStringLength(string s) {
-    int count = 0;
-    while (s[count] != '\0') {
-        count++;
-    }
-    return count;
-}
-
-bool isValidDateTime(string dt) {
-    // Check length first
-    if (getStringLength(dt) != 16) {
-        return false;
-    }
-
-    // Check if the fixed characters are correct
-    if (dt[4] != '-' || dt[7] != '-' || dt[10] != ' ' || dt[13] != ':') {
-        return false;
-    }
-
-    // Check if the other characters are digits (without using isdigit)
-    for (int i = 0; i < getStringLength(dt); i++) {
-        if (i == 4 || i == 7 || i == 10 || i == 13) continue; // skip -, space, :
-        if (dt[i] < '0' || dt[i] > '9') return false; // not a digit
-    }
-
-    // Check hour (HH)
-    int hour = (dt[11] - '0') * 10 + (dt[12] - '0');
-    if (hour < 0 || hour > 23) {
-        cout << "Hour must be between 00 and 23.\n";
-        return false;
-    }
-
-    // Check minute (MM)
-    int minute = (dt[14] - '0') * 10 + (dt[15] - '0');
-    if (minute < 0 || minute > 59) {
-        cout << "Minute must be between 00 and 59.\n";
-        return false;
-    }
-
-    return true;
-}
-
-//---------------------------------------------------- ADD ORDER ----------------------------------------------------
+//------------------------------------------------- Add New Order --------------------------------------------------
 void addOrders(Order orders[],OrderQueue &oq) {
 
+	// Error handling if queue is full
 	if(oq.full()) {
         cout << "Queue is full, cannot add more orders.\n";
         return;
     }
 
-    int orderCount = loadOrders(orders);
-    Order newOrder;
+    // Call loadOrders() to get the total of orders
+	int orderCount = loadOrders(orders);
+    
+    // Declare variables
+	Order newOrder;
     bool idExist = false;
     string choice;
     int addCount = 0;
@@ -2346,15 +2481,16 @@ void addOrders(Order orders[],OrderQueue &oq) {
     system("cls");
 }
 
-// --------------------- ORDER MENU ---------------------
+//----------------------------------------------------Order Menu----------------------------------------------------
 void orderMenu(){
 	Order orders[MAX_ORDERS];
 	string choice;
 	OrderQueue oq;
 	do {
 		int  orderCount = loadOrders(orders);
+		// Display order data
 		oq.display();
-	    
+	    // Display available operations
         cout << "|================================================|" << endl;
         cout << "|                 Available Actions              |" << endl;
         cout << "|================================================|" << endl;
@@ -2364,26 +2500,30 @@ void orderMenu(){
         cout << "|4. Save Sorted Data                             |" << endl;
         cout << "|5. Process Next Order                           |" << endl;
 		cout << "|6. Return to Team B Menu                        |" << endl;
-        cout << "|________________________________________________|" << endl;
-        cout << "Enter your choice: ";
+        cout << "|________________________________________________|" << endl;    
+		// Get choice from user
+		cout << "Enter your choice: ";
         getline(cin,choice);
         
+        // If-else case to determine the choice with the corresponding actions
         if(choice=="1"){
             system("cls");
-            addOrders(orders,oq);
+            addOrders(orders,oq); // Call add order function
     	}
       	else if(choice=="2"){
 			system("cls");
 			orderCount = loadOrders(orders);
 			string searchOrderID;  
-			    
+			// Ask user to enter the targeted order id to search   
 			cout << "\nEnter Order ID to search / 0 to return to Order Menu: ";
 			getline(cin,searchOrderID);
 			
+			// Return to Order Menu if entered '0'
 			if(searchOrderID=="0"){
 				orderMenu();
 			}
 			    
+			// Apply linear search using order ID (we don't implement jumpsearch here because Order ID is a string)
 			bool found = false;
 			for (int i = 0; i < orderCount; i++) {
 			if (orders[i].orderID == searchOrderID) {
@@ -2408,7 +2548,8 @@ void orderMenu(){
 			cin.get();  
 		}   
 		else if(choice=="3"){
-            system("cls");
+            // Display sorted order data
+			system("cls");
             shellSortOrdersByDateTime(orders, orderCount);
             cout << "Orders sorted by Date/Time:\n";
             for (int i = 0; i < orderCount; i++) {
@@ -2425,17 +2566,17 @@ void orderMenu(){
 		}
  		else if(choice=="4"){
 	        system("cls");
-	        saveSortedOrders(orders, orderCount);
+	        saveSortedOrders(orders, orderCount); // Call save order function
 		}
 		else if(choice=="5"){
             system("cls");
-		    oq.processNextOrder();
+		    oq.processNextOrder(); // Call process order function
 		    cout << "\nPress [Enter] to return to Order Menu.";
 		    cin.get();
 		}
 		else if(choice=="6"){
             system("cls");
-            teamBMenu();
+            teamBMenu(); // return to Team B Menu
             return;
 		}
 		else{
@@ -2443,14 +2584,15 @@ void orderMenu(){
 		    cout << "Press [Enter] to continue...";
 		    cin.get();
 		    system("cls");
-		    orderMenu();
+		    orderMenu(); // Error handling for invalid input
 		}
         system("cls");
 	}while (true);
 }
 
-// --------------------- MAIN PROGRAM ---------------------
+//---------------------------------------------------Main Program---------------------------------------------------
 int main() {
+	//call the mainMenu function (it works as the landing page of the program)
     mainMenu();
 
     return 0;
