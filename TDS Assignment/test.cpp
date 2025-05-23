@@ -236,6 +236,88 @@ struct Order {
     double totalAmount;
 };
 
+// ---------------------------------------------- SHELL SORT ALGORITHM ---------------------------------------------
+//Shell sort for product data
+void shellSort(Product arr[], int n)
+{
+    // Start with a big gap, then reduce the gap
+    for (int gap = n/2; gap > 0; gap /= 2)
+    {
+        // Do a gapped insertion sort for this gap size.
+        // The first gap elements a[0..gap-1] are already in gapped order
+        // keep adding one more element until the entire array is gap sorted 
+        for (int i = gap; i < n; i += 1)
+        {
+            // add a[i] to the elements that have been gap sorted
+            // save a[i] in temp and make a hole at position i
+            Product temp = arr[i];
+
+            // shift earlier gap-sorted elements up until the correct 
+            // location for a[i] is found
+            int j;            
+            for (j = i; j >= gap && arr[j - gap].id > temp.id; j -= gap)
+                arr[j] = arr[j - gap];
+            
+            //  put temp (the original a[i]) in its correct location
+            arr[j] = temp;
+        }
+    }
+}
+
+//Shell sort for order data
+void shellSortOrdersByDateTime(Order arr[], int n) {
+    // Convert datetime strings to comparable format and sort
+    for (int gap = n/2; gap > 0; gap /= 2) {
+        for (int i = gap; i < n; i += 1) {
+            Order temp = arr[i];
+            int j;
+            
+            // Compare datetime strings (newest first)
+            for (j = i; j >= gap && arr[j - gap].dateTime < temp.dateTime; j -= gap) {
+                arr[j] = arr[j - gap];
+            }
+            arr[j] = temp;
+        }
+    }
+}
+
+//--------------------------------------------------JUMP SEARCH ALGORITHM-------------------------------------------
+/*
+	Logic of JumpSearch
+	1. declare a fixed step size (usually is the square-root of array size)
+	2. jump through the array with fixed step size
+	3. once reached the jump position, check if the value of the element is the target
+		- 	if jump position=target, target found
+		-	if jump position<target, proceed with another jump
+		-	if jump position>target, return to the previous jump position and perform linear search to look for the target
+	4. if it jump until the end of array without any result, then the target does not exist in this array
+*/
+int jumpSearch(Product arr[], int size, int targetID) {
+    
+    //declare and calculate the fixed step size
+	int step = sqrt(size);
+	
+	//track the previous jump position
+    int prev = 0;
+	
+	//while loop to jump throught the array until element >= target is found
+    while (arr[getMin(step, size) - 1].id < targetID) {
+        prev = step;
+        step += sqrt(size);
+        if (prev >= size) 
+			return -1; //target is not in the array
+    }
+	
+	//for loop to perform linear search
+    for (int i = prev; i < getMin(step, size); i++) {
+        if (arr[i].id == targetID) 
+			return i; //target found
+    }
+	
+	//return -1 if target not found
+    return -1;
+}
+
 //------------------------------------------------------ QUEUE -----------------------------------------------------
 template <typename T>
 class ADTqueue {
@@ -293,6 +375,29 @@ public:
         }
         cout << "\nTotal orders in queue: " << (tail-head+1) << "/100\n\n";
     }
+    
+    void displayProduct() {
+	    if (empty()) {
+	        cout << "Product queue is empty\n";
+	        return;
+	    }
+	
+	    // Display unsorted product from queue
+		cout << "\nUnsorted Products:\n";
+	    for (int i = head; i <= tail; i++) {
+	        Product& product = queue[i];  // Access product from queue
+	
+	        cout << "\nID    : " << setw(3) << setfill('0') << product.id << endl;
+	        cout << "Name  : " << product.name << endl;
+	        cout << "Price : RM " << fixed << setprecision(2) << product.price << endl;
+	        cout << "\n";
+	        printWrappedText(product.description);
+	
+	        cout << "_________________________________________________________________________________________" << endl;
+	    }
+	
+	    cout << "\nTotal products in queue: " << (tail - head + 1) << "/100\n\n";
+	}
 };
 
 class OrderQueue : public ADTqueue<Order> {
@@ -398,6 +503,102 @@ public:
 	        cout << "\nOrder processed successfully and removed from file.\n";
 	    } else {
 	        cout << "No orders to process.\n";
+	    }
+	}
+};
+
+class ProductQueue : public ADTqueue<Product> {
+public:
+	ProductQueue() {
+        loadFromFile(); // Load data in constructor
+    }
+    
+    void loadFromFile() {
+        ifstream inFile("raw_product.txt");
+        if (!inFile) return;
+
+        Product product;
+        while (inFile >> product.id) {
+        	getline(inFile, product.name, '"');
+	    	getline(inFile, product.name, '"'); // Read the product name inside quotes
+            inFile >> product.price;
+            inFile.ignore(); // Ignore space after product price
+            getline(inFile, product.description, '"');
+	    	getline(inFile, product.description, '"'); // Read product description inside quotes
+            
+            if (!full()) {
+                append(product);
+            }
+        }
+        inFile.close();
+    }
+    
+    void deleteProduct() {
+	    if(!empty()) {
+	        // Get the product to be deleted
+	        Product nextProduct = serve();
+	        
+	        // Display processing information
+	        cout << "\nDeleting product: " << nextProduct.id << "-" << nextProduct.name << endl;
+	        
+	        // Read all products from file into an array
+	        Product product[MAX_PRODUCTS];
+	        int productCount = 0;
+	        
+	        ifstream inFile("raw_product.txt");
+	        if (!inFile) {
+	            cout << "Error opening product file for reading!\n";
+	            return;
+	        }
+	
+	        while (productCount < MAX_PRODUCTS && 
+	            inFile >> product[productCount].id) {
+	            getline(inFile, product[productCount].name, '"');
+		    	getline(inFile, product[productCount].name, '"'); // Read the product name inside quotes
+	            inFile >> product[productCount].price;
+	            inFile.ignore(); // Ignore space after product price
+	            getline(inFile, product[productCount].description, '"');
+		    	getline(inFile, product[productCount].description, '"'); // Read product description inside quotes
+	            productCount++;
+	        }
+	        inFile.close();
+	        
+	        // Find and remove the processed product
+	        bool found = false;
+	        for (int i = 0; i < productCount; i++) {
+	            if (product[i].id == nextProduct.id) {
+	                // Shift remaining elements left
+	                for (int j = i; j < productCount - 1; j++) {
+	                    product[j] = product[j + 1];
+	                }
+	                productCount--;
+	                found = true;
+	                break;
+	            }
+	        }
+	        
+	        if (!found) {
+	            cout << "Warning: Targeted product not found in file!\n";
+	        }
+	        
+	        // Rewrite the file without the processed order
+	        ofstream outFile("raw_product.txt");
+	        if (!outFile) {
+	            cout << "Error opening product file for writing!\n";
+	            return;
+	        }
+	
+	        for (int i = 0; i < productCount; i++) {	            
+	            outFile << setw(3) << setfill('0') << product[i].id << " \"" 
+		                << product[i].name << "\" " 
+		                << fixed << setprecision(2) << product[i].price << " \"" 
+		                << product[i].description << "\"\n";
+	        }
+	        outFile.close();
+	        
+	        cout << "\nProduct deleted successfully and removed from raw_product.txt\n";
+	    } else {
+	        cout << "No products to delete.\n";
 	    }
 	}
 };
@@ -1381,88 +1582,6 @@ class HashAdmin {
 		}
 };
 
-// ---------------------------------------------- SHELL SORT ALGORITHM ---------------------------------------------
-//Shell sort for product data
-void shellSort(Product arr[], int n)
-{
-    // Start with a big gap, then reduce the gap
-    for (int gap = n/2; gap > 0; gap /= 2)
-    {
-        // Do a gapped insertion sort for this gap size.
-        // The first gap elements a[0..gap-1] are already in gapped order
-        // keep adding one more element until the entire array is gap sorted 
-        for (int i = gap; i < n; i += 1)
-        {
-            // add a[i] to the elements that have been gap sorted
-            // save a[i] in temp and make a hole at position i
-            Product temp = arr[i];
-
-            // shift earlier gap-sorted elements up until the correct 
-            // location for a[i] is found
-            int j;            
-            for (j = i; j >= gap && arr[j - gap].id > temp.id; j -= gap)
-                arr[j] = arr[j - gap];
-            
-            //  put temp (the original a[i]) in its correct location
-            arr[j] = temp;
-        }
-    }
-}
-
-//Shell sort for order data
-void shellSortOrdersByDateTime(Order arr[], int n) {
-    // Convert datetime strings to comparable format and sort
-    for (int gap = n/2; gap > 0; gap /= 2) {
-        for (int i = gap; i < n; i += 1) {
-            Order temp = arr[i];
-            int j;
-            
-            // Compare datetime strings (newest first)
-            for (j = i; j >= gap && arr[j - gap].dateTime < temp.dateTime; j -= gap) {
-                arr[j] = arr[j - gap];
-            }
-            arr[j] = temp;
-        }
-    }
-}
-
-//--------------------------------------------------JUMP SEARCH ALGORITHM-------------------------------------------
-/*
-	Logic of JumpSearch
-	1. declare a fixed step size (usually is the square-root of array size)
-	2. jump through the array with fixed step size
-	3. once reached the jump position, check if the value of the element is the target
-		- 	if jump position=target, target found
-		-	if jump position<target, proceed with another jump
-		-	if jump position>target, return to the previous jump position and perform linear search to look for the target
-	4. if it jump until the end of array without any result, then the target does not exist in this array
-*/
-int jumpSearch(Product arr[], int size, int targetID) {
-    
-    //declare and calculate the fixed step size
-	int step = sqrt(size);
-	
-	//track the previous jump position
-    int prev = 0;
-	
-	//while loop to jump throught the array until element >= target is found
-    while (arr[getMin(step, size) - 1].id < targetID) {
-        prev = step;
-        step += sqrt(size);
-        if (prev >= size) 
-			return -1; //target is not in the array
-    }
-	
-	//for loop to perform linear search
-    for (int i = prev; i < getMin(step, size); i++) {
-        if (arr[i].id == targetID) 
-			return i; //target found
-    }
-	
-	//return -1 if target not found
-    return -1;
-}
-
 //---------------------------------------------READ FROM FILE (load function)----------------------------------------
 //Load products
 int loadProducts(Product products[]) {
@@ -1732,9 +1851,15 @@ void saveSortedOrders(Order orders[], int orderCount) {
 }
 
 //-------------------------------------------------Add New Products-------------------------------------------------
-void addProducts(Product products[]) {
+void addProducts(Product products[], ProductQueue &pq) {
     // Call loadProducts() to get the total of products
-	productCount = loadProducts(products);
+    int productCount = loadProducts(products);
+
+    // Error handling if queue is full
+    if (pq.full()) {
+        cout << "Queue is full, cannot add more products.\n";
+        return;
+    }
 
     // Temporary sorted copy of product data
     Product sortedProducts[MAX_PRODUCTS];
@@ -1742,12 +1867,10 @@ void addProducts(Product products[]) {
         sortedProducts[i] = products[i];
     }
     shellSort(sortedProducts, productCount);
-    
-	// Create a temporary Product object to store new product details before adding
+
+    // Declare variables
 	Product newProduct;
-    
-	//Declare variables
-	bool idExist = false;
+    bool idExist = false;
     string choice;
     int addCount = 0;
     const int MAX_ADD = 5;
@@ -1755,167 +1878,161 @@ void addProducts(Product products[]) {
     system("cls");
 
     do {
-    	system("cls");
-        // Display current products
-	    cout << "\nCurrent Products:\n";
-	    for (int i = 0; i < productCount; i++) {
-	        printIdWithLeadingZeros(sortedProducts[i].id);
-	        cout << " - " << sortedProducts[i].name << endl;
-	    }
+        // Display current product data
+		system("cls");
+        cout << "\nCurrent Products:\n";
+        for (int i = 0; i < productCount; i++) {
+            printIdWithLeadingZeros(sortedProducts[i].id);
+            cout << " - " << sortedProducts[i].name << endl;
+        }
 
-        //Get new product id from user
-        string idStr;
+        // Ask user to enter the ID for new product
+		string idStr;
         int idToAdd = -1;
         do {
             cout << "\nEnter ID in 3 digits [Press 0 to return to Product Menu] : ";
             getline(cin, idStr);
-
-            // Convert id from string to int
             idToAdd = StringToInt(idStr);
-            
-            // Check ID is digits
-            if (idToAdd == -1) {
-            	cout << "_________________________________________" << endl;
-                cout << "|Invalid Product ID!                    |" << endl;
-                cout << "|1. ID must be digits only.             |" << endl;
-                cout << "|2. ID must be exactly 3 digits.        |" << endl;
-                cout << "|_______________________________________|" << endl << endl;
-                continue;
-            }
-            // Return to Product Menu id enter '0'
-            if (idToAdd == 0) {
-                return;
-            }
-            // Check ID is exactly 3 digits
-            if (idStr.length() != 3) {
+
+            // Check if product ID is exactly 3 digits without any letters or special characters
+			if (idToAdd == -1 || idStr.length() != 3) {
                 cout << "_________________________________________" << endl;
                 cout << "|Invalid Product ID!                    |" << endl;
                 cout << "|1. ID must be digits only.             |" << endl;
                 cout << "|2. ID must be exactly 3 digits.        |" << endl;
                 cout << "|_______________________________________|" << endl << endl;
-                idToAdd = -1; 
                 continue;
             }
-            // Check ID already exists using jump search
+
+            // Return back to Product Menu if user entered '0'
+			if (idToAdd == 0) return;
+
+            // Check if the product ID already exist
 			idExist = false;
-			int index = jumpSearch(sortedProducts, productCount, idToAdd);
-			
-			if (index != -1 && sortedProducts[index].id == idToAdd) {
-			    cout << "_________________________________________" << endl;
+            int index = jumpSearch(sortedProducts, productCount, idToAdd);
+            if (index != -1 && sortedProducts[index].id == idToAdd) {
+                cout << "_________________________________________" << endl;
 			    cout << "|This Product ID already exists!        |" << endl;
 			    cout << "|_______________________________________|" << endl << endl;
-			    idExist = true;
-			}
+                idExist = true;
+            }
         } while (idToAdd == -1 || idExist);
-		// Assign the new id
         newProduct.id = idToAdd;
 
-        //Get new product name from user
+        // Ask user to enter the name for new product
 		do {
-		    cout << "Enter Product Name      : ";
-		    getline(cin, newProduct.name);
-		    
-		    // Check name is empty or just spaces
-		    if (isEmpty(newProduct.name)) {
-		        cout << "_______________________________________________" << endl;
+            cout << "Enter Product Name      : ";
+            getline(cin, newProduct.name);
+            
+			// Check if product name id empty
+			if (isEmpty(newProduct.name)) {
+                cout << "_______________________________________________" << endl;
 		        cout << "|Product Name cannot be empty or spaces only! |" << endl;
 		        cout << "|_____________________________________________|" << endl << endl;
-		        continue;
-		    }
-		    // Check name contain number / special character
-		    bool symbolAndNumber = false;
-		    for (char c : newProduct.name) {
-		        int ascii = (int)c;
-		        if (!(ascii == 32 || (ascii >= 65 && ascii <= 90) || (ascii >= 97 && ascii <= 122))) {
-		            symbolAndNumber = true;
-		            break;
-		        }
-		    }
-		    if (symbolAndNumber) {
-		        cout << "________________________________________________________" << endl;
+                continue;
+            }
+
+            // Check if there's number and special character
+			bool symbolAndNumber = false;
+            for (char c : newProduct.name) {
+                int ascii = (int)c;
+                if (!(ascii == 32 || (ascii >= 65 && ascii <= 90) || (ascii >= 97 && ascii <= 122))) {
+                    symbolAndNumber = true;
+                    break;
+                }
+            }
+            if (symbolAndNumber) {
+                cout << "________________________________________________________" << endl;
 		        cout << "|Number(s) & special character(s) are not allowed!     |" << endl;
 		        cout << "|______________________________________________________|" << endl << endl;
-		        continue;
-		    }
-		    // Check product name already exists
-		    bool exists = false;
-		    string newProductNameLower = toLowerCase(newProduct.name);
-		
-		    for (int i = 0; i < productCount; i++) {
-		        if (toLowerCase(products[i].name) == newProductNameLower) {
-		            exists = true;
-		            break;
-		        }
-		    }
-		    if (exists) {
-		        cout << "_________________________________________" << endl;
+                continue;
+            }
+
+            // Check if the product name already exists
+			string newProductNameLower = toLowerCase(newProduct.name);
+            bool exists = false;
+            for (int i = 0; i < productCount; i++) {
+                if (toLowerCase(products[i].name) == newProductNameLower) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (exists) {
+                cout << "_________________________________________" << endl;
 		        cout << "|This Product Name already exists!      |" << endl;
 		        cout << "|_______________________________________|" << endl << endl;
-		        continue;
-		    }
-		    break;
-		} while (true);
+                continue;
+            }
+            break;
+        } while (true);
 
-        //Get new product price from user
         string priceStr;
         float price = -1.0f;
-        do {
+        // Ask user to enter price for new product
+		do {
             cout << "Enter Price             : ";
             getline(cin, priceStr);
-            
-            // Convert price from string to float
             price = StringToFloat(priceStr);
-            // Check price value <=0
-            if (price <= 0) {
-            	cout << "_________________________________________" << endl;
-                cout << "|Invalid price!                         |" << endl;
-                cout << "|1. Only digits are allowed             |" << endl;
-                cout << "|2. Price value must be greater than 0. |" << endl;
-                cout << "|_______________________________________|" << endl << endl;
+            // Check if the price is lower than 0
+			if (price <= 0) {
+                cout << "____________________________________________________________" << endl;
+                cout << "|Invalid price!                                             |" << endl;
+                cout << "|1. Only digits with maximum one floating point are allowed |" << endl;
+                cout << "|2. Price value must be greater than 0.                     |" << endl;
+                cout << "|___________________________________________________________|" << endl << endl;
             }
         } while (price <= 0);
-        // Assign the new price
         newProduct.price = price;
 
-        //Get new product description from user
-        do {
+        // Ask user to enter description for new product
+		do {
             cout << "Enter Description       : ";
             getline(cin, newProduct.description);
-            // Check description is empty
-            if (isEmpty(newProduct.description)) {
-            	cout << "________________________________________________________" << endl;
+            
+			// Check if the description is empty
+			if (isEmpty(newProduct.description)) {
+                cout << "________________________________________________________" << endl;
 	        	cout << "|Description cannot be empty or spaces only!           |" << endl;
 	        	cout << "|______________________________________________________|" << endl << endl;
             }
         } while (isEmpty(newProduct.description));
 
-        // Add new product
+        // Add new product to array
         products[productCount] = newProduct;
         productCount++;
         addCount++;
 
-        // Update the sortedProducts array with the new product
-		for (int i = 0; i < productCount; i++) {
-		    sortedProducts[i] = products[i];
-		}
-		shellSort(sortedProducts, productCount);
-		
-		// Save to "raw_product.txt"
+        // Add to queue
+        if (!pq.full()) {
+            pq.append(newProduct);
+        } else {
+            cout << "| Product Queue is full. Product not added to queue! |\n";
+        }
+
+		// Save to file
 		ofstream outFile("raw_product.txt", ios::app);
 		if (!outFile) {
 		    cout << "Error opening file for writing!" << endl;
 		    return;
 		}
-		outFile << newProduct.id;
-		outFile << " \"" << newProduct.name << "\" ";
-		outFile.setf(ios::fixed);
-		outFile.precision(2);
-		outFile << newProduct.price << " \"" << newProduct.description << "\"\n";
-		outFile.close();
 		
-		cout << "\nProduct added successfully!" << endl;
+		outFile << setw(3) << setfill('0') << newProduct.id << " "; // format ID like 004
+		outFile << "\"" << newProduct.name << "\" ";
+		outFile << fixed << setprecision(2) << newProduct.price << " ";
+		outFile << "\"" << newProduct.description << "\"" << endl;
+		
+		outFile.close();
 
-		// Ask user if they want to add another product (maximum 5 in a row)
+        cout << "\nProduct added successfully!" << endl;
+        
+        // Reload the product data with latest record
+		productCount = loadProducts(products);
+        for (int i = 0; i < productCount; i++) {
+		    sortedProducts[i] = products[i];
+		}
+		shellSort(sortedProducts, productCount);
+
+        // Ask the user if wanted to add another product
         if (addCount < MAX_ADD) {
             cout << "Do you want to continue adding other products? [" << (MAX_ADD - addCount) << " times left]" << endl;
             cout << "___________________________________________" << endl;
@@ -1933,116 +2050,6 @@ void addProducts(Product products[]) {
     cout << "Press [ENTER] to return to Product Menu.";
     cin.get();
     system("cls");
-}
-
-//--------------------------------------------------Delete Products-------------------------------------------------
-void deleteProducts(Product products[]) {
-    // Call loadProducts() to get the total of products
-	productCount = loadProducts(products);
-    
-	// Declare variables
-	string idToDeleteString;
-    int idToDelete = -1;
-    bool productFound = false;
-
-    // Temporary sorted copy of product data
-    Product sortedProducts[MAX_PRODUCTS];
-    for (int i = 0; i < productCount; i++) {
-        sortedProducts[i] = products[i];
-    }
-    shellSort(sortedProducts, productCount);
-	
-	// Display current products
-    cout << "\nCurrent Products:\n";
-    for (int i = 0; i < productCount; i++) {
-        printIdWithLeadingZeros(sortedProducts[i].id);
-        cout << " - " << sortedProducts[i].name << endl;
-    }
-	
-	// Ask user to enter product id of product to be deleted
-    while (!productFound) {
-        cout << "\nEnter ID in 3 digits [Press 0 to return to Product Menu] : ";
-        getline(cin, idToDeleteString);
-
-        // Convert input product id string to int
-        idToDelete = StringToInt(idToDeleteString);
-
-        // If unable to convert to int
-		if (idToDelete == -1) {
-            cout << "Invalid input! Please enter digits only.\n";
-            continue;
-        }
-		// Return to Produst Menu if enter '0'
-        if (idToDelete == 0) {
-            return;
-        }
-		// If input id != 3 digits
-        if (idToDeleteString.length() != 3) {
-            cout << "ID must be exactly 3 digits!\n";
-            continue;
-        }
-
-        // Search the targeted product in sortedProducts with jumpSearch
-        int prodIndex = jumpSearch(sortedProducts, productCount, idToDelete);
-        if (prodIndex != -1) {
-            int actualID = -1;
-            for (int i = 0; i < productCount; i++) {
-                if (products[i].id == sortedProducts[prodIndex].id) {
-                    actualID = i;
-                    break;
-                }
-            }
-			
-			// Display found results
-            cout << "\nProduct Selected: ";
-            printIdWithLeadingZeros(products[actualID].id);
-            cout << " - " << products[actualID].name << endl;
-
-            // Confirm with user to delete product
-			cout << "\nAre you sure you want to delete this product? "<< endl;
-            cout << "___________________________________________" << endl;
-            cout << "| Press 1 for YES / any other keys for NO |" << endl;
-            cout << "|_________________________________________|" << endl;
-            cout << "Enter you choice: ";
-            string confirmString;
-            getline(cin, confirmString);
-            int confirm = StringToInt(confirmString);
-            if (confirm == 1) {
-                // Decrease product Count to delete
-                for (int i = actualID; i < productCount - 1; i++) {
-                    products[i] = products[i + 1];
-                }
-                productCount--;
-                // Save to "raw_product.txt"
-                ofstream outFile("raw_product.txt");
-                if (!outFile) {
-                    cout << "Error opening file for writing!" << endl;
-                    return;
-                }
-                for (int i = 0; i < productCount; i++) {
-                    // Print ID with leading zeros manually
-                    if (products[i].id < 10) outFile << "00" << products[i].id;
-                    else if (products[i].id < 100) outFile << "0" << products[i].id;
-                    else outFile << products[i].id;
-
-                    outFile << " \"" << products[i].name << "\" "
-                            << fixed << setprecision(2) << products[i].price << " \""
-                            << products[i].description << "\"\n";
-                }
-                outFile.close();
-
-                cout << "\nProduct deleted successfully!\n";
-                productFound = true;
-            } else {
-                cout << "\nDeletion cancelled.\n";
-                productFound = true;
-            }
-        } else {
-            cout << "Product not found. Please re-enter!\n";
-        }
-    }
-    cout << "Press [ENTER] to return to Product Menu.";
-    cin.get();
 }
 
 //------------------------------------------------- Search Product -------------------------------------------------
@@ -2092,6 +2099,7 @@ void searchProducts(Product products[]){
 //-------------------------------------------------- Product Menu --------------------------------------------------
 void productMenu(){
 	Product products[MAX_PRODUCTS];
+	ProductQueue pq;
 	string choice;
 
 	do {
@@ -2099,21 +2107,14 @@ void productMenu(){
 		int productCount = loadProducts(products);
 		
 	    // Display unsorted products
-		cout << "\nUnsorted Products:\n";
-	    for (int i = 0; i < productCount; i++) {
-	                    cout << "\nID   : " << setw(3) << setfill('0') << products[i].id << endl;
-	                    cout << "Name : " << products[i].name << endl;
-	                    cout << "Price: " << products[i].price << endl;
-	                    cout << "\n";
-	                    printWrappedText(products[i].description);
-	                    cout << "_________________________________________________________________________________________" << endl;
-	    }
+	    pq.displayProduct();
+
 	    // Display available operations
         cout << "|================================================|" << endl;
         cout << "|                 Available Actions              |" << endl;
         cout << "|================================================|" << endl;
         cout << "|1. Add New Product (min. 5 entries)             |" << endl;
-        cout << "|2. Delete Product                               |" << endl;
+        cout << "|2. Delete First Product in Queue                |" << endl;
         cout << "|3. Search Data by ID                            |" << endl;
         cout << "|4. Display Sorted Data                          |" << endl;
         cout << "|5. Save Sorted Data                             |" << endl;
@@ -2126,11 +2127,15 @@ void productMenu(){
         // If-else case to determine the choice with corresponding actions
         if(choice=="1"){
         	system("cls");
-            addProducts(products); // call add product function
+            addProducts(products, pq); // call add product function
 		}
         else if(choice=="2"){
-        	system("cls");
-            deleteProducts(products); // call delete product function
+		    system("cls");
+		    pq.deleteProduct(); // delete from file and queue
+		    cout << "\nPress [Enter] to return to Product Menu...";
+		    cin.get();
+		    pq = ProductQueue(); // re-load updated product list from file
+		    system("cls");
 		}
         else if(choice=="3"){
         	system("cls");
