@@ -6,7 +6,8 @@
 #include <sstream>
 #include <iomanip>
 
-#define TABLE_SIZE 11 // Prime number to reduce clustering in hash table
+// Chosen as a small prime number to reduce clustering and ensure better distribution in hash table
+#define TABLE_SIZE 11
 
 using namespace std;
 const int MAX_PRODUCTS = 100;
@@ -236,7 +237,7 @@ class HashCustomer {
 	
 		Node* front;// Front pointer of the linked list queue
 		Node* rear;// Rear pointer of the linked list queue
-		string filename;// File name for data persistence
+		string filename;// File name for saving/loading customer data
 
 		/*
 			Using linked list queue and separate chaining for collision handling:
@@ -245,7 +246,7 @@ class HashCustomer {
 		*/ 
 		Node* table[TABLE_SIZE];// Hash table array for separate chaining
 		
-		// Check ID validate
+		// Checks if the given ID string is exactly 4 numeric digits and all characters are digits
 		bool isValidID(const string& id) {
 		    int length = 0;
 		
@@ -266,12 +267,12 @@ class HashCustomer {
 		    return true;
 		}
 		
-		// Check Id existing validate
+		// Checks if the given ID already exists in the hash table
 		bool isIDExists(const string& id){
 			return search(id) != NULL;
 		}
 		
-		// Check Name validate
+		// Validates customer name
 		bool isValidName(const string& name){
 		    const int MAX_LENGTH = 30;
 		    const int MIN_LENGTH = 3;
@@ -302,7 +303,7 @@ class HashCustomer {
 		    return true;
 		}
 		
-		// Check Name existing validate
+		// Checks if a name already exists in the hash table
 		bool isNameExists(const string& name){
 		    for (int i = 0; i < TABLE_SIZE; i++){
 		        Node* current = table[i];
@@ -316,7 +317,7 @@ class HashCustomer {
 		    return false;
 		}
 		
-		// Check Phone number validate
+		// Validates phone number
 		bool isValidPhone(const string& phone){
 			const char* p = phone.c_str();
 			int i = 0;
@@ -351,7 +352,7 @@ class HashCustomer {
 			return true;
 		}
 		
-		// Check Email validate
+		// Validates email
 		bool isValidEmail(const string& email){
 			if(email[0] == '\0') return false;
 			
@@ -401,24 +402,34 @@ class HashCustomer {
 	    }
 	
 	public:
-		// Constructor: initializes the hash table and linked list queue pointers
+		// Constructor: initializes the hash table and linked list queue and separate chaining pointers
 		HashCustomer() : filename("customer.txt"), front(NULL), rear(NULL) {
 		    for(int i = 0; i < TABLE_SIZE; i++) {
 		        table[i] = NULL;
 		    }
 		}
 	
-		// Destructor: cleans up dynamically allocated nodes in the linked list queue and hash table
+		// Destructor: cleans up dynamically allocated nodes in the linked list queue, separate chaining and hash table
 		~HashCustomer() {
-			Node* current = front;
-			while (current != NULL) {
-				Node* next = current->next;
-				delete current;
-				current = next;
-			}
+		    // Clean up queue
+		    Node* current = front;
+		    while (current != NULL) {
+		        Node* next = current->next;
+		        delete current;
+		        current = next;
+		    }
+		    
+		    // Clean up hash table
+		    for(int i = 0; i < TABLE_SIZE; i++) {
+		        current = table[i];
+		        while(current != NULL) {
+		            Node* next = current->next;
+		            delete current;
+		            current = next;
+		        }
+		    }
 		}
 		
-		// Inserts a customer record into both the linked list queue and hash table
 		/*
 			Inserts a customer into both the linked list queue and hash table
 			- Linked list queue maintains insertion order for display
@@ -446,9 +457,8 @@ class HashCustomer {
 		    table[index] = hashNode;
 		}
 		
-		// Searches for a customer by ID in the hash table (O(1) average case)
 		/*
-			Searches for a customer by ID
+			Searches for a customer by ID in hash table
 			- Returns: Pointer to Customer if found, NULL otherwise
 			- Time: O(1) average case, O(n) worst case (all collisions)
 		*/
@@ -483,11 +493,10 @@ class HashCustomer {
 			return front == NULL;
 		}
 	
-		// Saves all customer records from the linked list queue to a file
 		/*
-			Saves all customer records to "customer.txt"
+			Saves all customer records from the linked list queue to "customer.txt"
 			- Format: "ID Name Email Phone"
-			- Overwrites existing file 
+			- Overwrites files if it exists
 			- Returns: void (prints error if file fails to open)
 		*/
 		void saveToFile() {
@@ -509,7 +518,7 @@ class HashCustomer {
 			file.close();
 		}
 	
-		// Loads customer records from a file into the hash table and linked list queue
+		// Loads customer records from customer.txt file into the hash table and linked list queue
 		/*
 			Example customer.txt content:
 			1001 Alice alice@mail.com 012-3456789
@@ -533,7 +542,6 @@ class HashCustomer {
 			file.close();
 		}
 	
-		// Displays all customer records in the linked list queue (FIFO order)
 		/*
 			Displays all customer records in FIFO order (from front to rear)
 			- Prints ID, Name, Email, and Phone for each customer
@@ -719,7 +727,7 @@ class HashAdmin {
 		*/ 
 		Node* table[TABLE_SIZE];// Hash table array for separate chaining
 		
-		// Check ID validate
+		// Checks if the given ID string is exactly 3 numeric digits and all characters are digits
 		bool isValidID(const string& id) {
 		    int length = 0;
 		    
@@ -740,12 +748,12 @@ class HashAdmin {
 		    return true;
 		}
 		
-		// Check ID existing validate
+		// Checks if the given ID already exists in the hash table
 		bool isIDExists(const string& id){
 			return search(id) != NULL;
 		}
 		
-		// Check Name validate
+		// Validates customer name
 		bool isValidName(const string& name){
 		    const int MAX_LENGTH = 30;
 		    const int MIN_LENGTH = 3;
@@ -776,7 +784,7 @@ class HashAdmin {
 		    return true;
 		}
 		
-		// Check Name existing validate
+		// Checks if a name already exists in the hash table
 		bool isNameExists(const string& admin_name){
 		    for (int i = 0; i < TABLE_SIZE; i++){
 		        Node* current = table[i];
@@ -790,7 +798,7 @@ class HashAdmin {
 		    return false;
 		}
 		
-		// Check Phone number validate
+		// Validates phone number
 		bool isValidPhone(const string& admin_phone){
 			const char* p = admin_phone.c_str();
 			int i = 0;
@@ -825,7 +833,7 @@ class HashAdmin {
 			return true;
 		}
 		
-		// Check Email validate
+		// Validates email
 		bool isValidEmail(const string& email){
 			if(email[0] == '\0') return false;
 			
@@ -858,7 +866,7 @@ class HashAdmin {
 			return hasDot;
 		}
 		
-		// Check Position validate
+		// Validates admin position
 		bool isValidPosition(const string& position) {
 			return position == "admin" || position == "superadmin";
 		}
@@ -908,7 +916,6 @@ class HashAdmin {
 		    }
 		}
 		
-		// Inserts a admin record into both the linked list queue and hash table
 		/*
 			Inserts a admin into both the linked list queue and hash table
 			- Linked list queue maintains insertion order for display
@@ -936,9 +943,8 @@ class HashAdmin {
 		    table[index] = hashNode;
 		}
 		
-		// Searches for a admin by ID in the hash table (O(1) average case)
 		/*
-			Searches for a admin by ID
+			Searches for a admin by ID in hash table
 			- Returns: Pointer to Admin if found, NULL otherwise
 			- Time: O(1) average case, O(n) worst case (all collisions)
 		*/
@@ -955,9 +961,9 @@ class HashAdmin {
 	        return NULL;
 	    }
 		
-		// Convert a line of text into a admin object
+		// Convert a line of text into a Admin object
 		/*
-			Parses a line from customer.txt into a Customer object
+			Parses a line from admin.txt into a Admin object
 			Expected format: "ID Name Email Phone Position"
 			Example: "103 limmei limmei88@gmail.com 012-34782910 admin"
 		*/
@@ -973,11 +979,10 @@ class HashAdmin {
 			return front == NULL;
 		}
 	
-		// Saves all admin records from the linked list queue to a file
 		/*
-			Saves all admin records to "customer.txt"
+			Saves all admin records from the linked list queue to "admin.txt"
 			- Format: "ID Name Email Phone"
-			- Overwrites existing file
+			- Overwrites files if it exists
 			- Returns: void (prints error if file fails to open)
 		*/
 		void saveToFile() {
@@ -1000,7 +1005,7 @@ class HashAdmin {
 			file.close();
 		}
 	
-		// Loads admin records from a file into the hash table and linked list queue
+		// Loads admin records from admin.txt file into the hash table and linked list queue
 		/*
 			Example admin.txt content:
 			105 aishah aishahrahman@yahoo.com 013-90451277 admin
@@ -1024,7 +1029,6 @@ class HashAdmin {
 			file.close();
 		}
 	
-		// Displays all admin records in the linked list queue (FIFO order)
 		/*
 			Displays all admin records in FIFO order (from front to rear)
 			- Prints ID, Name, Email, Phone and Posiiton for each admin
@@ -1046,13 +1050,13 @@ class HashAdmin {
 			}
 		}
 	
-		// Hashing admin main menu
+		// Hashing Admin main menu
 		/*
 			Menu Options:
 			1. Display Admin Information (FIFO order)
 			2. Add Admin Information (Validates input)
 			3. Search Admin Information (O(1) avg time)
-			4. Save Admin Information (Overwrites customer.txt)
+			4. Save Admin Information (Overwrites admin.txt)
 			5. Return to Team A Menu (Exit)
 		*/
 		void hashingAdmin() {
