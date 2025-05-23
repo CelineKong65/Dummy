@@ -1796,17 +1796,16 @@ void addProducts(Product products[]) {
                 idToAdd = -1; 
                 continue;
             }
-            // Check ID already exists
-            idExist = false;
-            for (int i = 0; i < productCount; i++) {
-                if (products[i].id == idToAdd) {
-                	cout << "_________________________________________" << endl;
-	                cout << "|This Product ID already exists!        |" << endl;
-	                cout << "|_______________________________________|" << endl << endl;
-                    idExist = true;
-                    break;
-                }
-            }
+            // Check ID already exists using jump search
+			idExist = false;
+			int index = jumpSearch(sortedProducts, productCount, idToAdd);
+			
+			if (index != -1 && sortedProducts[index].id == idToAdd) {
+			    cout << "_________________________________________" << endl;
+			    cout << "|This Product ID already exists!        |" << endl;
+			    cout << "|_______________________________________|" << endl << endl;
+			    idExist = true;
+			}
         } while (idToAdd == -1 || idExist);
 		// Assign the new id
         newProduct.id = idToAdd;
