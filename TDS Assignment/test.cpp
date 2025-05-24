@@ -2208,6 +2208,9 @@ void addOrders(Order orders[],OrderQueue &oq) {
     HC.loadFromFile();
     Product products[MAX_PRODUCTS];
     int productCount = loadProducts(products);
+
+	// Sort products by ID for jump search
+    shellSort(products, productCount);
     
     system("cls");
     
@@ -2298,7 +2301,6 @@ void addOrders(Order orders[],OrderQueue &oq) {
             // Manual string to int conversion
             int customerID = StringToInt(customerIDStr);
 
-            
             Customer* foundCustomer = HC.search(customerIDStr);
             if(foundCustomer == NULL) {
                 cout << "Customer ID not found in system! Please enter a valid customer ID.\n";
@@ -2333,23 +2335,17 @@ void addOrders(Order orders[],OrderQueue &oq) {
                 cout << "Product ID must contain only digits!\n";
                 continue;
             }
-            
             // Manual string to int conversion
             int productID = StringToInt(productIDStr);
+			
+            // Use jum search to check if the product exist
+            int foundIndex = jumpSearch(products, productCount, productID);
             
-            bool productFound = false;
-            for(int i = 0; i < productCount; i++) {
-                if(products[i].id == productID) {
-                    productFound = true;
-                    break;
-                }
-            }
-            
-            if(!productFound) {
-                cout << "Product ID not found in system! Please enter a valid product ID.\n";
+            if (foundIndex == -1) {
+                cout << "Product ID not found in system! Please re-enter.\n";
             } else {
                 validProduct = true;
-                newOrder.productID = productID;
+                newOrder.productID = productID; // Assign valid product ID
             }
         } while(!validProduct);
         
