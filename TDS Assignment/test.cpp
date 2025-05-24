@@ -988,17 +988,41 @@ class HashCustomer {
 						
 					case 2: 
 					{
-						// Add customer information and validate customer details
-						do{
-							cout << "Enter customer ID (4 digits): ";
-							getline(cin, cus.cus_id);
-							if (!isValidID(cus.cus_id)){
-						        cout << "ID must contain digits only and exactly 4 digits! Please try again.\n";
-						    }else if (isIDExists(cus.cus_id)){
-						        cout << "This ID already exists! Please enter a different ID.\n";
-						    }
-						}while (!isValidID(cus.cus_id) || isIDExists(cus.cus_id));
-						
+						system("cls");
+						cout << "Current Customer List\n" << endl;
+						Node* current = front;
+						int i = 1;
+						while (current != NULL) {
+							cout << current->data.cus_id << " - " << current->data.cus_name << endl;
+							current = current->next;
+							i++;
+						}
+						// Add admin information and validate customer details
+					    string inputId;
+					    do {
+					        cout << "\nEnter customer ID in 4 digits [Press 0 to return] : ";
+					        getline(cin, inputId);
+					        
+					        // Check for exit condition first
+					        if(inputId == "0") {
+					            system("cls");
+					            break;  // This will exit the do-while loop
+					        }
+					        
+					        if (!isValidID(inputId)) {
+					            cout << "Customer ID must contain digits only and exactly 4 digits! Please try again.\n";
+					        } else if (isIDExists(inputId)) {
+					            cout << "This customer ID already exists! Please enter a different ID.\n";
+					        } else {
+					            cus.cus_id = inputId;
+					            break; // Exit the loop if valid
+					        }
+					    } while (true);
+					    
+					    // If user entered 0, skip the rest and return to menu
+					    if(inputId == "0")
+					        continue;
+
 						do{
 							cout << "Enter customer name : ";
 							getline(cin, cus.cus_name);
@@ -1476,16 +1500,40 @@ class HashAdmin {
 						
 					case 2: 
 					{
+						system("cls");
+						cout << "Current Admin List\n" << endl;
+						Node* current = front;
+						int i = 1;
+						while (current != NULL) {
+							cout << current->data.admin_id << " - " << current->data.admin_name << endl;
+							current = current->next;
+							i++;
+						}
 						// Add admin information and validate admin details
-						do{
-							cout << "Enter admin ID (3 digits): ";
-							getline(cin, ad.admin_id);
-							if (!isValidID(ad.admin_id)){
-						        cout << "Admin ID must contain digits only and exactly 3 digits! Please try again.\n";
-						    }else if (isIDExists(ad.admin_id)){
-						        cout << "This admin ID already exists! Please enter a different ID.\n";
-						    }
-						}while (!isValidID(ad.admin_id) || isIDExists(ad.admin_id));
+					    string inputId;
+					    do {
+					        cout << "\nEnter admin ID in 3 digits [Press 0 to return] : ";
+					        getline(cin, inputId);
+					        
+					        // Check for exit condition first
+					        if(inputId == "0") {
+					            system("cls");
+					            break;  // This will exit the do-while loop
+					        }
+					        
+					        if (!isValidID(inputId)) {
+					            cout << "Admin ID must contain digits only and exactly 3 digits! Please try again.\n";
+					        } else if (isIDExists(inputId)) {
+					            cout << "This admin ID already exists! Please enter a different ID.\n";
+					        } else {
+					            ad.admin_id = inputId;
+					            break; // Exit the loop if valid
+					        }
+					    } while (true);
+					    
+					    // If user entered 0, skip the rest and return to menu
+					    if(inputId == "0")
+					        continue;
 						
 						do{
 							cout << "Enter admin name : ";
@@ -1709,6 +1757,7 @@ void teamAMenu(){
 			}
 		case 3:
 			{
+				cin.ignore();
 				system("cls");
 				mainMenu();
 				break;
