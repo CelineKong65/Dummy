@@ -1878,46 +1878,58 @@ void addProducts(Product products[], ProductQueue &pq) {
     system("cls");
 
     do {
-        // Display current product data
-		system("cls");
-        cout << "\nCurrent Products:\n";
-        for (int i = 0; i < productCount; i++) {
-            printIdWithLeadingZeros(sortedProducts[i].id);
-            cout << " - " << sortedProducts[i].name << endl;
-        }
-
-        // Ask user to enter the ID for new product
-		string idStr;
-        int idToAdd = -1;
-        do {
-            cout << "\nEnter ID in 3 digits [Press 0 to return to Product Menu] : ";
-            getline(cin, idStr);
-            idToAdd = StringToInt(idStr);
-
-            // Check if product ID is exactly 3 digits without any letters or special characters
-			if (idToAdd == -1 || idStr.length() != 3) {
-                cout << "_________________________________________" << endl;
-                cout << "|Invalid Product ID!                    |" << endl;
-                cout << "|1. ID must be digits only.             |" << endl;
-                cout << "|2. ID must be exactly 3 digits.        |" << endl;
-                cout << "|_______________________________________|" << endl << endl;
-                continue;
-            }
-
-            // Return back to Product Menu if user entered '0'
-			if (idToAdd == 0) return;
-
-            // Check if the product ID already exist
-			idExist = false;
-            int index = jumpSearch(sortedProducts, productCount, idToAdd);
-            if (index != -1 && sortedProducts[index].id == idToAdd) {
-                cout << "_________________________________________" << endl;
-			    cout << "|This Product ID already exists!        |" << endl;
-			    cout << "|_______________________________________|" << endl << endl;
-                idExist = true;
-            }
-        } while (idToAdd == -1 || idExist);
-        newProduct.id = idToAdd;
+	        // Display current product data
+			system("cls");
+	        cout << "\nCurrent Products:\n";
+	        for (int i = 0; i < productCount; i++) {
+	            printIdWithLeadingZeros(sortedProducts[i].id);
+	            cout << " - " << sortedProducts[i].name << endl;
+	        }
+	
+	        // Ask user to enter the ID for new product
+			string idStr;
+			int idToAdd = -1;
+			bool isValid = false;
+			do {
+			    cout << "\nEnter ID in 3 digits [Press 0 to return to Product Menu] : ";
+			    getline(cin, idStr);
+			
+			    if (idStr == "0") return;
+			    isValid = true;
+			
+			    if (idStr.length() != 3) {
+			        isValid = false;
+			    } else {
+			        for (char c : idStr) {
+			            if (!isdigit(c)) {
+			                isValid = false;
+			                break;
+			            }
+			        }
+			    }
+			
+			    if (!isValid) {
+			        cout << "_________________________________________" << endl;
+			        cout << "|Invalid Product ID!                    |" << endl;
+			        cout << "|1. ID must be digits only.             |" << endl;
+			        cout << "|2. ID must be exactly 3 digits.        |" << endl;
+			        cout << "|_______________________________________|" << endl << endl;
+			        continue;
+			    }
+			
+			    idToAdd = StringToInt(idStr);
+			
+			    idExist = false;
+			    int index = jumpSearch(sortedProducts, productCount, idToAdd);
+			    if (index != -1 && sortedProducts[index].id == idToAdd) {
+			        cout << "_________________________________________" << endl;
+			        cout << "|This Product ID already exists!        |" << endl;
+			        cout << "|_______________________________________|" << endl << endl;
+			        idExist = true;
+			    }else{
+			    	newProduct.id = idToAdd;
+				}
+			} while (!isValid || idExist);
 
         // Ask user to enter the name for new product
 		do {
