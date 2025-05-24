@@ -2188,6 +2188,13 @@ void addOrders(Order orders[],OrderQueue &oq) {
 
     // Call loadOrders() to get the total of orders
 	int orderCount = loadOrders(orders);
+
+	// Temporary sorted copy of order data according to date-time
+    Order sortedOrders[MAX_PRODUCTS];
+    for (int i = 0; i < orderCount; i++) {
+        sortedOrders[i] = orders[i];
+    }
+    shellSortOrdersByDateTime(sortedOrders,orderCount);
     
     // Declare variables
 	Order newOrder;
@@ -2207,9 +2214,9 @@ void addOrders(Order orders[],OrderQueue &oq) {
     do {
         cout << "\nCurrent Orders:\n";
         for(int i = 0; i < orderCount; i++) {
-            cout << orders[i].orderID << " - " 
-                 << orders[i].dateTime << " - " 
-                 << "Customer: " << orders[i].customerID << endl;
+            cout << sortedOrders[i].orderID << " - " 
+                 << sortedOrders[i].dateTime << " - " 
+                 << "Customer: " << sortedOrders[i].customerID << endl;
         }
         
         cout << endl;
