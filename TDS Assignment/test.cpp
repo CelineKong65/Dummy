@@ -706,6 +706,10 @@ class HashCustomer {
 			const char* p = phone.c_str();
 			int i = 0;
 			int digitCount = 0;
+			
+			if (!(p[0] == '0' && p[1] == '1')) {
+		        return false;
+		    }
 		
 			while (p[i] != '\0') {
 				if (i == 3 && p[i] != '-'){
@@ -736,6 +740,20 @@ class HashCustomer {
 			return true;
 		}
 		
+		// Checks if the phone number already exists in the hash table
+		bool isPhoneExists(const string& phone){
+			for (int i = 0; i < TABLE_SIZE; i++){
+				Node* current = table[i];
+				while (current != NULL) {
+					if (current->data.cus_phone == phone){
+						return true;
+					}
+					current = current->next;
+				}
+			}
+			return false;
+		}
+
 		// Validates email
 		bool isValidEmail(const string& email){
 			if(email[0] == '\0') return false;
@@ -769,6 +787,20 @@ class HashCustomer {
 			return hasDot;
 		}
 		
+		// Checks if the email already exists in the hash table
+		bool isEmailExists(const string& email){
+			for (int i = 0; i < TABLE_SIZE; i++){
+				Node* current = table[i];
+				while (current != NULL) {
+					if (current->data.cus_email == email){
+						return true;
+					}
+					current = current->next;
+				}
+			}
+			return false;
+		}
+		
 		// Check Hash function to generate an index from customer ID
 		/*
 			Computes the hash index for a given key
@@ -777,9 +809,9 @@ class HashCustomer {
 			- Returns: Hash index (0 to TABLE_SIZE-1)
 		*/
 		int hashFunction(string key){
-	        unsigned int hash = 0;
-	        for (char ch : key) {
-	            hash = (hash << 5) + ch;
+	        int hash = 0;
+	        for (int i = 0; i < key.length(); i++) {
+	            hash = (hash << 5) + key[i];
 	        }
 			// Return using the division method
 	        return hash % TABLE_SIZE;
@@ -958,7 +990,7 @@ class HashCustomer {
 		void hashingCustomer() {
 			loadFromFile();
 			
-			int choice;
+			string choice;
 			Customer cus;
 			
 			do {
@@ -971,138 +1003,124 @@ class HashCustomer {
 				cout << "\n4. Save Customer Information";
 				cout << "\n5. Return to Team A Menu";
 				cout << "\n--------------------------------------------------" << endl;
-				cout << "\nEnter your choice: ";
-				cin >> choice;
-				cin.ignore();
+				cout<<"Enter your choice: ";
+    			getline(cin,choice);
 				cout << endl;
 				
-				switch(choice) {
-					case 1:
-					{
-						display();
-						cout << "\nPress [Enter] back to menu...";
-						cin.get(); 
-						system("cls");
-						break;
+				if(choice == "1"){
+					display();
+					cout << "\nPress [Enter] back to menu...";
+					cin.get();
+					cin.get(); 
+					system("cls");
+				}else if(choice == "2"){
+					system("cls");
+					cout << "Current Customer List\n" << endl;
+					Node* current = front;
+					int i = 1;
+					while (current != NULL) {
+						cout << current->data.cus_id << " - " << current->data.cus_name << endl;
+						current = current->next;
+						i++;
 					}
-						
-					case 2: 
-					{
-						system("cls");
-						cout << "Current Customer List\n" << endl;
-						Node* current = front;
-						int i = 1;
-						while (current != NULL) {
-							cout << current->data.cus_id << " - " << current->data.cus_name << endl;
-							current = current->next;
-							i++;
-						}
-						// Add admin information and validate customer details
-					    string inputId;
-					    do {
-					        cout << "\nEnter customer ID in 4 digits [Press 0 to return] : ";
-					        getline(cin, inputId);
+					// Add admin information and validate customer details
+					string inputId;
+					do {
+					    cout << "\nEnter customer ID in 4 digits [Press 0 to return] : ";
+					    getline(cin, inputId);
 					        
-					        // Check for exit condition first
-					        if(inputId == "0") {
-					            system("cls");
-					            break;  // This will exit the do-while loop
-					        }
+					    // Check for exit condition first
+					    if(inputId == "0") {
+						    system("cls");
+						    break;  // This will exit the do-while loop
+					    }
 					        
-					        if (!isValidID(inputId)) {
-					            cout << "Customer ID must contain digits only and exactly 4 digits! Please try again.\n";
-					        } else if (isIDExists(inputId)) {
-					            cout << "This customer ID already exists! Please enter a different ID.\n";
-					        } else {
-					            cus.cus_id = inputId;
-					            break; // Exit the loop if valid
-					        }
-					    } while (true);
+					    if (!isValidID(inputId)) {
+					        cout << "Customer ID must contain digits only and exactly 4 digits! Please try again.\n";
+					    } else if (isIDExists(inputId)) {
+					        cout << "This customer ID already exists! Please enter a different ID.\n";
+					    } else {
+					        cus.cus_id = inputId;
+					        break; // Exit the loop if valid
+					    }
+					} while (true);
 					    
-					    // If user entered 0, skip the rest and return to menu
-					    if(inputId == "0")
-					        continue;
-
-						do{
-							cout << "Enter customer name : ";
-							getline(cin, cus.cus_name);
-							if (!isValidName(cus.cus_name)){
-						        cout << "Invalid name! Only letters and spaces are allowed, name must be 3 to 30 characters.\n";
-						    }else if (isNameExists(cus.cus_name)){
-						        cout << "This name already exists! Please enter a different name.\n";
-						    }
-						}while (!isValidName(cus.cus_name) || isNameExists(cus.cus_name));
+					// If user entered 0, skip the rest and return to menu
+					if(inputId == "0")
+					    continue;
+						
+					do{
+						cout << "Enter customer name : ";
+						getline(cin, cus.cus_name);
+						if (!isValidName(cus.cus_name)){
+						    cout << "Invalid name! Only letters and spaces are allowed, name must be 3 to 30 characters.\n";
+						}else if (isNameExists(cus.cus_name)){
+						    cout << "This name already exists! Please enter a different name.\n";
+						}
+					}while (!isValidName(cus.cus_name) || isNameExists(cus.cus_name));
 						
 						
-						do{
-							cout << "Enter customer phone number (e.g. 010-1234567) : ";
-							getline(cin, cus.cus_phone);
-							if (!isValidPhone(cus.cus_phone)){
-								cout << "Invalid phone number! Make sure it follows the format 010-1234567 and contains only digits with 10 or 11 numbers.\n";
-							}
-						}while(!isValidPhone(cus.cus_phone));
+					do{
+						cout << "Enter customer phone number (e.g. 010-1234567) : ";
+						getline(cin, cus.cus_phone);
+						if (!isValidPhone(cus.cus_phone)){
+							cout << "Invalid phone number! Make sure it follows the format 010-1234567, contains only digits with 10 or 11 numbers and strat with '01'.\n";
+						}else if (isPhoneExists(cus.cus_phone)) {
+							cout << "Phone number already exists!" << endl;
+						}
+					}while(!isValidPhone(cus.cus_phone) || isPhoneExists(cus.cus_phone));
 						
-						do{
-							cout << "Enter customer email (e.g. john@example.com) : ";
-							getline(cin, cus.cus_email);
-							if (!isValidEmail(cus.cus_email)){
-								cout << "Invalid email address! Make sure it contains '@' and a '.' and they are not at the beginning or end.\n";
-							}
-						}while(!isValidEmail(cus.cus_email));
+					do {
+						cout << "Enter customer email : ";
+						getline(cin, cus.cus_email);
+						if (!isValidEmail(cus.cus_email)) {
+						    cout << "Invalid email format! Please enter a valid email.\n";
+						} else if (isEmailExists(cus.cus_email)) {
+						    cout << "This email already exists! Please enter a different email.\n";
+						}
+					} while (!isValidEmail(cus.cus_email) || isEmailExists(cus.cus_email));
 						
-						insert(cus);
-						cout << "\nPress [Enter] back to menu...";
-						cin.get(); 
-						system("cls");
-						break;
-					}
-						
-					case 3: 
-					{
-						// Search customer information by ID
-						string searchID;
-	                    cout << "Search Customer Information \n" << endl;
-	                    cout << "Enter customer ID (4 digits): ";
-	                    getline(cin, searchID);
+					insert(cus);
+					cout << "\nCustomer added successfully!\n\n";
+					cout << "\nPress [Enter] back to menu...";
+					cin.get(); 
+					system("cls");
+				}else if(choice =="3"){
+					// Search customer information by ID
+					string searchID;
+	                cout << "Search Customer Information \n" << endl;
+	                cout << "Enter customer ID (4 digits): ";
+	                getline(cin, searchID);
 	            
-	                    Customer* foundCustomer = search(searchID);
-	                    if (foundCustomer != NULL) {
-	                        cout << "\nCustomer Found:\n" << endl;
-	                        cout << "Cust ID  : " << foundCustomer->cus_id << endl;
-	                        cout << "Name     : " << foundCustomer->cus_name << endl;
-	                        cout << "Email    : " << foundCustomer->cus_email << endl;
-	                        cout << "Phone    : " << foundCustomer->cus_phone << endl;
-	                    } else {
-	                        cout << "\nCustomer not found!" << endl;
-	                    }
+	                Customer* foundCustomer = search(searchID);
+	                if (foundCustomer != NULL) {
+	                    cout << "\nCustomer Found:\n" << endl;
+	                    cout << "Cust ID  : " << foundCustomer->cus_id << endl;
+	                    cout << "Name     : " << foundCustomer->cus_name << endl;
+	                    cout << "Email    : " << foundCustomer->cus_email << endl;
+	                    cout << "Phone    : " << foundCustomer->cus_phone << endl;
+	                } else {
+	                    cout << "\nCustomer not found!" << endl;
+	                }
 	                    
-	                    cout << "\nPress [Enter] back to menu...";
-	                    cin.get(); 
-	                    system("cls");
-	                    break;
-					}
-	                    
-					case 4: 
-					{
-						// Save customer data to file
-						saveToFile();
-						cout << "Saved the customer information to " << filename << endl;
-						cout << "\nPress [Enter] back to menu...";
-						cin.get(); 
-						system("cls");
-						break;
-					}
-						
-					case 5: 
-					{
-						system("cls");
-						teamAMenu();
-						break;
-					}
-						
-					default:
-						cout << "Invalid choice." << endl;
-						break;
+	                cout << "\nPress [Enter] back to menu...";
+	                cin.get(); 
+	                system("cls");
+	                
+				} else if (choice == "4"){
+					// Save customer data to file
+					saveToFile();
+					cout << "Saved the customer information to " << filename << endl;
+					cout << "\nPress [Enter] back to menu...";
+					cin.get(); 
+					system("cls");
+				} else if (choice == "5"){
+					system("cls");
+					teamAMenu();
+				} else {
+					cout << "Invalid choice. Please Enter to try again" << endl;
+					cin.get();
+					system("cls");
 				}
 				
 			} while (true);
@@ -1211,6 +1229,10 @@ class HashAdmin {
 			const char* p = admin_phone.c_str();
 			int i = 0;
 			int digitCount = 0;
+			
+			if (!(p[0] == '0' && p[1] == '1')) {
+		        return false;
+		    }
 		
 			while (p[i] != '\0') {
 				if (i == 3 && p[i] != '-'){
@@ -1239,6 +1261,20 @@ class HashAdmin {
 			}
 		
 			return true;
+		}
+		
+		// Checks if the phone number already exists in the hash table
+		bool isPhoneExists(const string& phone){
+			for (int i = 0; i < TABLE_SIZE; i++){
+				Node* current = table[i];
+				while (current != NULL) {
+					if (current->data.admin_phone == phone){
+						return true;
+					}
+					current = current->next;
+				}
+			}
+			return false;
 		}
 		
 		// Validates email
@@ -1274,6 +1310,20 @@ class HashAdmin {
 			return hasDot;
 		}
 		
+		// Checks if the email already exists in the hash table
+		bool isEmailExists(const string& email){
+			for (int i = 0; i < TABLE_SIZE; i++){
+				Node* current = table[i];
+				while (current != NULL) {
+					if (current->data.admin_email == email){
+						return true;
+					}
+					current = current->next;
+				}
+			}
+			return false;
+		}
+		
 		// Validates admin position
 		bool isValidPosition(const string& position) {
 			return position == "admin" || position == "superadmin";
@@ -1287,9 +1337,9 @@ class HashAdmin {
 			- Returns: Hash index (0 to TABLE_SIZE-1)
 		*/
 		int hashFunction(string key){
-	        unsigned int hash = 0;
-	        for (char ch : key) {
-	            hash = (hash << 5) + ch;
+	        int hash = 0;
+	        for (int i = 0; i < key.length(); i++) {
+	            hash = (hash << 5) + key[i];
 	        }
 			// Return using the division method
 	        return hash % TABLE_SIZE;
@@ -1470,7 +1520,7 @@ class HashAdmin {
 		void hashingAdmin() {
 			loadFromFile();
 			
-			int choice;
+			string choice;
 			Admin ad;
 			
 			do {
@@ -1484,147 +1534,133 @@ class HashAdmin {
 				cout << "\n5. Return to Team A Menu";
 				cout << "\n--------------------------------------------------" << endl;
 				cout << "\nEnter your choice: ";
-				cin >> choice;
-				cin.ignore();
-				cout << endl;
-				
-				switch(choice) {
-					case 1:
-					{
-						displayAdmin();
-						cout << "\nPress [Enter] back to menu...";
-						cin.get(); 
-						system("cls");
-						break;
+		        getline(cin, choice);
+		        cout << endl;
+		
+		        if (choice == "1") {
+		            displayAdmin();
+		            cout << "\nPress [Enter] back to menu...";
+		            cin.get();
+		            cin.get();
+		            system("cls");
+		
+		        } else if (choice == "2") {
+					system("cls");
+					cout << "Current Admin List\n" << endl;
+					Node* current = front;
+					int i = 1;
+					while (current != NULL) {
+						cout << current->data.admin_id << " - " << current->data.admin_name << endl;
+						current = current->next;
+						i++;
 					}
-						
-					case 2: 
-					{
-						system("cls");
-						cout << "Current Admin List\n" << endl;
-						Node* current = front;
-						int i = 1;
-						while (current != NULL) {
-							cout << current->data.admin_id << " - " << current->data.admin_name << endl;
-							current = current->next;
-							i++;
-						}
-						// Add admin information and validate admin details
-					    string inputId;
-					    do {
-					        cout << "\nEnter admin ID in 3 digits [Press 0 to return] : ";
-					        getline(cin, inputId);
+					// Add admin information and validate admin details
+					string inputId;
+					do {
+					    cout << "\nEnter admin ID in 3 digits [Press 0 to return] : ";
+					    getline(cin, inputId);
 					        
-					        // Check for exit condition first
-					        if(inputId == "0") {
-					            system("cls");
-					            break;  // This will exit the do-while loop
-					        }
+					    // Check for exit condition first
+					    if(inputId == "0") {
+					        system("cls");
+					        break;  // This will exit the do-while loop
+					    }
 					        
-					        if (!isValidID(inputId)) {
-					            cout << "Admin ID must contain digits only and exactly 3 digits! Please try again.\n";
-					        } else if (isIDExists(inputId)) {
-					            cout << "This admin ID already exists! Please enter a different ID.\n";
-					        } else {
-					            ad.admin_id = inputId;
-					            break; // Exit the loop if valid
-					        }
-					    } while (true);
+					    if (!isValidID(inputId)) {
+					        cout << "Admin ID must contain digits only and exactly 3 digits! Please try again.\n";
+					    } else if (isIDExists(inputId)) {
+					        cout << "This admin ID already exists! Please enter a different ID.\n";
+					    } else {
+					        ad.admin_id = inputId;
+					        break; // Exit the loop if valid
+					    }
+					} while (true);
 					    
-					    // If user entered 0, skip the rest and return to menu
-					    if(inputId == "0")
-					        continue;
+					// If user entered 0, skip the rest and return to menu
+					if(inputId == "0")
+					    continue;
 						
-						do{
-							cout << "Enter admin name : ";
-							getline(cin, ad.admin_name);
-							if (!isValidName(ad.admin_name)){
-						        cout << "Invalid name! Only letters and spaces are allowed, name must be 3 to 30 characters.\n";
-						    }else if (isNameExists(ad.admin_name)){
-						        cout << "This name already exists! Please enter a different name.\n";
-						    }
-						}while (!isValidName(ad.admin_name) || isNameExists(ad.admin_name));
+					do{
+						cout << "Enter admin name : ";
+						getline(cin, ad.admin_name);
+						if (!isValidName(ad.admin_name)){
+						    cout << "Invalid name! Only letters and spaces are allowed, name must be 3 to 30 characters.\n";
+						}else if (isNameExists(ad.admin_name)){
+						    cout << "This name already exists! Please enter a different name.\n";
+						}
+					}while (!isValidName(ad.admin_name) || isNameExists(ad.admin_name));
 						
 						
-						do{
-							cout << "Enter admin phone number (e.g. 010-1234567) : ";
-							getline(cin, ad.admin_phone);
-							if (!isValidPhone(ad.admin_phone)){
-								cout << "Invalid phone number! Make sure it follows the format 010-1234567 and contains only digits with 10 or 11 numbers.\n";
-							}
-						}while(!isValidPhone(ad.admin_phone));
+					do{
+						cout << "Enter admin phone number (e.g. 010-1234567) : ";
+						getline(cin, ad.admin_phone);
+						if (!isValidPhone(ad.admin_phone)){
+							cout << "Invalid phone number! Make sure it follows the format 010-1234567, contains only digits with 10 or 11 numbers and strat with '01'.\n";
+						}else if (isPhoneExists(ad.admin_phone)) {
+							cout << "Phone number already exists!" << endl;
+						}
+					}while(!isValidPhone(ad.admin_phone) || isPhoneExists(ad.admin_phone));
 						
-						do{
-							cout << "Enter admin email (e.g. john@example.com) : ";
-							getline(cin, ad.admin_email);
-							if (!isValidEmail(ad.admin_email)){
-								cout << "Invalid email address! Make sure it contains '@' and a '.' and they are not at the beginning or end.\n";
-							}
-						}while(!isValidEmail(ad.admin_email));
+					do{
+						cout << "Enter admin email (e.g. john@example.com) : ";
+						getline(cin, ad.admin_email);
+						if (!isValidEmail(ad.admin_email)){
+							cout << "Invalid email address! Make sure it contains '@' and a '.' and they are not at the beginning or end.\n";
+						}else if (isEmailExists(ad.admin_email)) {
+						    cout << "This email already exists! Please enter a different email.\n";
+						}
+					}while(!isValidEmail(ad.admin_email) || isEmailExists(ad.admin_email));
 						
-						do{
-							cout << "Enter admin position (superadmin/admin) : ";
-							getline(cin, ad.admin_position);
-							if (!isValidPosition(ad.admin_position)){
-								cout << "Invalid position entered. Please select either 'admin' or 'superadmin'.\n";
-							}
-						}while(!isValidPosition(ad.admin_position));
+					do{
+						cout << "Enter admin position (superadmin/admin) : ";
+						getline(cin, ad.admin_position);
+						if (!isValidPosition(ad.admin_position)){
+							cout << "Invalid position entered. Please select either 'admin' or 'superadmin'.\n";
+						}
+					}while(!isValidPosition(ad.admin_position));
 						
-						insert(ad);
-						cout << "\nPress [Enter] back to menu...";
-						cin.get(); 
-						system("cls");
-						break;
-					}
-						
-					case 3: 
-					{
-						// Search admin information by ID
-						string searchID;
-	                    cout << "Search Admin Information\n" << endl;
-	                    cout << "Enter admin ID (3 digits): ";
-	                    getline(cin, searchID);
-	                    
-	                    Admin* foundAdmin = search(searchID);
-	                    if (foundAdmin != NULL) {
-	                        cout << "\nAdmin Found:\n" << endl;
-	                        cout << "Admin ID  : " << foundAdmin->admin_id << endl;
-	                        cout << "Name      : " << foundAdmin->admin_name << endl;
-	                        cout << "Email     : " << foundAdmin->admin_email << endl;
-	                        cout << "Phone     : " << foundAdmin->admin_phone << endl;
-	                        cout << "Position  : " << foundAdmin->admin_position << endl;
-	                    } else {
-	                        cout << "\nAdmin not found!" << endl;
-	                    }
-	                    
-	                    cout << "\nPress [Enter] back to menu...";
-	                    cin.get(); 
-	                    system("cls");
-	                    break;
-					}
-	                    
-					case 4: 
-					{
-						// Save admin data to file
-						saveToFile();
-						cout << "Saved the admin information to " << filename << endl;
-						cout << "\nPress [Enter] back to menu...";
-						cin.get(); 
-						system("cls");
-						break;
-					}
-						
-					case 5: 
-					{
-						system("cls");
-						teamAMenu();
-						break;
-					}
-						
-					default:
-						cout << "Invalid choice." << endl;
-						break;
-				}
+					insert(ad);
+					cout << "\nPress [Enter] back to menu...";
+					cin.get(); 
+					system("cls");
+				}else if (choice == "3") {
+					// Search admin information by ID
+		            string searchID;
+		            cout << "Search Admin Information\n" << endl;
+		            cout << "Enter admin ID (3 digits): ";
+		            getline(cin, searchID);
+		
+		            Admin* foundAdmin = search(searchID);
+		            if (foundAdmin != NULL) {
+		                cout << "\nAdmin Found:\n" << endl;
+		                cout << "Admin ID  : " << foundAdmin->admin_id << endl;
+		                cout << "Name      : " << foundAdmin->admin_name << endl;
+		                cout << "Email     : " << foundAdmin->admin_email << endl;
+		                cout << "Phone     : " << foundAdmin->admin_phone << endl;
+		                cout << "Position  : " << foundAdmin->admin_position << endl;
+		            } else {
+		                cout << "\nAdmin not found!" << endl;
+		            }
+		            cout << "\nPress [Enter] back to menu...";
+		            cin.get();
+		            system("cls");
+				}else if (choice == "4") {
+					// Save admin data to file
+		            saveToFile();
+		            cout << "Saved the admin information to " << filename << endl;
+		            cout << "\nPress [Enter] back to menu...";
+		            cin.get();
+		            system("cls");
+		        } else if (choice == "5") {
+	             	system("cls");
+		            teamAMenu();
+		            break;
+		
+		        } else {
+		            cout << "Invalid choice. Please Enter to try again" << endl;
+		            cin.get();
+		            system("cls");
+		        }
 				
 			} while (true);
 		}
