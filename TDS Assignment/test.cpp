@@ -900,7 +900,14 @@ class HashCustomer {
 		Customer parseCustomer(const string& line) {
 			Customer c;
 			stringstream ss(line);
-			ss >> c.cus_id >> c.cus_name >> c.cus_email >> c.cus_phone;
+			string nameWithQuotes;
+
+			ss >> c.cus_id;
+			ss >> ws; 
+			getline(ss, nameWithQuotes, '"'); 
+			getline(ss, c.cus_name, '"');  
+			ss >> c.cus_email >> c.cus_phone;
+			
 			return c;
 		}
 	
@@ -925,7 +932,7 @@ class HashCustomer {
 			Node* current = front;
 			while (current != NULL) {
 				file << current->data.cus_id << " "
-					 << current->data.cus_name << " "
+					 << "\"" << current->data.cus_name << "\" "
 					 << current->data.cus_email << " "
 					 << current->data.cus_phone << endl;
 				current = current->next;
@@ -937,8 +944,8 @@ class HashCustomer {
 		// Loads customer records from customer.txt file into the hash table and linked list queue
 		/*
 			Example customer.txt content:
-			1001 Alice alice@mail.com 012-3456789
-			1002 Bob bob@mail.com 011-9876543
+			1001 "Alice" alice@mail.com 012-3456789
+			1002 "Bob" bob@mail.com 011-9876543
 		*/ 
 		void loadFromFile() {
 			ifstream file("customer.txt");
@@ -1428,7 +1435,12 @@ class HashAdmin {
 		Admin parseAdmin(const string& line) {
 			Admin a;
 			stringstream ss(line);
-			ss >> a.admin_id >> a.admin_name >> a.admin_email >> a.admin_phone >> a.admin_position;
+			string nameWithQuotes;
+			ss >> a.admin_id;
+			ss >> ws;
+			getline(ss, nameWithQuotes, '"'); 
+			getline(ss, a.admin_name, '"');  
+			ss >> a.admin_email >> a.admin_phone >> a.admin_position;
 			return a;
 		}
 	
@@ -1453,7 +1465,7 @@ class HashAdmin {
 			Node* current = front;
 			while (current != NULL) {
 				file << current->data.admin_id << " "
-					 << current->data.admin_name << " "
+					 << "\"" << current->data.admin_name << "\" "
 					 << current->data.admin_email << " "
 					 << current->data.admin_phone << " "
 					 << current->data.admin_position << endl;
@@ -1533,7 +1545,7 @@ class HashAdmin {
 				cout << "\n4. Save Admin Information";
 				cout << "\n5. Return to Team A Menu";
 				cout << "\n--------------------------------------------------" << endl;
-				cout << "\nEnter your choice: ";
+				cout << "Enter your choice: ";
 		        getline(cin, choice);
 		        cout << endl;
 		
@@ -1651,10 +1663,10 @@ class HashAdmin {
 		            cout << "\nPress [Enter] back to menu...";
 		            cin.get();
 		            system("cls");
+		
 		        } else if (choice == "5") {
 	             	system("cls");
 		            teamAMenu();
-		            break;
 		
 		        } else {
 		            cout << "Invalid choice. Please Enter to try again" << endl;
@@ -1767,7 +1779,7 @@ void mainMenu(){
 void teamAMenu(){
 	HashCustomer HC;
 	HashAdmin HA;
-	int choice;
+	string choice;
 	
 	cout<<"=================================================="<<endl;
     cout<<"                    Team A Menu                   "<<endl;
@@ -1777,36 +1789,25 @@ void teamAMenu(){
     cout<<"3. Return to Main Menu"<<endl;
     cout<<"--------------------------------------------------"<<endl;
     cout<<"Enter your choice: ";
-    cin>>choice;
-    switch(choice){
-    	case 1:
-    		{
-    			system("cls");
-    			HC.hashingCustomer();
-    			break;
-			}
-		case 2:
-    		{
-    			system("cls");
-    			HA.hashingAdmin();
-    			break;
-			}
-		case 3:
-			{
-				cin.ignore();
-				system("cls");
-				mainMenu();
-				break;
-			}
-		default:
-			{
-				cout<<"Invalid choice. Press Enter to try again"<<endl;
-				cin.ignore();
-				cin.get();
-				system("cls");
-				teamAMenu();
-				break;
-			}
+    getline(cin,choice);
+	//If-else case to determine the choice and its corresponding actions
+    if (choice == "1") {
+	    system("cls");
+	    HC.hashingCustomer(); //Display hashing customer menu
+	}
+	else if (choice == "2") {
+	    system("cls");
+	    HA.hashingAdmin(); //Display hashing admin menu
+	}
+	else if (choice == "3") {
+	    system("cls");
+	    mainMenu(); //Display main menu
+	}
+	else {
+	    cout << "Invalid choice. Press Enter to try again";
+	    cin.get();
+	    system("cls");
+	    teamAMenu(); //Error handling for invalid choice input
 	}
 }
 
