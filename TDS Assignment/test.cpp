@@ -67,7 +67,7 @@ void printIdWithLeadingZeros(int id) {
 void printWrappedText(const string& text) {
 	int lineLength = 60;
     int count = 0;
-    for (size_t i = 0; i < text.length(); ++i) {
+    for (size_t i = 0; i < getStringLength(text); ++i) {
         cout << text[i];
         count++;
 
@@ -817,7 +817,7 @@ class HashCustomer {
 		*/
 		int hashFunction(string key){
 	        int hash = 0;
-	        for (int i = 0; i < key.length(); i++) {
+	        for (int i = 0; i < getStringLength(key); i++) {
 	            hash = (hash << 5) + key[i];
 	        }
 			// Return using the division method
@@ -1352,7 +1352,7 @@ class HashAdmin {
 		*/
 		int hashFunction(string key){
 	        int hash = 0;
-	        for (int i = 0; i < key.length(); i++) {
+	        for (int i = 0; i < getStringLength(key); i++) {
 	            hash = (hash << 5) + key[i];
 	        }
 			// Return using the division method
@@ -1990,7 +1990,7 @@ void addProducts(Product products[], ProductQueue &pq) {
 			    if (idStr == "0") return;
 			    isValid = true;
 			
-			    if (idStr.length() != 3) {
+			    if (getStringLength(idStr) != 3) {
 			        isValid = false;
 			    } else {
 			        for (char c : idStr) {
@@ -2340,7 +2340,7 @@ void addOrders(Order orders[],OrderQueue &oq) {
             }
             
             // Check if starts with ORD and has exactly 3 digits after
-            if(newOrder.orderID.length() != 6 || 
+            if(getStringLength(newOrder.orderID) != 6 || 
                newOrder.orderID[0] != 'O' || 
                newOrder.orderID[1] != 'R' || 
                newOrder.orderID[2] != 'D') {
@@ -2391,7 +2391,7 @@ void addOrders(Order orders[],OrderQueue &oq) {
             
             // Check if customer ID contains only digits (0-9)
             bool allDigits = true;
-            for(int i = 0; i < customerIDStr.length(); i++) {
+            for(int i = 0; i < getStringLength(customerIDStr); i++) {
                 if(customerIDStr[i] < '0' || customerIDStr[i] > '9') {
                     allDigits = false;
                     break;
@@ -2429,7 +2429,7 @@ void addOrders(Order orders[],OrderQueue &oq) {
             
             // Check if product ID contains only digits (0-9)
             bool allDigits = true;
-            for(int i = 0; i < productIDStr.length(); i++) {
+            for(int i = 0; i < getStringLength(productIDStr); i++) {
                 if(productIDStr[i] < '0' || productIDStr[i] > '9') {
                     allDigits = false;
                     break;
@@ -2505,7 +2505,7 @@ void addOrders(Order orders[],OrderQueue &oq) {
             bool hasDecimal = false;
             bool validNumber = true;
             int decimalPlaces = 0;
-            for(int i = 0; i < amountStr.length(); i++) {
+            for(int i = 0; i < getStringLength(amountStr); i++) {
                 if(amountStr[i] == '.') {
                     if(hasDecimal) {
                         validNumber = false;
@@ -2531,7 +2531,7 @@ void addOrders(Order orders[],OrderQueue &oq) {
             double amount = 0.0;
             double decimalMultiplier = 0.1;
             bool decimalReached = false;
-            for(int i = 0; i < amountStr.length(); i++) {
+            for(int i = 0; i < getStringLength(amountStr); i++) {
                 if(amountStr[i] == '.') {
                     decimalReached = true;
                 }
