@@ -2558,7 +2558,7 @@ void addOrders(Order orders[],OrderQueue &oq) {
             return;
         }
         
-        outFile << newOrder.orderID << " "
+        outFile << "\n" << newOrder.orderID << " "
                 << newOrder.customerID << " "
                 << newOrder.productID << " "
                 << "\"" << newOrder.dateTime << "\" " 
