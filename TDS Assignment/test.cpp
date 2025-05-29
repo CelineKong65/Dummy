@@ -128,14 +128,17 @@ bool isValidDateTime(string dt) {
 */
 int StringToInt(const string& str) {
     int result = 0;
-    if (str.length() == 0) 
-		return -1;
+    int len = getStringLength(str);
 
-    for (size_t i = 0; i < str.length(); i++) {
+    if (len == 0)
+        return -1;
+
+    for (int i = 0; i < len; i++) {
         char c = str[i];
-        if (c < '0' || c > '9') return -1;
+        if (c < '0' || c > '9') return -1; // invalid character
         result = result * 10 + (c - '0');
     }
+
     return result;
 }
 
@@ -155,9 +158,11 @@ float StringToFloat(const string& str) {
     bool decimalFound = false;
     float decimalDivisor = 10.0f;
     int digitCount = 0;
-    if (str.length() == 0) return -1.0f;
+    int len = getStringLength(str);  // Use custom length function
 
-    for (size_t i = 0; i < str.length(); i++) {
+    if (len == 0) return -1.0f;  // empty string
+
+    for (int i = 0; i < len; i++) {
         char c = str[i];
         if (c == '.') {
             if (decimalFound) return -1.0f; // multiple dots
@@ -177,6 +182,7 @@ float StringToFloat(const string& str) {
             return -1.0f; // invalid character
         }
     }
+
     if (digitCount == 0) return -1.0f; // no digits found
     return result;
 }
