@@ -2551,6 +2551,12 @@ void addOrders(Order orders[],OrderQueue &oq) {
         orderCount++;
         addCount++;
 
+		// Update the sorted array
+		for (int i = 0; i < orderCount; i++) {
+		    sortedOrders[i] = orders[i];
+		}
+		shellSortOrdersByDateTime(sortedOrders, orderCount);
+
         // Save to order file
         ofstream outFile("order.txt", ios::app);
         if (!outFile) {
