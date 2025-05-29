@@ -36,14 +36,24 @@ int getMin(int a, int b) {
     }
 }
 
+//Function to get the string length
+int getStringLength(string s) {
+    int count = 0;
+    while (s[count] != '\0') {
+        count++;
+    }
+    return count;
+}
+
 //Function to determine whether a string is "empty" ignoring whitespace like spaces ' ' & '\t'.
 bool isEmpty(const string& str) {
-    for (size_t i = 0; i < str.length(); i++) {
+    int length = getStringLength(str);
+    for (int i = 0; i < length; i++) {
         if (str[i] != ' ' && str[i] != '\t') {
-            return false;
+            return false;  // Found a non-whitespace character
         }
     }
-    return true;
+    return true;  // All characters were spaces or tabs
 }
 
 //Function to print '0' or '00' to ensure displayed product id is exactly 3 digits
@@ -68,15 +78,6 @@ void printWrappedText(const string& text) {
         }
     }
     cout << endl;
-}
-
-//Function to get the string length
-int getStringLength(string s) {
-    int count = 0;
-    while (s[count] != '\0') {
-        count++;
-    }
-    return count;
 }
 
 //Function to check if the date-time is valid
